@@ -1287,9 +1287,9 @@
           </select>
         </div>
         <input id="accountProfileExamDateInput" type="date" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-        <button onclick="saveCloudProfile()" class="w-full py-2.5 rounded-xl bg-themeAccent text-white text-xs font-black">Save Profile</button>
+        <button id="accountSaveProfileButton" onclick="saveCloudProfile()" class="w-full py-2.5 rounded-xl bg-themeAccent text-white text-xs font-black transition-opacity">Save Profile</button>
         <p class="text-[9px] leading-relaxed text-themeMuted -mt-1">Saves only your account profile: name, age, course and exam date.</p>
-        <button onclick="syncNowFromCloud()" class="w-full py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-black">☁️ Sync Study Data</button>
+        <button id="accountSyncStudyButton" onclick="syncNowFromCloud()" class="w-full py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-black transition-opacity">☁️ Sync Study Data</button>
         <p class="text-[9px] leading-relaxed text-themeMuted -mt-1">Checks this device against the cloud and syncs your study data. If both copies changed, you choose which copy to keep.</p>
         <div class="pt-2 border-t border-themeBorder/60 space-y-2">
           <div class="text-[9px] font-black uppercase tracking-wider text-themeMuted">Advanced Data Control</div>
@@ -5944,17 +5944,43 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   window.submitNewPassword=submitNewPassword;
 
+  function setAccountActionLoading(buttonId, loading, loadingText, normalText){
+    const button=document.getElementById(buttonId);
+    if(!button) return;
+    button.disabled=!!loading;
+    button.classList.toggle('opacity-60',!!loading);
+    button.classList.toggle('cursor-wait',!!loading);
+    button.textContent=loading ? loadingText : normalText;
+  }
+
   async function saveCloudProfile(){
+    if(!sb || !currentUser){accountToast('Sign in first','alert-circle');return;}
+    const name=(document.getElementById('accountProfileNameInput')?.value||'').trim()||'Doctor';
+    const age=(document.getElementById('accountProfileAgeInput')?.value||'').trim();
+    const course=document.getElementById('accountProfileCourseInput')?.value==='INI-CET'?'INI-CET':'NEET PG';
+    const examDate=document.getElementById('accountProfileExamDateInput')?.value||'';
+    const button=document.getElementById('accountSaveProfileButton');
+    setAccountActionLoading('accountSaveProfileButton',true,'⟳ Saving profile…','Save Profile');
+    setSyncStatus('Saving profile…');
     try{
-      if(!sb || !currentUser){accountToast('Sign in first','alert-circle');return;}
-      const name=(document.getElementById('accountProfileNameInput')?.value||'').trim()||'Doctor';
-      const age=(document.getElementById('accountProfileAgeInput')?.value||'').trim();
-      const course=document.getElementById('accountProfileCourseInput')?.value==='INI-CET'?'INI-CET':'NEET PG';
-      const examDate=document.getElementById('accountProfileExamDateInput')?.value||'';
       await saveProfileRow({name,age,course,exam_date:examDate});
+      /* Keep Supabase Auth's dashboard display name in sync with the profile. */
+      const {error:metaError}=await sb.auth.updateUser({data:{
+        name,
+        age:age?Number(age):null,
+        course,
+        exam_date:examDate||null
+      }});
+      if(metaError) console.warn('Auth profile metadata update failed:',metaError);
       populateAccountUI();
+      setSyncStatus('Synced');
       accountToast('Profile saved ✓');
-    }catch(err){accountToast(err.message||'Could not save profile','alert-circle');}
+    }catch(err){
+      setSyncStatus('Sync failed');
+      accountToast(err.message||'Could not save profile','alert-circle');
+    }finally{
+      setAccountActionLoading('accountSaveProfileButton',false,'','Save Profile');
+    }
   }
   window.saveCloudProfile=saveCloudProfile;
 
@@ -5968,9 +5994,10 @@ document.addEventListener('DOMContentLoaded',function(){
   async function syncNowFromCloud(){
     if(!sb || !currentUser){accountToast('Sign in first','alert-circle');return;}
     if(cloudSaveBusy){accountToast('A sync is already in progress');return;}
+    setAccountActionLoading('accountSyncStudyButton',true,'⟳ Syncing…','☁️ Sync Study Data');
     try{
       clearTimeout(cloudSaveTimer);
-      setSyncStatus('Checking…');
+      setSyncStatus('Syncing…');
       const cloudRow=await fetchCloudRow();
       if(!cloudRow){
         await uploadCloudState(true);
@@ -6008,6 +6035,8 @@ document.addEventListener('DOMContentLoaded',function(){
       console.error('Sync check failed:',err);
       setSyncStatus('Sync failed');
       accountToast(err.message||'Could not sync cloud data','alert-circle');
+    }finally{
+      setAccountActionLoading('accountSyncStudyButton',false,'','☁️ Sync Study Data');
     }
   }
   window.syncNowFromCloud=syncNowFromCloud;
