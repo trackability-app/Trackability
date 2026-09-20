@@ -288,7 +288,10 @@
 
           <div class="relative py-4 flex flex-col items-center justify-center">
             <div class="w-56 h-56 rounded-full border-4 border-themeCardSoft flex flex-col items-center justify-center relative shadow-inner">
-              <div id="timerRingVisual" class="absolute inset-0 rounded-full border-4 border-transparent border-t-themeAccent transition-all duration-300"></div>
+              <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 224 224" aria-hidden="true">
+                <circle cx="112" cy="112" r="104" fill="none" stroke="var(--card-soft)" stroke-width="4" opacity="0.9"></circle>
+                <circle id="timerRingVisual" cx="112" cy="112" r="104" fill="none" stroke="var(--accent-color)" stroke-width="4" stroke-linecap="round" stroke-dasharray="653.45" stroke-dashoffset="653.45" class="transition-[stroke-dashoffset] duration-1000 ease-linear"></circle>
+              </svg>
 
               <span id="focusActiveTagIndicator" class="text-[10px] font-black uppercase tracking-wider text-themeAccent bg-themeAccent/10 px-2.5 py-0.5 rounded-full mb-1">
                 STUDY SESSION
@@ -742,12 +745,6 @@
       </button>
     </div>
 
-    <div id="fullscreenAnimationStage" class="fullscreen-animation-stage" aria-hidden="true">
-      <div id="fsWaterFill" class="fs-water-fill"></div><div class="fs-water-wave wave-one"></div><div class="fs-water-wave wave-two"></div>
-      <div id="fsCircleVisual" class="fs-circle-visual"><div class="fs-circle-inner"></div></div>
-      <div id="fsDotsVisual" class="fs-dots-visual"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-    </div>
-
     <div class="flex flex-col items-center text-center space-y-3 relative z-10">
       <span id="fullscreenSessionType" class="px-4 py-1 rounded-full text-xs font-black tracking-wider bg-themeAccent/20 text-themeAccent uppercase">STUDY</span>
       <h2 id="fullscreenSubjectName" class="text-xl sm:text-2xl font-black">Surgery</h2>
@@ -755,12 +752,6 @@
 
       <div id="fullscreenTimerDisplay" class="text-6xl sm:text-8xl font-black font-mono tracking-tight my-4">00:00:00</div>
       <div id="fullscreenPomoCycleNotice" class="text-xs font-bold text-amber-400"></div>
-      <div class="flex items-center gap-1.5 bg-themeCardSoft/80 p-1 rounded-xl border border-themeBorder backdrop-blur-sm">
-        <span class="px-2 text-[9px] font-black uppercase text-themeMuted">Animation</span>
-        <button onclick="setFullscreenAnimation('water')" id="fsAnim-water" class="px-2 py-1 rounded-lg text-[9px] font-bold bg-themeAccent text-white">💧 Water</button>
-        <button onclick="setFullscreenAnimation('circle')" id="fsAnim-circle" class="px-2 py-1 rounded-lg text-[9px] font-bold text-themeMuted">◯ Circle</button>
-        <button onclick="setFullscreenAnimation('dots')" id="fsAnim-dots" class="px-2 py-1 rounded-lg text-[9px] font-bold text-themeMuted">••• Dots</button>
-      </div>
     </div>
 
     <div class="flex items-center justify-center gap-4 relative z-10">
@@ -2525,6 +2516,15 @@
       }
     }
 
+    function updateFocusProgressRing(){
+      const ring=document.getElementById('timerRingVisual');
+      if(!ring)return;
+      const circumference=653.45;
+      const target=Math.max(1,(isPomoMode?pomoWorkMins:timerSelectedTargetMins)*60);
+      const progress=isPomoMode ? (1-Math.max(0,pomoRemainingSec)/target) : Math.min(1,Math.max(0,timerElapsedSeconds)/target);
+      ring.style.strokeDashoffset=String(circumference*(1-progress));
+    }
+
     function updateTimerDisplay() {
       let display = "00:00:00";
       if (!isPomoMode) {
@@ -2542,6 +2542,7 @@
         document.getElementById('focusModeLabel').textContent = `🍅 Pomodoro ${pomoPhase.toUpperCase()} (${pomoCurrentCycle}/${pomoTotalCycles})`;
       }
       document.getElementById('fullscreenTimerDisplay').textContent = display;
+      updateFocusProgressRing();
       updateFullscreenAnimation();
       updateHomeActiveFocusTimer();
     }
@@ -2599,8 +2600,8 @@
       toggleFocusTimer();
     }
 
-    function setFullscreenAnimation(type,persist=true){fullscreenAnimation=type;if(persist){try{localStorage.setItem('TRACKEBILITY_FS_ANIM',type);}catch(e){}}['water','circle','dots'].forEach(k=>{const b=document.getElementById(`fsAnim-${k}`);if(b)b.className=k===type?'px-2 py-1 rounded-lg text-[9px] font-bold bg-themeAccent text-white':'px-2 py-1 rounded-lg text-[9px] font-bold text-themeMuted';});const w=document.getElementById('fsWaterFill'),c=document.getElementById('fsCircleVisual'),d=document.getElementById('fsDotsVisual');if(w)w.style.display=type==='water'?'block':'none';if(c)c.style.display=type==='circle'?'block':'none';if(d)d.style.display=type==='dots'?'flex':'none';}
-    function updateFullscreenAnimation(){const target=Math.max(1,isPomoMode?pomoWorkMins*60:timerSelectedTargetMins*60),remaining=Math.max(0,isPomoMode?pomoRemainingSec:target-timerElapsedSeconds),pct=Math.max(0,Math.min(100,remaining/target*100)),fill=document.getElementById('fsWaterFill');if(fill)fill.style.height=`${pct}%`;setFullscreenAnimation(fullscreenAnimation,false);}
+    function setFullscreenAnimation(type,persist=true){ fullscreenAnimation=type||'none'; if(persist){try{localStorage.setItem('TRACKEBILITY_FS_ANIM','none');}catch(e){}} }
+    function updateFullscreenAnimation(){ return; }
 
     function openFullscreenTimer() {
       const subId = document.getElementById('focusSubjectSelect').value;
@@ -3377,7 +3378,7 @@
       const f=document.getElementById('settingsFontSummary'); if(f)f.textContent=(FONT_LABELS[appState.fontStyle]||'Default')+' • tap to change';
       const z=document.getElementById('settingsTextSizeSummary'); if(z)z.textContent=TEXT_SIZE_LABELS[appState.fontSize]||'Normal';
       const i=document.getElementById('settingsIconSummary'); if(i)i.textContent=(TRACK_ICON_PALETTES[appState.iconColor||'coral-amber']?.name||'Coral Amber')+' • Home icon';
-      const a=document.getElementById('settingsAccountSummary'); if(a)a.textContent='Sign in to sync your data across devices';
+      const a=document.getElementById('settingsAccountSummary'); if(a){ const email=currentUser?.email||''; const name=appState.cloudProfile?.name||appState.profileName||''; a.textContent=currentUser ? ('Logged in: '+(name ? name+' • ' : '')+email) : 'Not signed in • tap to sign in'; }
     }
     function renderThemePicker(){
       const grid=document.getElementById('themePickerGrid'); if(!grid)return;
@@ -5254,7 +5255,7 @@
     const byDate={};monthLogs.forEach(x=>{byDate[x.date]=(byDate[x.date]||0)+(Number(x.hours)||0);});
     const points=Object.keys(byDate).sort().map(date=>({date,hours:byDate[date]}));
     const max=8, ticks=[8,7,6,5,4,3,2,1,0];
-    const bars=points.map(p=>{const h=Math.max(0,Number(p.hours)||0),pct=Math.min(100,h/max*100);let cls=h>=7?'green':h<5?'red':h>=6?'yellow':'mid';return `<div class="tb-sleep-bar-col" title="${escF(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${Number(p.date.slice(-2))}</span></div>`;}).join('');
+    const bars=points.map(p=>{const h=Math.max(0,Number(p.hours)||0),pct=Math.min(100,h/max*100);let cls=h>=7?'green':h<5?'red':h>=6?'yellow':'mid';return `<div class="tb-sleep-bar-col" title="${escF(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${String(p.date||'').slice(8,10)}/${String(p.date||'').slice(5,7)}</span></div>`;}).join('');
     const plot=points.length?`<div class="tb-sleep-yaxis">${ticks.map(v=>`<span>${v}h</span>`).join('')}</div><div class="tb-sleep-plot"><div class="tb-sleep-bars">${bars}</div></div>`:'<div class="text-[9px] text-themeMuted py-8 text-center w-full">No sleep records in this month.</div>';
     const total=points.reduce((a,p)=>a+p.hours,0),avg=points.length?total/points.length:0;
     return `<div class="sleep-summary-card"><div class="flex items-start justify-between gap-3"><div><div class="text-[8px] font-black uppercase text-themeMuted">Sleep Summary • ${monthText(sd)}</div><div class="text-sm font-black text-themeText mt-1">${total.toFixed(1)} h total</div></div><div class="text-right"><div class="text-sm font-black text-themeAccent">${avg.toFixed(1)} h</div><div class="text-[8px] text-themeMuted">average / logged day</div></div></div><div class="mt-3"><div class="text-[8px] font-black uppercase text-themeMuted mb-1">Hours of sleep</div><div class="tb-sleep-chart-wrap">${plot}</div><div class="tb-sleep-legend mt-2"><span><i class="g"></i> ≥7h</span><span><i class="y"></i> 6–&lt;7h</span><span><i class="o"></i> 5–&lt;6h</span><span><i class="r"></i> &lt;5h</span></div></div></div>`;
@@ -5629,12 +5630,18 @@ window.renderGTTracker=function(){
   c.innerHTML=all.length?all.map(g=>{
     const attempted=Number(g.attempted??((Number(g.correct)||0)+(Number(g.wrong)||0)));
     return `<div class="p-3.5 rounded-2xl bg-themeCard border border-themeBorder space-y-2 tb-gt-detail">
-      <div class="flex justify-between gap-2">
-        <div class="min-w-0"><span class="font-bold text-sm block">${F(g.name||'Grand Test')}</span><span class="text-[9px] text-themeMuted">${F(g.date||'')}${g.platform?' • '+F(g.platform):''}</span></div>
-        <span class="text-base font-black text-themeAccent">${Number(g.score)||0} marks</span>
+      <div class="flex justify-between items-start gap-3">
+        <div class="min-w-0">
+          <span class="text-[9px] font-black text-themeMuted block">${F(g.date||'')}</span>
+          <span class="font-black text-sm text-themeText block mt-0.5">${F(g.name||'Grand Test')}</span>
+        </div>
+        <span class="text-2xl leading-none font-black text-themeAccent whitespace-nowrap">${Number(g.score)||0}</span>
       </div>
-      <div class="text-[9px] text-themeMuted">✓ ${Number(g.correct||0)} correct • ✕ ${Number(g.wrong||0)} wrong • ${attempted} attempted • ${Number(g.total||0)} total questions</div>
-      <div class="text-[9px] text-themeMuted">Score calculation: (4 × ${Number(g.correct||0)}) − (1 × ${Number(g.wrong||0)}) = <b class="text-themeText">${Number(g.score)||0}</b></div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-xl bg-themeCardSoft px-2 py-2"><span class="block text-[8px] uppercase font-black text-themeMuted">Correct</span><b class="block text-sm text-emerald-400 mt-0.5">${Number(g.correct||0)}</b></div>
+        <div class="rounded-xl bg-themeCardSoft px-2 py-2"><span class="block text-[8px] uppercase font-black text-themeMuted">Wrong</span><b class="block text-sm text-rose-400 mt-0.5">${Number(g.wrong||0)}</b></div>
+        <div class="rounded-xl bg-themeCardSoft px-2 py-2"><span class="block text-[8px] uppercase font-black text-themeMuted">Total Qs</span><b class="block text-sm text-themeText mt-0.5">${Number(g.total||0)}</b></div>
+      </div>
       <button onclick="undoGT('${F(g.id||'')}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black">Remove</button>
     </div>`;
   }).join(''):'<p class="text-center text-xs text-themeMuted py-6">No Grand Tests recorded yet.</p>';
@@ -5652,7 +5659,7 @@ function sleepChartFinal(logs,selected){
   const bars=points.map(p=>{
     const h=Math.max(0,p.hours),pct=Math.min(100,h/max*100);
     const cls=h>=7?'green':h>=6?'yellow':h>=5?'orange':'red';
-    return `<div class="tb-sleep-bar-col" title="${F(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${Number(p.date.slice(-2))}</span></div>`;
+    return `<div class="tb-sleep-bar-col" title="${F(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${String(p.date||'').slice(8,10)}/${String(p.date||'').slice(5,7)}</span></div>`;
   }).join('');
   const total=points.reduce((a,p)=>a+p.hours,0),avg=points.length?total/points.length:0;
   return `<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder">
@@ -5870,6 +5877,7 @@ document.addEventListener('DOMContentLoaded',function(){
     signedOut.classList.toggle('hidden',isIn);
     signedIn.classList.toggle('hidden',!isIn);
     if(status) status.textContent=isIn ? 'Cloud account • sync enabled' : 'Guest mode • data stays on this device';
+    updateSettingsSummaries();
     if(isIn){
       const email=currentUser.email||'';
       const ed=document.getElementById('accountEmailDisplay'); if(ed) ed.textContent=email;
@@ -5963,6 +5971,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         setSyncStatus('Synced');
         populateAccountUI();
+        updateSettingsSummaries();
       }catch(err){
         console.error('Cloud bootstrap failed:',err);
         setSyncStatus('Sync failed');
