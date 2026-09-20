@@ -118,22 +118,6 @@
     body.ui-scale-small .ui-scalable, body.ui-scale-normal .ui-scalable, body.ui-scale-large .ui-scalable, body.ui-scale-xlarge .ui-scalable { font-size: calc(var(--ui-base-font-size, 1rem) * var(--ui-font-scale)) !important; }
 
     .logo-symbol { width: 42px; height: 42px; border-radius: 15px; flex: 0 0 auto; overflow: hidden; box-shadow: 0 8px 24px var(--accent-glow); }
-    .logo-symbol svg { width: 100%; height: 100%; display: block; }
-    .settings-row { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:12px; border:1px solid var(--border-color); border-radius:16px; background:var(--card-color); text-align:left; transition:transform .15s ease, border-color .15s ease, background .15s ease; }
-    .settings-row:active { transform:scale(.985); }
-    .settings-row:hover { border-color:var(--accent-color); }
-    .settings-row-icon { width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:var(--card-soft-color); color:var(--accent-color); flex:0 0 auto; }
-    .settings-row-copy { min-width:0; flex:1; }
-    .settings-row-title { font-size:11px; font-weight:800; color:var(--text-color); }
-    .settings-row-sub { font-size:9px; color:var(--muted-color); margin-top:2px; line-height:1.25; }
-    .icon-palette-card { border:2px solid var(--border-color); border-radius:18px; padding:8px; background:var(--card-color); cursor:pointer; transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease; }
-    .icon-palette-card:active { transform:scale(.97); }
-    .icon-palette-card.selected { border-color:var(--accent-color); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent-color) 18%,transparent); }
-    .icon-palette-preview { width:72px; height:72px; margin:0 auto 7px; border-radius:20px; overflow:hidden; box-shadow:0 7px 18px rgba(0,0,0,.12); }
-    .faq-item { border:1px solid var(--border-color); border-radius:16px; overflow:hidden; background:var(--card-color); }
-    .faq-question { width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; text-align:left; color:var(--text-color); font-size:11px; font-weight:800; }
-    .faq-answer { padding:0 12px 12px; color:var(--muted-color); font-size:10px; line-height:1.55; }
-    .faq-answer.hidden { display:none; }
     .calendar-collapsible { transition: max-height .28s ease, opacity .2s ease, padding .2s ease; overflow: hidden; }
     .calendar-collapsible.is-collapsed { max-height: 0 !important; opacity: 0; padding-top: 0 !important; padding-bottom: 0 !important; margin: 0 !important; }
     .expand-toggle { transition: transform .2s ease; }
@@ -168,7 +152,25 @@
   <!-- TOP APP BAR -->
   <header class="flex items-center justify-between px-4 pt-3.5 pb-2.5 shrink-0 border-b border-themeBorder bg-themeCard/90 backdrop-blur-md z-30">
     <div class="flex items-center gap-3">
-      <div id="homeTrackabilityIcon" class="logo-symbol" title="TRACKEBILITY" aria-label="TRACKEBILITY app icon"></div>
+      <div class="logo-symbol" title="TRACKEBILITY" aria-label="Trakebility logo">
+        <svg viewBox="0 0 84 84" width="42" height="42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="tlLogoGrad" x1="10" y1="10" x2="74" y2="74" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#172b4d"/><stop offset="1" stop-color="#061224"/>
+            </linearGradient>
+            <linearGradient id="tlMint" x1="38" y1="25" x2="74" y2="12" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#19b8c8"/><stop offset="1" stop-color="#52e79b"/>
+            </linearGradient>
+          </defs>
+          <rect width="84" height="84" rx="18" fill="#f8fafc"/>
+          <path d="M17 22c0-7 5-11 12-11h27L44 20c-5 3-8 7-10 12H28c-7 0-11-4-11-10Z" fill="url(#tlLogoGrad)"/>
+          <path d="M67 11c0 15-10 27-25 27H31c-2 3-3 7-3 12v17c0 7 4 11 11 11h3V48c0-7 4-12 11-12h14V11Z" fill="url(#tlMint)"/>
+          <path d="M39 37h9c-7 4-9 9-9 16v17c0 7-4 11-11 11h-1c-7 0-11-4-11-11V49c0-7 4-12 11-12h12Z" fill="url(#tlLogoGrad)" opacity=".98"/>
+          <path d="M35 51l5 5 9-10" fill="none" stroke="#59f2a7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M35 63l5 5 9-10" fill="none" stroke="#72c9ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M35 75l5 5 9-10" fill="none" stroke="#cf8cff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <div>
         <div class="flex items-center gap-1.5">
           <span class="text-[11px] font-black tracking-widest text-themeAccent uppercase">TRACKEBILITY</span>
@@ -190,7 +192,9 @@
       <button onclick="openModal('settingsModal')" title="Settings & Customization" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
         <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
-
+      <button onclick="openAccountModal()" title="Account & Cloud Sync" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
+        <i data-lucide="cloud" class="w-4 h-4"></i>
+      </button>
     </div>
   </header>
 
@@ -1349,95 +1353,73 @@
 
   <!-- SETTINGS MODAL -->
   <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-start gap-3">
+    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[85vh] overflow-y-auto custom-scroll">
+      <div class="flex justify-between items-center">
         <div>
-          <h3 class="text-sm font-black">Settings</h3>
-          <p class="text-[10px] text-themeMuted mt-1">Personalize TRACKEBILITY and manage your account.</p>
+          <h3 class="text-sm font-black">App Settings & Customization</h3>
+          <p class="text-[11px] text-themeMuted">Configure for any examination</p>
         </div>
-        <button onclick="closeModal('settingsModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button onclick="closeModal('settingsModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div class="p-3 rounded-2xl bg-themeCardSoft/70 border border-themeBorder space-y-2.5">
-        <div class="text-[9px] font-black uppercase tracking-wider text-themeMuted">Profile & Target</div>
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-bold text-themeMuted">Student / Doctor Name</label>
-          <input type="text" id="settingsProfileNameInput" placeholder="Your Name" class="w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-bold text-themeMuted">Target Examination</label>
-          <input type="text" id="settingsExamTitleInput" placeholder="Exam Name (e.g. NEET PG 2027, UPSC, USMLE)" class="w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="text-[10px] font-bold text-themeMuted">Target Date</label>
-          <input type="date" id="settingsExamDateInput" class="w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" />
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-themeMuted">Student / Doctor Name</label>
+        <input type="text" id="settingsProfileNameInput" placeholder="Your Name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-themeMuted">Target Examination & Target Date</label>
+        <input type="text" id="settingsExamTitleInput" placeholder="Exam Name (e.g. NEET PG 2027, UPSC, USMLE)" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText mb-1" />
+        <input type="date" id="settingsExamDateInput" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-themeMuted">Themes</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="setTheme('dark-obsidian')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#0b0f19] text-slate-100">🌌 Obsidian</button>
+          <button onclick="setTheme('dark-oled')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-black text-white">⚫ OLED</button>
+          <button onclick="setTheme('dark-burgundy')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#120407] text-rose-200">🍷 Burgundy</button>
+          <button onclick="setTheme('dark-emerald')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#04130c] text-emerald-300">🌲 Emerald</button>
+          <button onclick="setTheme('dark-midnight')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#060b1a] text-sky-200">🌃 Midnight</button>
+          <button onclick="setTheme('dark-forest')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#03110b] text-emerald-200">🌿 Forest</button>
+          <button onclick="setTheme('dark-plum')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#100718] text-purple-200">🪻 Plum</button>
+          <button onclick="setTheme('theme-light')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-white text-black">☀️ Clean Light</button>
+          <button onclick="setTheme('theme-warm')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#faf6f0] text-amber-900">🤎 Beige</button>
+          <button onclick="setTheme('light-sky')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#eff8ff] text-sky-900">💧 Sky</button>
+          <button onclick="setTheme('light-mint')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#effcf6] text-emerald-900">🍃 Mint</button>
+          <button onclick="setTheme('light-lavender')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#f7f5ff] text-violet-900">💜 Lavender</button>
+          <button onclick="setTheme('light-rose')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#fff5f7] text-rose-900">🌸 Rose</button>
+          <button onclick="setTheme('light-slate')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#f1f5f9] text-slate-900">🩶 Slate</button>
         </div>
       </div>
 
-      <div class="space-y-2">
-        <div class="text-[9px] font-black uppercase tracking-wider text-themeMuted px-1">Appearance</div>
-        <button class="settings-row" onclick="openModal('themePickerModal');renderThemePicker();">
-          <span class="settings-row-icon"><i data-lucide="palette" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Themes</span><span id="settingsThemeSummary" class="settings-row-sub">Choose your app theme</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('fontPickerModal');renderFontPicker();">
-          <span class="settings-row-icon"><i data-lucide="type" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Fonts</span><span id="settingsFontSummary" class="settings-row-sub">Choose your typography</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('textSizeModal');renderTextSizePicker();">
-          <span class="settings-row-icon"><i data-lucide="text-cursor-input" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Text Size</span><span id="settingsTextSizeSummary" class="settings-row-sub">Normal</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('iconColorModal');renderIconPalette();">
-          <span class="settings-row-icon"><i data-lucide="app-window" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">App Icon Color</span><span id="settingsIconSummary" class="settings-row-sub">Change the icon shown at the top of Home</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-themeMuted">Typography / Font Family</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="setFontStyle('font-space')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Space Grotesk'">Space Grotesk</button>
+          <button onclick="setFontStyle('font-dmsans')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'DM Sans'">DM Sans</button>
+          <button onclick="setFontStyle('font-poppins')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Poppins'">Poppins</button>
+          <button onclick="setFontStyle('font-josefin')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Josefin Sans'">Josefin Sans</button>
+          <button onclick="setFontStyle('font-indie')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Indie Flower'">Indie Flower</button>
+          <button onclick="setFontStyle('font-righteous')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Righteous'">Righteous</button>
+          <button onclick="setFontStyle('font-lobster')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Lobster Two'">Lobster Two</button>
+          <button onclick="setFontStyle('font-anton')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Anton'">Anton</button>
+          <button onclick="setFontStyle('font-nanum')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Nanum Gothic'">Nanum Gothic</button>
+        </div>
       </div>
 
-      <div class="space-y-2">
-        <div class="text-[9px] font-black uppercase tracking-wider text-themeMuted px-1">Account</div>
-        <button class="settings-row" onclick="closeModal('settingsModal');openAccountModal();">
-          <span class="settings-row-icon"><i data-lucide="cloud" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Account & Cloud Sync</span><span id="settingsAccountSummary" class="settings-row-sub">Sign in to sync your data across devices</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-      </div>
-
-      <div class="space-y-2">
-        <div class="text-[9px] font-black uppercase tracking-wider text-themeMuted px-1">Support & Info</div>
-        <button class="settings-row" onclick="openModal('shareModal');prepareShareLink();">
-          <span class="settings-row-icon"><i data-lucide="share-2" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Share with Friends</span><span class="settings-row-sub">Create a link to share TRACKEBILITY</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('faqModal');renderFAQ();">
-          <span class="settings-row-icon"><i data-lucide="circle-help" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">FAQ & Help</span><span class="settings-row-sub">Answers about tracking, Focus, MCQs, GTs and sync</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('notificationModal');renderNotificationSettings();">
-          <span class="settings-row-icon"><i data-lucide="bell" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Notification Settings</span><span class="settings-row-sub">Control notification preferences</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('privacyModal');">
-          <span class="settings-row-icon"><i data-lucide="shield-check" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Privacy Policy</span><span class="settings-row-sub">Policy content will be added here</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
-        <button class="settings-row" onclick="openModal('termsModal');">
-          <span class="settings-row-icon"><i data-lucide="file-text" class="w-4 h-4"></i></span>
-          <span class="settings-row-copy"><span class="settings-row-title">Terms & Conditions</span><span class="settings-row-sub">Terms content will be added here</span></span>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i>
-        </button>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-themeMuted">Overall Text & UI Size</label>
+        <div class="grid grid-cols-4 gap-1.5">
+          <button onclick="setFontSize('ui-text-small')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-[10px] font-black">A−</button>
+          <button onclick="setFontSize('ui-text-normal')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-[11px] font-black">A</button>
+          <button onclick="setFontSize('ui-text-large')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-xs font-black">A+</button>
+          <button onclick="setFontSize('ui-text-xlarge')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-sm font-black">A++</button>
+        </div>
       </div>
 
       <div class="space-y-2 pt-2 border-t border-themeBorder">
-        <div class="text-[9px] font-black uppercase tracking-wider text-themeMuted">Backup & Portability</div>
+        <label class="text-xs font-bold text-themeMuted">Backup & Portability</label>
         <div class="flex gap-2">
           <button onclick="exportDataBackup()" class="flex-1 py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-bold active:scale-95 transition">Export JSON</button>
           <button onclick="document.getElementById('importFileInput').click()" class="flex-1 py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-bold active:scale-95 transition">Restore JSON</button>
@@ -1445,82 +1427,7 @@
         </div>
       </div>
 
-      <button onclick="saveGeneralSettings()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-bold shadow active:scale-95 transition">Save Profile & Target</button>
-    </div>
-  </div>
-
-  <!-- THEME PICKER -->
-  <div id="themePickerModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[86vh] overflow-y-auto custom-scroll">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Themes</h3><p class="text-[10px] text-themeMuted mt-1">Tap a theme to apply it immediately.</p></div><button onclick="closeModal('themePickerModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div id="themePickerGrid" class="grid grid-cols-2 gap-2.5"></div>
-    </div>
-  </div>
-
-  <!-- FONT PICKER -->
-  <div id="fontPickerModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[86vh] overflow-y-auto custom-scroll">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Fonts</h3><p class="text-[10px] text-themeMuted mt-1">Typography applies across the app.</p></div><button onclick="closeModal('fontPickerModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div id="fontPickerGrid" class="grid grid-cols-2 gap-2"></div>
-    </div>
-  </div>
-
-  <!-- TEXT SIZE PICKER -->
-  <div id="textSizeModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Text Size</h3><p class="text-[10px] text-themeMuted mt-1">Adjust the overall interface size.</p></div><button onclick="closeModal('textSizeModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div id="textSizePickerGrid" class="grid grid-cols-4 gap-2"></div>
-    </div>
-  </div>
-
-  <!-- APP ICON COLOR PICKER -->
-  <div id="iconColorModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">App Icon Color</h3><p class="text-[10px] text-themeMuted mt-1">Choose the TRACKEBILITY icon style shown at the top of Home.</p></div><button onclick="closeModal('iconColorModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div id="iconPaletteGrid" class="grid grid-cols-2 gap-2.5"></div>
-      <p class="text-[9px] text-themeMuted leading-relaxed">This changes the in-app Home icon. The store/launcher icon is controlled by the app package and does not change dynamically from Settings.</p>
-    </div>
-  </div>
-
-  <!-- FAQ & HELP -->
-  <div id="faqModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">FAQ & Help</h3><p class="text-[10px] text-themeMuted mt-1">Quick answers about TRACKEBILITY.</p></div><button onclick="closeModal('faqModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div id="faqList" class="space-y-2"></div>
-    </div>
-  </div>
-
-  <!-- SHARE -->
-  <div id="shareModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Share with Friends</h3><p class="text-[10px] text-themeMuted mt-1">Create a shareable TRACKEBILITY link.</p></div><button onclick="closeModal('shareModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder"><div class="text-[9px] font-black uppercase tracking-wider text-themeMuted mb-1">Share link</div><div id="shareLinkText" class="text-[10px] font-semibold text-themeText break-all"></div></div>
-      <div class="grid grid-cols-2 gap-2"><button onclick="copyShareLink()" class="py-3 rounded-2xl bg-themeAccent text-white text-xs font-black flex items-center justify-center gap-2"><i data-lucide="copy" class="w-4 h-4"></i> Copy Link</button><button onclick="shareTrackabilityLink()" class="py-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-xs font-black text-themeText flex items-center justify-center gap-2"><i data-lucide="share-2" class="w-4 h-4"></i> Share</button></div>
-    </div>
-  </div>
-
-  <!-- NOTIFICATIONS -->
-  <div id="notificationModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Notification Settings</h3><p class="text-[10px] text-themeMuted mt-1">Choose which notification preferences are enabled.</p></div><button onclick="closeModal('notificationModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div id="notificationSettingsBody" class="space-y-2"></div>
-      <p class="text-[9px] text-themeMuted leading-relaxed">These preferences are stored with your app settings. Actual device notification delivery depends on the platform and notification support enabled for TRACKEBILITY.</p>
-    </div>
-  </div>
-
-  <!-- PRIVACY -->
-  <div id="privacyModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[82vh] overflow-y-auto custom-scroll">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Privacy Policy</h3><p class="text-[10px] text-themeMuted mt-1">TRACKEBILITY privacy information.</p></div><button onclick="closeModal('privacyModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div class="p-4 rounded-2xl bg-themeCardSoft border border-themeBorder text-[10px] text-themeMuted leading-relaxed"><b class="text-themeText">Privacy Policy content placeholder</b><br><br>The final Privacy Policy text will be added here once you provide the wording and data-handling details you want TRACKEBILITY to publish.</div>
-    </div>
-  </div>
-
-  <!-- TERMS -->
-  <div id="termsModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[82vh] overflow-y-auto custom-scroll">
-      <div class="flex items-center justify-between"><div><h3 class="text-sm font-black">Terms & Conditions</h3><p class="text-[10px] text-themeMuted mt-1">TRACKEBILITY terms of use.</p></div><button onclick="closeModal('termsModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-      <div class="p-4 rounded-2xl bg-themeCardSoft border border-themeBorder text-[10px] text-themeMuted leading-relaxed"><b class="text-themeText">Terms & Conditions content placeholder</b><br><br>The final Terms & Conditions will be added here once you provide the wording you want TRACKEBILITY to publish.</div>
+      <button onclick="saveGeneralSettings()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-bold shadow active:scale-95 transition">Apply & Save Settings</button>
     </div>
   </div>
 
@@ -1637,8 +1544,6 @@
       theme: 'dark-obsidian',
       fontStyle: 'font-space',
       fontSize: 'ui-text-normal',
-      iconColor: 'coral-amber',
-      notificationSettings: { studyReminders: true, taskReminders: true },
       goalMonthOffset: 0,
       subjects: defaultCanonical19,
       mcqSources: ['Marrow', 'PrepLadder', 'BTR', 'Cerebellum', 'Bhatia', 'PYQ Exam'],
@@ -1672,8 +1577,6 @@
       appState.sleepLogs = appState.sleepLogs || [];
       appState.mistakeReviewLogs = appState.mistakeReviewLogs || [];
       appState.achievementCelebrations = appState.achievementCelebrations || {};
-      appState.notificationSettings = Object.assign({ studyReminders: true, taskReminders: true }, appState.notificationSettings || {});
-      appState.iconColor = appState.iconColor || 'coral-amber';
       appState.grandTests = appState.grandTests || [];
       appState.grandTests.forEach(gt => { if (!gt.id) gt.id = 'gt_' + Date.now() + Math.random(); if (gt.total == null) gt.total = 200; if (gt.attempted == null) gt.attempted = gt.correct != null && gt.wrong != null ? Number(gt.correct) + Number(gt.wrong) : Number(gt.total || 0); if (gt.score == null && gt.correct != null) gt.score = Number(gt.correct) * 4 - Number(gt.wrong || 0); });
       appState.achievementCelebrations = appState.achievementCelebrations || {};
@@ -1685,8 +1588,6 @@
       document.getElementById('settingsExamTitleInput').value = appState.examTitle || 'NEET PG 2027';
       document.getElementById('settingsExamDateInput').value = appState.examDate || '2027-03-14';
       document.getElementById('navProfileName').textContent = appState.profileName || 'Doctor';
-      renderHomeTrackabilityIcon();
-      updateSettingsSummaries();
     }
 
     function saveState() {
@@ -1728,7 +1629,6 @@
       applyBodyClasses();
       saveState();
       showToast('Text size updated');
-      updateSettingsSummaries();
     }
 
     function toggleCalendarPanel(bodyId, toggleId) {
@@ -3328,111 +3228,8 @@
       showToast('Chapter added');
     }
 
-    const TRACK_ICON_PALETTES = {
-      'coral-amber': { name:'Coral Amber', bgLight:'#f8fafc', bgDark:'#0b1628', tLight:'#18324f', tDark:'#ffffff', a:'#f43f72', b:'#ff9a3d', bookA:'#f43f72', bookB:'#ff9a3d' },
-      'blue-cyan': { name:'Gradient Blue', bgLight:'#f8fbff', bgDark:'#08203d', tLight:'#18324f', tDark:'#ffffff', a:'#2563eb', b:'#22d3ee', bookA:'#7c3aed', bookB:'#22d3ee' },
-      'purple-pink': { name:'Gradient Purple', bgLight:'#faf8ff', bgDark:'#171033', tLight:'#23304d', tDark:'#ffffff', a:'#7c3aed', b:'#f472b6', bookA:'#8b5cf6', bookB:'#f472b6' },
-      'green-lime': { name:'Gradient Green', bgLight:'#f7fffb', bgDark:'#062b28', tLight:'#173b39', tDark:'#ffffff', a:'#14b8a6', b:'#a3e635', bookA:'#22d3ee', bookB:'#a3e635' },
-      'pink-blue': { name:'Pink Blue', bgLight:'#fbfbff', bgDark:'#15182e', tLight:'#18324f', tDark:'#ffffff', a:'#f43f72', b:'#3b82f6', bookA:'#f43f72', bookB:'#38bdf8' },
-      'pastel-fresh': { name:'Pastel Fresh', bgLight:'#f8fbff', bgDark:'#182033', tLight:'#30425f', tDark:'#ffffff', a:'#d946ef', b:'#34d399', bookA:'#c084fc', bookB:'#67e8f9' },
-      'vibrant-clean': { name:'Vibrant Clean', bgLight:'#fffaf7', bgDark:'#211421', tLight:'#19334d', tDark:'#ffffff', a:'#ec4899', b:'#f59e0b', bookA:'#ec4899', bookB:'#fb923c' },
-      'mono': { name:'Minimal Mono', bgLight:'#f7f7f7', bgDark:'#0b0b0d', tLight:'#34373c', tDark:'#ffffff', a:'#6b7280', b:'#d1d5db', bookA:'#9ca3af', bookB:'#4b5563' },
-      'soft-pastel': { name:'Soft Pastel', bgLight:'#fffaf7', bgDark:'#201a25', tLight:'#1f344e', tDark:'#ffffff', a:'#f472b6', b:'#60a5fa', bookA:'#f9a8d4', bookB:'#60a5fa' },
-      'indigo-cyan': { name:'Indigo Cyan', bgLight:'#f7fbff', bgDark:'#09152b', tLight:'#172b4d', tDark:'#ffffff', a:'#6366f1', b:'#06b6d4', bookA:'#818cf8', bookB:'#22d3ee' }
-    };
-
-    const THEME_OPTIONS = [
-      ['dark-obsidian','Obsidian','Deep indigo'],['dark-oled','OLED','Pure black'],['dark-burgundy','Burgundy','Wine red'],['dark-emerald','Emerald','Forest green'],['dark-midnight','Midnight','Sky blue'],['dark-forest','Forest','Green'],['dark-plum','Plum','Purple'],
-      ['theme-light','Clean Light','Classic light'],['theme-warm','Beige','Warm neutral'],['light-sky','Sky','Cool blue'],['light-mint','Mint','Fresh green'],['light-lavender','Lavender','Soft violet'],['light-rose','Rose','Soft pink'],['light-slate','Slate','Neutral grey']
-    ];
-    const FONT_OPTIONS = [
-      ['font-space','Space Grotesk'],['font-dmsans','DM Sans'],['font-poppins','Poppins'],['font-josefin','Josefin Sans'],['font-indie','Indie Flower'],['font-righteous','Righteous'],['font-lobster','Lobster Two'],['font-anton','Anton'],['font-nanum','Nanum Gothic']
-    ];
-    const FONT_LABELS = Object.fromEntries(FONT_OPTIONS);
-    const THEME_LABELS = Object.fromEntries(THEME_OPTIONS.map(x=>[x[0],x[1]]));
-    const TEXT_SIZE_LABELS = {'ui-text-small':'Small','ui-text-normal':'Normal','ui-text-large':'Large','ui-text-xlarge':'Extra Large'};
-
-    function isDarkTheme(){ return String(appState.theme||'dark-obsidian').startsWith('dark-') || appState.theme==='dark'; }
-    function buildTrackabilityIconSVG(paletteKey, size=84, uid='home'){
-      const p=TRACK_ICON_PALETTES[paletteKey]||TRACK_ICON_PALETTES['coral-amber'];
-      const dark=isDarkTheme(); const bg=dark?p.bgDark:p.bgLight; const t=dark?p.tDark:p.tLight;
-      const rid=`tiRing_${uid}_${paletteKey.replace(/[^a-z0-9]/gi,'')}`; const bid=`tiBook_${uid}_${paletteKey.replace(/[^a-z0-9]/gi,'')}`;
-      return `<svg viewBox="0 0 84 84" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="${rid}" x1="13" y1="15" x2="72" y2="67" gradientUnits="userSpaceOnUse"><stop stop-color="${p.a}"/><stop offset="1" stop-color="${p.b}"/></linearGradient><linearGradient id="${bid}" x1="20" y1="63" x2="64" y2="52" gradientUnits="userSpaceOnUse"><stop stop-color="${p.bookA}"/><stop offset="1" stop-color="${p.bookB}"/></linearGradient></defs><rect width="84" height="84" rx="18" fill="${bg}"/><path d="M14 49A29 29 0 0 1 39 17" fill="none" stroke="url(#${rid})" stroke-width="7" stroke-linecap="round"/><path d="M45 17A29 29 0 0 1 70 49" fill="none" stroke="url(#${rid})" stroke-width="7" stroke-linecap="round"/><circle cx="42" cy="13" r="8" fill="url(#${rid})"/><rect x="27" y="27" width="30" height="8" rx="4" fill="${t}"/><path d="M35 35h14v12c0 5-2 8-7 11-5-3-7-6-7-11V35Z" fill="${t}"/><path d="M21 55c8-4 14-4 21 1v17c-7-5-13-6-21-3V55Z" fill="url(#${bid})"/><path d="M63 55c-8-4-14-4-21 1v17c7-5 13-6 21-3V55Z" fill="url(#${bid})"/></svg>`;
-    }
-    function renderHomeTrackabilityIcon(){
-      const el=document.getElementById('homeTrackabilityIcon'); if(!el)return;
-      el.innerHTML=buildTrackabilityIconSVG(appState.iconColor||'coral-amber',84,'home');
-      const s=document.getElementById('settingsIconSummary'); if(s) s.textContent=(TRACK_ICON_PALETTES[appState.iconColor||'coral-amber']?.name||'Coral Amber')+' • Home icon';
-    }
-    function setIconColor(key){
-      if(!TRACK_ICON_PALETTES[key])return;
-      appState.iconColor=key; saveState(); renderHomeTrackabilityIcon(); renderIconPalette(); updateSettingsSummaries(); showToast('App icon updated');
-    }
-    function renderIconPalette(){
-      const grid=document.getElementById('iconPaletteGrid'); if(!grid)return;
-      grid.innerHTML=Object.entries(TRACK_ICON_PALETTES).map(([key,p])=>`<button class="icon-palette-card ${appState.iconColor===key?'selected':''}" onclick="setIconColor('${key}')"><div class="icon-palette-preview">${buildTrackabilityIconSVG(key,72,'pal_'+key)}</div><div class="text-[10px] font-black text-themeText">${p.name}</div><div class="text-[8px] text-themeMuted mt-0.5">${key==='mono'?'Monochrome':'Gradient accent'}</div></button>`).join(''); if(window.lucide)lucide.createIcons();
-    }
-    function updateSettingsSummaries(){
-      const t=document.getElementById('settingsThemeSummary'); if(t)t.textContent=(THEME_LABELS[appState.theme]||'Custom theme')+' • tap to change';
-      const f=document.getElementById('settingsFontSummary'); if(f)f.textContent=(FONT_LABELS[appState.fontStyle]||'Default')+' • tap to change';
-      const z=document.getElementById('settingsTextSizeSummary'); if(z)z.textContent=TEXT_SIZE_LABELS[appState.fontSize]||'Normal';
-      const i=document.getElementById('settingsIconSummary'); if(i)i.textContent=(TRACK_ICON_PALETTES[appState.iconColor||'coral-amber']?.name||'Coral Amber')+' • Home icon';
-      const a=document.getElementById('settingsAccountSummary'); if(a)a.textContent='Sign in to sync your data across devices';
-    }
-    function renderThemePicker(){
-      const grid=document.getElementById('themePickerGrid'); if(!grid)return;
-      grid.innerHTML=THEME_OPTIONS.map(([key,name,desc])=>`<button onclick="setTheme('${key}');renderThemePicker();" class="p-3 rounded-2xl border ${appState.theme===key?'border-themeAccent ring-2 ring-themeAccent/20':'border-themeBorder'} bg-themeCardSoft text-left"><div class="h-10 rounded-xl mb-2" style="background:${themePreviewBg(key)}"><div class="w-1/2 h-full rounded-xl" style="background:${themePreviewAccent(key)}"></div></div><div class="text-[10px] font-black text-themeText">${name}</div><div class="text-[8px] text-themeMuted mt-0.5">${desc}</div></button>`).join(''); if(window.lucide)lucide.createIcons();
-    }
-    function themePreviewBg(k){ const map={'dark-obsidian':'#0b0f19','dark-oled':'#000','dark-burgundy':'#120407','dark-emerald':'#04130c','dark-midnight':'#060b1a','dark-forest':'#03110b','dark-plum':'#100718','theme-light':'#f8fafc','theme-warm':'#faf6f0','light-sky':'#eff8ff','light-mint':'#effcf6','light-lavender':'#f7f5ff','light-rose':'#fff5f7','light-slate':'#f1f5f9'}; return map[k]||'#fff'; }
-    function themePreviewAccent(k){ const map={'dark-obsidian':'#6366f1','dark-oled':'#a855f7','dark-burgundy':'#f43f5e','dark-emerald':'#10b981','dark-midnight':'#38bdf8','dark-forest':'#34d399','dark-plum':'#c084fc','theme-light':'#6366f1','theme-warm':'#d97706','light-sky':'#0284c7','light-mint':'#059669','light-lavender':'#7c3aed','light-rose':'#e11d48','light-slate':'#475569'}; return map[k]||'#6366f1'; }
-    function renderFontPicker(){
-      const grid=document.getElementById('fontPickerGrid'); if(!grid)return;
-      grid.innerHTML=FONT_OPTIONS.map(([key,name])=>`<button onclick="setFontStyle('${key}');renderFontPicker();" class="py-3 px-3 rounded-2xl border ${appState.fontStyle===key?'border-themeAccent ring-2 ring-themeAccent/20':'border-themeBorder'} bg-themeCardSoft text-left"><div style="font-family:'${name}'" class="text-sm font-bold text-themeText">${name}</div><div class="text-[8px] text-themeMuted mt-1">Aa • TRACKEBILITY • 00:50:00</div></button>`).join(''); if(window.lucide)lucide.createIcons();
-    }
-    function renderTextSizePicker(){
-      const grid=document.getElementById('textSizePickerGrid'); if(!grid)return;
-      grid.innerHTML=Object.entries(TEXT_SIZE_LABELS).map(([key,name])=>`<button onclick="setFontSize('${key}');renderTextSizePicker();" class="py-3 rounded-2xl border ${appState.fontSize===key?'border-themeAccent ring-2 ring-themeAccent/20':'border-themeBorder'} bg-themeCardSoft text-themeText font-black">${key==='ui-text-small'?'A−':key==='ui-text-normal'?'A':key==='ui-text-large'?'A+':'A++'}<span class="block text-[8px] text-themeMuted mt-1">${name}</span></button>`).join(''); if(window.lucide)lucide.createIcons();
-    }
-    const FAQ_ITEMS=[
-      ['What is TRACKEBILITY?','TRACKEBILITY is a study and life-tracking workspace. You can organize subjects and chapters, plan tasks, use the Focus/Pomodoro timer, log MCQs and tests, review mistakes, and track personal routines such as gym, sleep and nutrition.'],
-      ['How does the Focus Timer work?','Choose Study, Revision or Other, select a subject/chapter when applicable, choose a preset or custom duration, and start the timer. Completed sessions are added to Focus History and contribute to your study-time statistics.'],
-      ['Can I use TRACKEBILITY for exams other than NEET PG?','Yes. The target examination name and target date are editable, so the dashboard can be configured for another examination.'],
-      ['How are MCQs tracked?','You can add MCQs from the Home screen and view MCQ History. Grand Tests can also contribute their question totals to daily MCQ metrics according to the test data you record.'],
-      ['How are Grand Test scores calculated?','For the Grand Test tracker, the app uses +4 for each correct answer and −1 for each wrong answer. Unattempted questions are calculated from total minus correct minus wrong.'],
-      ['Can I sync my data across devices?','Yes. Sign in to your TRACKEBILITY account from Settings → Account & Cloud Sync. Signed-in data can be synchronized through the connected cloud account.'],
-      ['Can I export my data?','Yes. Settings includes Export JSON and Restore JSON so you can keep a portable backup of your app data.'],
-      ['Will changing a theme or font delete my study data?','No. Theme, font, text-size and icon-color choices are saved as settings in your existing app state.'],
-      ['What does App Icon Color change?','It changes the TRACKEBILITY symbol displayed in the Home header. It does not change the installed store/launcher icon dynamically.'],
-      ['How do I share TRACKEBILITY?','Settings → Share with Friends creates a link that you can copy or send using your device sharing options.']
-    ];
-    function renderFAQ(){
-      const list=document.getElementById('faqList'); if(!list)return;
-      list.innerHTML=FAQ_ITEMS.map((x,i)=>`<div class="faq-item"><button class="faq-question" onclick="toggleFAQ(${i})"><span>${x[0]}</span><i id="faqIcon${i}" data-lucide="chevron-down" class="w-4 h-4 shrink-0 text-themeMuted"></i></button><div id="faqAnswer${i}" class="faq-answer hidden">${x[1]}</div></div>`).join(''); if(window.lucide)lucide.createIcons();
-    }
-    function toggleFAQ(i){ const a=document.getElementById('faqAnswer'+i),ic=document.getElementById('faqIcon'+i); if(!a)return; const hidden=a.classList.toggle('hidden'); if(ic)ic.style.transform=hidden?'':'rotate(180deg)'; }
-    function prepareShareLink(){
-      const base=(window.location.href||'https://trackability.in/').split('#')[0].split('?')[0];
-      const url=base+(base.includes('?')?'&':'?')+'ref=friend';
-      const el=document.getElementById('shareLinkText'); if(el)el.textContent=url;
-      window.__trackabilityShareLink=url;
-    }
-    async function copyShareLink(){
-      prepareShareLink(); const url=window.__trackabilityShareLink;
-      try{ await navigator.clipboard.writeText(url); showToast('Share link copied ✓'); }catch(e){ const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();showToast('Share link copied ✓'); }
-    }
-    async function shareTrackabilityLink(){
-      prepareShareLink(); const url=window.__trackabilityShareLink;
-      if(navigator.share){ try{await navigator.share({title:'TRACKEBILITY',text:'Track your study, focus sessions, tasks, MCQs, tests and more with TRACKEBILITY.',url});}catch(e){} } else { await copyShareLink(); }
-    }
-    function renderNotificationSettings(){
-      const body=document.getElementById('notificationSettingsBody'); if(!body)return;
-      const n=appState.notificationSettings||{};
-      body.innerHTML=`<label class="settings-row"><span class="settings-row-icon"><i data-lucide="timer" class="w-4 h-4"></i></span><span class="settings-row-copy"><span class="settings-row-title">Study reminders</span><span class="settings-row-sub">Allow future Focus/study reminder features to use notifications.</span></span><input id="notifyStudyToggle" type="checkbox" ${n.studyReminders!==false?'checked':''} onchange="updateNotificationSetting('studyReminders',this.checked)" class="w-5 h-5 accent-[var(--accent-color)]"></label><label class="settings-row"><span class="settings-row-icon"><i data-lucide="calendar-check" class="w-4 h-4"></i></span><span class="settings-row-copy"><span class="settings-row-title">Task reminders</span><span class="settings-row-sub">Allow future task reminder features to use notifications.</span></span><input id="notifyTaskToggle" type="checkbox" ${n.taskReminders!==false?'checked':''} onchange="updateNotificationSetting('taskReminders',this.checked)" class="w-5 h-5 accent-[var(--accent-color)]"></label>`; if(window.lucide)lucide.createIcons();
-    }
-    function updateNotificationSetting(key,value){ appState.notificationSettings=appState.notificationSettings||{}; appState.notificationSettings[key]=!!value; saveState(); showToast('Notification preference saved'); }
-
-    function setTheme(t) { appState.theme = t; applyBodyClasses(); saveState(); renderHomeTrackabilityIcon(); updateSettingsSummaries(); showToast('Theme updated'); }
-    function setFontStyle(f) { appState.fontStyle = f; applyBodyClasses(); saveState(); updateSettingsSummaries(); showToast('Typography updated'); }
+    function setTheme(t) { appState.theme = t; applyBodyClasses(); saveState(); showToast('Theme updated'); }
+    function setFontStyle(f) { appState.fontStyle = f; applyBodyClasses(); saveState(); showToast('Typography updated'); }
 
     function saveGeneralSettings() {
       appState.profileName = document.getElementById('settingsProfileNameInput').value.trim() || 'Doctor';
@@ -3442,8 +3239,6 @@
       saveState();
       closeModal('settingsModal');
       renderHome();
-      renderHomeTrackabilityIcon();
-      updateSettingsSummaries();
       showToast('Settings saved');
     }
 
@@ -6337,7 +6132,6 @@ document.addEventListener('DOMContentLoaded',function(){
   document.addEventListener('DOMContentLoaded',function(){
     setTimeout(function(){
       try{ initSupabase(); }catch(e){console.error(e);}
-      try{ renderHomeTrackabilityIcon(); updateSettingsSummaries(); }catch(e){}
       const header=document.getElementById('navProfileName');
       if(header && !header.dataset.accountBound){
         header.dataset.accountBound='1';
