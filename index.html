@@ -2467,7 +2467,7 @@
         }
         showToast('Task updated successfully');
       } else {
-        appState.tasks.push({ id:'tsk_'+Date.now(), name, date, color, startTime, endTime, duration, completed:false, reminderEnabled, reminderPreset, subjectId, chapterId, trackerType, trackerLogged:false, mcqTaskCount:0 });
+        appState.tasks.push({ id:'tsk_'+Date.now(), name, date, color, startTime, endTime, duration, completed:false, reminderEnabled, reminderPreset, subjectId, chapterId, trackerType, mcqType: trackerType === 'mcq' ? mcqType : '', trackerLogged:false, mcqTaskCount:0 });
         showToast('✓ Task added to schedule');
       }
       saveState(); closeModal('taskModal'); refreshAllViews();
@@ -3946,7 +3946,7 @@
     if(window.pendingMCQTaskId){const task=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=questions;task.mcqActivityId=savedRec.id;savedRec.taskId=task.id;}window.pendingMCQTaskId='';}
     saveState();closeModal(id);renderHome();openMCQHistoryModal();showToast(idx>=0?'MCQ entry updated':'MCQ entry logged');
   };
-  window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':'Q-Bank'} "${x.name}"?`))return;appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();showToast('MCQ entry deleted');};
+  window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':x.type==='misc'?'Misc / Other':'Q-Bank'} "${x.name}"?`))return;appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();showToast('MCQ entry deleted');};
 
   /* ---------- Home redesign ---------- */
   function installHomeLayout(){
@@ -3994,7 +3994,7 @@
   let mcqWeekCursor=new Date();let mcqHistoryExpanded=false;let mcqSelectedDate='';
   function startOfWeek(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
   function allMCQDates(){ensureMCQActivityStore();const s=new Set(Object.keys(appState.mcqCounts||{}));(appState.grandTests||[]).forEach(x=>x.date&&s.add(x.date));appState.mcqActivities.forEach(x=>x.date&&s.add(x.date));return s;}
-  function mcqEntriesForDate(date){ensureMCQActivityStore();const arr=[];const practice=Number((appState.mcqCounts||{})[date]||0);if(practice)arr.push({type:'Practice',name:'Practice MCQs',questions:practice});(appState.grandTests||[]).filter(x=>x.date===date).forEach(g=>arr.push({type:'GT',id:g.id,name:g.name,questions:Number(g.total)||0,score:g.score}));appState.mcqActivities.filter(x=>x.date===date).forEach(x=>arr.push({type:x.type==='mini'?'Mini Test':'Q-Bank',id:x.id,name:x.name,questions:Number(x.questions)||0,notes:x.notes,platform:x.platform}));return arr;}
+  function mcqEntriesForDate(date){ensureMCQActivityStore();const arr=[];const practice=Number((appState.mcqCounts||{})[date]||0);if(practice)arr.push({type:'Practice',name:'Practice MCQs',questions:practice});(appState.grandTests||[]).filter(x=>x.date===date).forEach(g=>arr.push({type:'GT',id:g.id,name:g.name,questions:Number(g.total)||0,score:g.score}));appState.mcqActivities.filter(x=>x.date===date).forEach(x=>arr.push({type:x.type==='mini'?'Mini Test':x.type==='misc'?'Misc / Other':'Q-Bank',id:x.id,name:x.name,questions:Number(x.questions)||0,notes:x.notes,platform:x.platform}));return arr;}
   window.openMCQHistoryModal=function(){
     ensureMCQActivityStore();const modal=document.getElementById('mcqHistoryModal');if(!modal)return;let cal=document.getElementById('mcqHistoryCalendarWrap');if(!cal){cal=document.createElement('div');cal.id='mcqHistoryCalendarWrap';cal.className='space-y-2';document.getElementById('mcqHistorySummaryStats').after(cal);}const month=new Date(mcqWeekCursor.getFullYear(),mcqWeekCursor.getMonth(),1),monthLabel=month.toLocaleDateString('en-US',{month:'long',year:'numeric'}),daysIn=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
     const first=startOfWeek(mcqWeekCursor),days=[];for(let i=0;i<7;i++){const x=new Date(first);x.setDate(first.getDate()+i);days.push(x);}const totalMonth=Array.from({length:daysIn},(_,i)=>{const x=new Date(month.getFullYear(),month.getMonth(),i+1);return getDailyMCQTotalV2(ymd(x));});const plus=totalMonth.filter(n=>n>=50).length;
@@ -4006,7 +4006,7 @@
   window.shiftMCQHistoryWeek=function(delta){mcqWeekCursor.setDate(mcqWeekCursor.getDate()+delta*7);mcqSelectedDate='';openMCQHistoryModal();};
   window.toggleMCQHistoryCalendar=function(){mcqHistoryExpanded=!mcqHistoryExpanded;openMCQHistoryModal();};
   window.selectMCQHistoryDate=function(date){mcqSelectedDate=date;openMCQHistoryModal();};
-  function renderSelectedMCQDay(date){const e=document.getElementById('mcqHistorySelectedDay');if(!e)return;const entries=mcqEntriesForDate(date),total=getDailyMCQTotalV2(date);e.innerHTML=`<div class="p-3 rounded-2xl bg-themeCard border border-themeBorder"><div class="flex justify-between items-center"><b class="text-xs">${date}</b><b class="text-themeAccent">${total} MCQs</b></div><div class="space-y-1 mt-2">${entries.length?entries.map(x=>`<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">${esc(x.type)}</span><b class="block text-[10px]">${esc(x.name)}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}${x.notes?`<p class="text-[8px] text-themeMuted">${esc(x.notes)}</p>`:''}</div><div class="text-right shrink-0"><b class="text-emerald-400">${x.questions}</b><div class="flex gap-1 justify-end mt-1">${x.id&&x.type==='Q-Bank'?`<button onclick="openQBankModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:''}${x.id&&x.type==='Mini Test'?`<button onclick="openMiniTestModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:''}</div></div></div>`).join(''):'<span class="text-[9px] text-themeMuted">No detailed source entries.</span>'}</div></div>`;}
+  function renderSelectedMCQDay(date){const e=document.getElementById('mcqHistorySelectedDay');if(!e)return;const entries=mcqEntriesForDate(date),total=getDailyMCQTotalV2(date);e.innerHTML=`<div class="p-3 rounded-2xl bg-themeCard border border-themeBorder"><div class="flex justify-between items-center"><b class="text-xs">${date}</b><b class="text-themeAccent">${total} MCQs</b></div><div class="space-y-1 mt-2">${entries.length?entries.map(x=>`<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">${esc(x.type)}</span><b class="block text-[10px]">${esc(x.name)}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}${x.notes?`<p class="text-[8px] text-themeMuted">${esc(x.notes)}</p>`:''}</div><div class="text-right shrink-0"><b class="text-emerald-400">${x.questions}</b><div class="flex gap-1 justify-end mt-1">${x.id&&x.type==='Q-Bank'?`<button onclick="openQBankModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:''}${x.id&&x.type==='Mini Test'?`<button onclick="openMiniTestModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:''}${x.id&&x.type==='Misc / Other'?`<button onclick="openMiscMCQModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:''}</div></div></div>`).join(''):'<span class="text-[9px] text-themeMuted">No detailed source entries.</span>'}</div></div>`;}
 
   /* ---------- Tracker calendars: compact week + expand ---------- */
   let trackerCalExpanded=false;
@@ -6692,7 +6692,7 @@ document.addEventListener('DOMContentLoaded',function(){
   window.deleteGymLog=function(id){const x=(appState.gymLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Delete this workout log?'))return;recycleDelete('Workout',`${x.date||''} • ${x.split||'Workout'}`,x);appState.gymLogs=appState.gymLogs.filter(a=>a.id!==id);saveState();renderGymTracker();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('Workout moved to Recycle Bin');};
   window.deleteMcqId=function(id){const x=(appState.mcqIds||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Delete this MCQ ID entry?'))return;recycleDelete('MCQ ID',x.name||x.id,x);appState.mcqIds=appState.mcqIds.filter(a=>a.id!==id);saveState();renderMcqIdTracker();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('MCQ ID moved to Recycle Bin');};
   window.undoGT=function(id){const x=(appState.grandTests||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Remove "${x.name}"? It will be kept in Recycle Bin for 30 days.`))return;recycleDelete('Grand Test',x.name||'Grand Test',x);appState.grandTests=appState.grandTests.filter(a=>a.id!==id);saveState();renderGTTracker();renderHome();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('GT moved to Recycle Bin');};
-  window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':'Q-Bank'} "${x.name}"?`))return;recycleDelete('Q-Bank / Mini Test',x.name||'MCQ entry',x);appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();updateRecycleCount();showToast('MCQ entry moved to Recycle Bin');};
+  window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':x.type==='misc'?'Misc / Other':'Q-Bank'} "${x.name}"?`))return;recycleDelete('Q-Bank / Mini Test',x.name||'MCQ entry',x);appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();updateRecycleCount();showToast('MCQ entry moved to Recycle Bin');};
   window.deleteSleepEntry=function(id){const x=(appState.sleepLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Remove this sleep record?'))return;recycleDelete('Sleep',`${x.date||''} • ${x.hours||0} hours`,x);appState.sleepLogs=appState.sleepLogs.filter(a=>a.id!==id);if(x.taskId){const t=(appState.tasks||[]).find(a=>a.id===x.taskId);if(t){t.completed=false;t.trackerLogged=false;t.sleepLogId=null;}}saveState();refreshAllViews();renderSleepTracker();updateRecycleCount();showToast('Sleep record moved to Recycle Bin');};
   window.deleteReviewLog=function(id){const x=(appState.mistakeReviewLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Remove this review record?'))return;recycleDelete('Review',x.title||'Mistake Book Review',x);appState.mistakeReviewLogs=appState.mistakeReviewLogs.filter(a=>a.id!==id);if(x.taskId){const t=(appState.tasks||[]).find(a=>a.id===x.taskId);if(t){t.completed=false;t.trackerLogged=false;t.reviewLogId=null;}}saveState();refreshAllViews();renderMistakeReviewTracker();updateRecycleCount();showToast('Review moved to Recycle Bin');};
 
@@ -6949,169 +6949,6 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   function formatStatsHours(h){h=Number(h)||0;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh?`${hh}h ${mm?mm+'m':''}`:(mm?mm+'m':'0 h');}
 
-
-  /* ---------- Final fixes: MCQ Misc label, custom Statistics range, nutrition charts ---------- */
-
-  /* MCQ history: preserve Misc / Other as its own source label. */
-  const __tbOriginalMCQEntriesForDate = mcqEntriesForDate;
-  mcqEntriesForDate = function(date){
-    ensureMCQActivityStore();
-    const arr=[];
-    const practice=Number((appState.mcqCounts||{})[date]||0);
-    if(practice)arr.push({type:'Practice',name:'Practice MCQs',questions:practice});
-    (appState.grandTests||[]).filter(x=>x.date===date).forEach(g=>arr.push({type:'GT',id:g.id,name:g.name,questions:Number(g.total)||0,score:g.score}));
-    appState.mcqActivities.filter(x=>x.date===date).forEach(x=>{
-      const label=x.type==='mini'?'Mini Test':(x.type==='misc'?'Misc / Other':'Q-Bank');
-      arr.push({type:label,id:x.id,name:x.name,questions:Number(x.questions)||0,notes:x.notes,platform:x.platform});
-    });
-    return arr;
-  };
-
-  /* Re-render MCQ history with correct Misc / Other edit/delete controls. */
-  const __tbHistoryRenderer = renderSelectedMCQDay;
-  renderSelectedMCQDay = function(date){
-    const e=document.getElementById('mcqHistorySelectedDay');if(!e)return;
-    const entries=mcqEntriesForDate(date),total=getDailyMCQTotalV2(date);
-    e.innerHTML=`<div class="p-3 rounded-2xl bg-themeCard border border-themeBorder"><div class="flex justify-between items-center"><b class="text-xs">${date}</b><b class="text-themeAccent">${total} MCQs</b></div><div class="space-y-1 mt-2">${entries.length?entries.map(x=>{
-      const edit=x.type==='Q-Bank'?`<button onclick="openQBankModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button>`:
-        x.type==='Mini Test'?`<button onclick="openMiniTestModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button>`:
-        x.type==='Misc / Other'?`<button onclick="openMiscMCQModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button>`:'';
-      const del=(x.id&&(x.type==='Q-Bank'||x.type==='Mini Test'||x.type==='Misc / Other'))?`<button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:'';
-      return `<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">${esc(x.type)}</span><b class="block text-[10px]">${esc(x.name)}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}${x.notes?`<p class="text-[8px] text-themeMuted">${esc(x.notes)}</p>`:''}</div><div class="text-right shrink-0"><b class="text-emerald-400">${x.questions}</b><div class="flex gap-1 justify-end mt-1">${edit}${del}</div></div></div>`;
-    }).join(''):'<span class="text-[9px] text-themeMuted">No detailed source entries.</span>'}</div></div>`;
-  };
-
-  /* ---------- Custom Statistics ---------- */
-  let tbStatsMode=localStorage.getItem('trackability_stats_mode')||'today';
-  let tbStatsStart=localStorage.getItem('trackability_stats_start')||today();
-  let tbStatsEnd=localStorage.getItem('trackability_stats_end')||today();
-  let tbStatsCalendarDate=dateOf(tbStatsStart||today());
-  let tbStatsCalendarOpen=true;
-
-  function tbStatsRange(){
-    let a=tbStatsStart||today(),b=tbStatsEnd||today();
-    if(tbStatsMode==='today')a=b=today();
-    if(tbStatsMode==='total'){
-      const ds=collectDates();
-      if(ds.length){a=ds[0];b=ds[ds.length-1];}
-      else a=b=today();
-    }
-    if(a>b){const t=a;a=b;b=t;}
-    return {startS:a,endS:b};
-  }
-  function tbStatsDateList(r){
-    const out=[],a=dateOf(r.startS),b=dateOf(r.endS);
-    for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1))out.push(ymd(d));
-    return out;
-  }
-  function tbStatsActivityDates(){
-    const set=new Set();
-    const add=a=>(a||[]).forEach(x=>x?.date&&set.add(x.date));
-    add(appState.tasks);add(appState.focusSessions);add(appState.sleepLogs);add(appState.nutritionLogs);
-    add(appState.gymLogs);add(appState.mistakeReviewLogs);add(appState.mistakes);add(appState.mcqIds);
-    add(appState.grandTests);add(appState.mcqActivities);
-    Object.keys(appState.mcqCounts||{}).forEach(x=>set.add(x));
-    return set;
-  }
-  function tbStatsInRange(date,r){return date>=r.startS&&date<=r.endS;}
-  function tbStatsData(r){
-    const f=a=>(a||[]).filter(x=>tbStatsInRange(String(x.date||''),r));
-    const tasks=f(appState.tasks),focus=f(appState.focusSessions),sleep=f(appState.sleepLogs),nut=f(appState.nutritionLogs),gym=f(appState.gymLogs),reviews=f(appState.mistakeReviewLogs),mistakes=f(appState.mistakes),ids=f(appState.mcqIds),gts=f(appState.grandTests),acts=f(appState.mcqActivities);
-    let practice=0,qbank=0,mini=0,misc=0,gt=0;
-    Object.keys(appState.mcqCounts||{}).forEach(d=>{if(tbStatsInRange(d,r))practice+=Number(appState.mcqCounts[d]||0);});
-    gts.forEach(x=>gt+=Number(x.total||0));
-    acts.forEach(x=>{const q=Number(x.questions||0);if(x.type==='mini')mini+=q;else if(x.type==='misc')misc+=q;else qbank+=q;});
-    const focusH=focus.reduce((a,x)=>a+Number(x.durationSeconds||0),0)/3600;
-    const protein=nut.reduce((a,x)=>a+Number(x.protein||0),0),kcal=nut.reduce((a,x)=>a+Number(x.kcal||0),0),sleepH=sleep.reduce((a,x)=>a+Number(x.hours||0),0);
-    const activeDays=new Set([...tasks,...focus,...sleep,...nut,...gym,...reviews,...mistakes,...ids,...gts,...acts].map(x=>x.date).filter(Boolean));
-    return {tasks,focus,sleep,nut,gym,reviews,mistakes,ids,gts,focusH,protein,kcal,sleepH,activeDays,mcq:{practice,qbank,mini,misc,gt,total:practice+qbank+mini+misc+gt}};
-  }
-  function tbStatsFmtHours(h){h=Number(h)||0;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh?`${hh}h ${mm?mm+'m':''}`:(mm?`${mm}m`:'0 h');}
-  function tbStatsCard(label,value,detail,wide){return `<div class="rounded-2xl p-3 bg-themeCardSoft border border-themeBorder ${wide?'col-span-2':''}"><div class="text-[9px] font-black uppercase text-themeMuted">${label}</div><div class="text-xl font-black text-themeText mt-1">${value}</div><div class="text-[9px] text-themeMuted mt-1">${detail||''}</div></div>`;}
-
-  function tbStatsMonthCalendar(){
-    const wrap=document.getElementById('statsCalendarCard');if(!wrap)return;
-    const d=tbStatsCalendarDate,days=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),first=(new Date(d.getFullYear(),d.getMonth(),1).getDay()+6)%7;
-    const activity=tbStatsActivityDates();
-    let html=`<div class="flex items-center justify-between gap-2"><button onclick="tbStatsShiftMonth(-1)" class="p-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeAccent">‹</button><div class="text-center"><b class="text-xs text-themeAccent">${d.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</b><div class="text-[8px] text-themeMuted mt-0.5">Select dates for a custom range</div></div><button onclick="tbStatsShiftMonth(1)" class="p-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeAccent">›</button></div>`;
-    html+=`<div class="grid grid-cols-7 gap-1 mt-2 text-center text-[8px] font-black text-themeMuted"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="grid grid-cols-7 gap-1 mt-1">`;
-    for(let i=0;i<first;i++)html+='<span></span>';
-    for(let day=1;day<=days;day++){
-      const date=ymd(new Date(d.getFullYear(),d.getMonth(),day)),isStart=date===tbStatsStart,isEnd=date===tbStatsEnd,inSel=tbStatsMode==='custom'&&date>=tbStatsStart&&date<=tbStatsEnd;
-      html+=`<button onclick="tbStatsPickDate('${date}')" class="min-h-[40px] rounded-xl border ${isStart||isEnd?'border-themeAccent bg-themeAccent/15':inSel?'border-themeBorder bg-themeCardSoft':'border-transparent bg-themeCardSoft'} text-[10px] font-bold text-themeText relative">${day}${activity.has(date)?'<span class="block text-[7px] text-themeAccent">•</span>':''}</button>`;
-    }
-    html+='</div><div class="flex justify-between items-center pt-2"><span class="text-[8px] text-themeMuted">First tap = From • second tap = To</span><button onclick="tbStatsToggleCalendar()" class="px-2.5 py-1.5 rounded-xl bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">'+(tbStatsCalendarOpen?'Minimize':'Show calendar')+'</button></div>';
-    if(tbStatsCalendarOpen)wrap.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-2">${html}</div>`;
-    else wrap.innerHTML=`<div class="flex justify-end"><button onclick="tbStatsToggleCalendar()" class="px-2.5 py-1.5 rounded-xl bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">Show calendar</button></div>`;
-  }
-  window.tbStatsToggleCalendar=function(){tbStatsCalendarOpen=!tbStatsCalendarOpen;tbStatsMonthCalendar();};
-  window.tbStatsShiftMonth=function(delta){tbStatsCalendarDate.setMonth(tbStatsCalendarDate.getMonth()+Number(delta||0));tbStatsMonthCalendar();};
-  window.tbStatsPickDate=function(date){
-    if(tbStatsMode!=='custom'||!tbStatsStart||tbStatsStart===tbStatsEnd){tbStatsStart=date;tbStatsEnd=date;tbStatsMode='custom';}
-    else if(date<tbStatsStart){tbStatsStart=date;}
-    else if(date>tbStatsEnd){tbStatsEnd=date;}
-    else {tbStatsStart=date;tbStatsEnd=date;}
-    localStorage.setItem('trackability_stats_start',tbStatsStart);localStorage.setItem('trackability_stats_end',tbStatsEnd);localStorage.setItem('trackability_stats_mode','custom');
-    tbStatsCalendarDate=dateOf(date);renderStatistics();
-  };
-  window.tbStatsApplyDates=function(){
-    const a=document.getElementById('tbStatsFrom')?.value||today(),b=document.getElementById('tbStatsTo')?.value||today();
-    tbStatsStart=a;tbStatsEnd=b;tbStatsMode='custom';localStorage.setItem('trackability_stats_start',a);localStorage.setItem('trackability_stats_end',b);localStorage.setItem('trackability_stats_mode','custom');tbStatsCalendarDate=dateOf(a);renderStatistics();
-  };
-  window.tbStatsSetMode=function(mode){
-    tbStatsMode=mode;
-    if(mode==='today'){tbStatsStart=tbStatsEnd=today();}
-    if(mode==='custom'){if(!tbStatsStart)tbStatsStart=today();if(!tbStatsEnd)tbStatsEnd=today();}
-    localStorage.setItem('trackability_stats_mode',tbStatsMode);localStorage.setItem('trackability_stats_start',tbStatsStart);localStorage.setItem('trackability_stats_end',tbStatsEnd);renderStatistics();
-  };
-  window.renderStatistics=function(){
-    const c=document.getElementById('statsDailySummary');if(!c)return;
-    const r=tbStatsRange(),d=tbStatsData(r),days=d.activeDays.size||1,done=d.tasks.filter(x=>x.completed).length;
-    const modeButtons=[['today','Today'],['custom','Custom Range'],['total','Total']].map(([k,l])=>`<button onclick="tbStatsSetMode('${k}')" class="flex-1 min-w-[92px] py-2 rounded-xl text-[10px] font-black ${tbStatsMode===k?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">${l}</button>`).join('');
-    c.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3">
-      <div class="flex gap-1.5">${modeButtons}</div>
-      <div class="text-center"><div class="text-[10px] font-black uppercase text-themeAccent">${tbStatsMode==='today'?'TODAY':tbStatsMode==='total'?'TOTAL ACTIVITY':'CUSTOM DATE RANGE'}</div><div class="text-[10px] text-themeMuted mt-1">${r.startS} → ${r.endS}</div></div>
-      ${tbStatsMode==='custom'?`<div class="grid grid-cols-2 gap-2"><div><label class="block text-[8px] font-black text-themeMuted mb-1">FROM</label><input id="tbStatsFrom" type="date" value="${r.startS}" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></div><div><label class="block text-[8px] font-black text-themeMuted mb-1">TO</label><input id="tbStatsTo" type="date" value="${r.endS}" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></div></div><button onclick="tbStatsApplyDates()" class="w-full py-2.5 rounded-xl bg-themeAccent text-white text-[10px] font-black">Apply Date Range</button>`:''}
-    </div>
-    <div class="grid grid-cols-2 gap-2">${tbStatsCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`,true)}
-      ${tbStatsCard('📚 Focus',tbStatsFmtHours(d.focusH),`${d.focus.length} sessions`)}
-      ${tbStatsCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}
-      ${tbStatsCard('📝 Grand Tests',d.gts.length,`${d.mcq.gt} questions`)}
-      ${tbStatsCard('🏋️ Gym',d.gym.length,'workout logs')}
-      ${tbStatsCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,`${d.sleep.length?Math.round(d.sleepH/d.sleep.length*10)/10:0} h / log`)}
-      ${tbStatsCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(d.protein/days)} g / active day`)}
-      ${tbStatsCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(d.kcal/days).toLocaleString()} / active day`)}
-      ${tbStatsCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}
-      ${tbStatsCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}
-    </div>`;
-    tbStatsMonthCalendar();
-    const head=document.querySelector('#tab-statistics h3');if(head)head.textContent='ACTIVITY STATISTICS';
-    const sub=head?.parentElement?.querySelector('p');if(sub)sub.textContent='Choose today, a custom date range, or all recorded activity.';
-    if(window.lucide)lucide.createIcons();
-  };
-
-  /* ---------- Protein / kcal bar charts ---------- */
-  let tbNutritionChartTab='protein';
-  window.setNutritionChartTab=function(tab){tbNutritionChartTab=tab;renderNutritionChart();};
-  function renderNutritionChart(){
-    const host=document.getElementById('nutritionChartWrap');if(!host)return;
-    const anchor=trackerSelectedDate||today();
-    let cursor=new Date();
-    try{cursor=trackerCalState('nutrition',anchor).cursor;}catch(e){cursor=dateOf(anchor);}
-    const prefix=`${cursor.getFullYear()}-${pad(cursor.getMonth()+1)}`;
-    const logs=(appState.nutritionLogs||[]).filter(x=>String(x.date||'').startsWith(prefix));
-    const byDate={};logs.forEach(x=>{byDate[x.date]=(byDate[x.date]||0)+Number(tbNutritionChartTab==='protein'?x.protein||0:x.kcal||0);});
-    const daysIn=new Date(cursor.getFullYear(),cursor.getMonth()+1,0).getDate(),max=tbNutritionChartTab==='protein'?300:5000,unit=tbNutritionChartTab==='protein'?'g':'kcal',label=tbNutritionChartTab==='protein'?'Protein':'Calories';
-    let bars='';
-    for(let day=1;day<=daysIn;day++){
-      const date=`${prefix}-${pad(day)}`,value=Number(byDate[date]||0),height=Math.min(100,(value/max)*100);
-      bars+=`<div class="flex flex-col items-center justify-end h-48 min-w-[28px]"><div class="text-[7px] text-themeMuted mb-1">${value?Math.round(value):''}</div><div title="${date}: ${Math.round(value)} ${unit}" class="w-4 rounded-t-md bg-themeAccent transition-all" style="height:${Math.max(value?2:0,height)}%"></div><span class="text-[7px] text-themeMuted mt-1">${day}</span></div>`;
-    }
-    host.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeMuted">Nutrition Chart</h4><p class="text-[9px] text-themeMuted">${cursor.toLocaleDateString('en-US',{month:'long',year:'numeric'})} • Y-axis max ${max.toLocaleString()} ${unit}</p></div><div class="flex gap-1"><button onclick="setNutritionChartTab('protein')" class="px-2.5 py-1.5 rounded-xl text-[9px] font-black ${tbNutritionChartTab==='protein'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Protein</button><button onclick="setNutritionChartTab('kcal')" class="px-2.5 py-1.5 rounded-xl text-[9px] font-black ${tbNutritionChartTab==='kcal'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Kcal</button></div></div><div class="flex gap-2 mt-2"><div class="w-10 h-48 flex flex-col justify-between text-[7px] text-themeMuted text-right pr-1"><span>${max}</span><span>${Math.round(max*.75)}</span><span>${Math.round(max*.5)}</span><span>${Math.round(max*.25)}</span><span>0</span></div><div class="flex-1 overflow-x-auto custom-scroll"><div class="min-w-max flex items-end gap-1 border-b border-themeBorder px-1">${bars}</div></div></div><div class="text-[8px] text-themeMuted text-center">${label} per day • dates are shown on the X-axis</div></div>`;
-  }
-  const __tbNutritionBase=window.renderNutritionTracker;
-  window.renderNutritionTracker=function(){if(typeof __tbNutritionBase==='function')__tbNutritionBase();let mod=document.getElementById('trackerMod-nutrition');if(!mod)return;let host=document.getElementById('nutritionChartWrap');if(!host){host=document.createElement('div');host.id='nutritionChartWrap';const first=mod.firstElementChild;if(first)first.after(host);else mod.appendChild(host);}renderNutritionChart();};
-
   function init(){
     removeOldLogoUI();ensureMiscChooser();
     /* First launch is intentionally white/light until the user reaches the theme screen. */
@@ -7125,5 +6962,275 @@ document.addEventListener('DOMContentLoaded',function(){
   setInterval(removeOldLogoUI,1500);
 })();
 </script>
+
+<script id="trackability-update20-final-fixes">
+(function(){
+  'use strict';
+  const esc=v=>window.escapeHtml?window.escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const pad=n=>String(n).padStart(2,'0');
+  const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today=()=>ymd(new Date());
+  const dateObj=s=>new Date(`${s}T00:00:00`);
+  const monthTitle=d=>d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const fmtDate=s=>dateObj(s).toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'});
+  const oldRenderNutritionTracker=window.renderNutritionTracker;
+
+  /* =========================================================
+     1) MCQ: persist the selected task type + correct Misc label
+     ========================================================= */
+  function normalizeTaskMCQTypes(){
+    (appState.tasks||[]).forEach(t=>{
+      if(t.trackerType==='mcq' && !t.mcqType) t.mcqType='qbank';
+    });
+  }
+  normalizeTaskMCQTypes();
+
+  const oldSaveTask=window.saveTask;
+  // The source saveTask was patched above so new tasks now persist mcqType.
+  // This wrapper also guarantees legacy/edit paths retain it.
+  window.saveTask=function(){
+    if(typeof oldSaveTask==='function') oldSaveTask();
+    normalizeTaskMCQTypes();
+    try{saveState();}catch(e){}
+  };
+
+  // A single authoritative task-completion route. It uses the type saved on the task.
+  const oldToggleTaskDone=window.toggleTaskDone;
+  window.toggleTaskDone=function(id){
+    const t=(appState.tasks||[]).find(x=>x.id===id);
+    if(!t){return typeof oldToggleTaskDone==='function'?oldToggleTaskDone(id):undefined;}
+    if(t.trackerType==='mcq' && !t.completed && !t.trackerLogged){
+      window.pendingMCQTaskId=t.id;
+      const type=t.mcqType||'qbank';
+      if(type==='gt'){
+        openGTModal();
+        const e=document.getElementById('gtDate'); if(e)e.value=t.date||today();
+      }else if(type==='mini'){
+        openMiniTestModal();
+        const e=document.getElementById('miniTestModalDate'); if(e)e.value=t.date||today();
+      }else if(type==='misc'){
+        openMiscMCQModal();
+        const e=document.getElementById('miscMCQDate'); if(e)e.value=t.date||today();
+      }else{
+        openQBankModal();
+        const e=document.getElementById('qbankModalDate'); if(e)e.value=t.date||today();
+      }
+      return;
+    }
+    return typeof oldToggleTaskDone==='function'?oldToggleTaskDone(id):undefined;
+  };
+
+  // Home + Add MCQ chooser: Misc is a first-class source.
+  const oldOpenChooser=window.openAddMCQChooser;
+  window.openAddMCQChooser=function(taskId=''){
+    if(typeof oldOpenChooser==='function') oldOpenChooser(taskId);
+    setTimeout(()=>{
+      const m=document.getElementById('addMCQChooserModal');
+      const grid=m?.querySelector('.grid');
+      if(!grid)return;
+      if(!grid.querySelector('[data-mcq-source="misc"]')){
+        const b=document.createElement('button');
+        b.setAttribute('data-mcq-source','misc');
+        b.className='p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-left';
+        b.innerHTML='<b class="text-xs">📌 Misc / Other</b><span class="block text-[9px] text-themeMuted mt-1">Log MCQs from any other source.</span>';
+        b.onclick=()=>window.chooseMCQSource('misc');
+        grid.appendChild(b);
+      }
+    },0);
+  };
+  const oldChooseSource=window.chooseMCQSource;
+  window.chooseMCQSource=function(type){
+    if(type==='misc'){
+      const task=window.pendingMCQTaskId?(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId):null;
+      closeModal('addMCQChooserModal');
+      openMiscMCQModal();
+      if(task){const e=document.getElementById('miscMCQDate');if(e)e.value=task.date||today();}
+      return;
+    }
+    if(typeof oldChooseSource==='function')return oldChooseSource(type);
+  };
+
+  // History renderer: preserve misc as Misc / Other, with edit/delete.
+  const oldHistory=window.openMCQHistoryModal;
+  window.openMCQHistoryModal=function(){
+    if(typeof oldHistory==='function') oldHistory();
+    setTimeout(()=>{
+      const modal=document.getElementById('mcqHistoryModal');
+      if(!modal)return;
+      const selected=modal.querySelector('#mcqHistorySelectedDay');
+      if(!selected)return;
+      selected.querySelectorAll('[data-misc-history]').forEach(e=>e.remove());
+      // Re-render the selected-day detail if the underlying history code exposed a selected date.
+      const text=selected.textContent||'';
+      const m=text.match(/(\d{4}-\d{2}-\d{2})/);
+      if(!m)return;
+      const date=m[1];
+      const acts=(appState.mcqActivities||[]).filter(x=>x.date===date);
+      const misc=acts.filter(x=>x.type==='misc');
+      if(!misc.length)return;
+      const box=document.createElement('div');
+      box.setAttribute('data-misc-history','1');
+      box.className='space-y-1 mt-1';
+      box.innerHTML=misc.map(x=>`<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">Misc / Other</span><b class="block text-[10px]">${esc(x.name||'Misc / Other')}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}</div><div class="text-right"><b class="text-emerald-400">${Number(x.questions||0)}</b><div class="flex gap-1 justify-end mt-1"><button onclick="openMiscMCQModal('${esc(x.id||'')}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id||'')}')" class="text-[8px] text-rose-400">Delete</button></div></div></div>`).join('');
+      selected.appendChild(box);
+    },20);
+  };
+
+  /* =========================================================
+     2) STATISTICS: Today / Custom Range / Total + full calendar
+     ========================================================= */
+  let statsMode=localStorage.getItem('trackability_stats_mode_v20')||'today';
+  let statsFrom=localStorage.getItem('trackability_stats_from_v20')||today();
+  let statsTo=localStorage.getItem('trackability_stats_to_v20')||today();
+  let statsCalMonth=new Date(); statsCalMonth.setDate(1);
+  let statsCalExpanded=true;
+  let statsRangeSelecting='from';
+
+  function collectActivityDates(){
+    const s=new Set();
+    const add=a=>(a||[]).forEach(x=>x?.date&&s.add(x.date));
+    add(appState.tasks);add(appState.focusSessions);add(appState.sleepLogs);add(appState.nutritionLogs);add(appState.gymLogs);add(appState.mistakeReviewLogs);add(appState.mistakes);add(appState.mcqIds);add(appState.grandTests);add(appState.mcqActivities);
+    Object.keys(appState.mcqCounts||{}).forEach(d=>s.add(d));
+    return s;
+  }
+  function statsRange(){
+    if(statsMode==='today')return {from:today(),to:today()};
+    if(statsMode==='total'){
+      const ds=Array.from(collectActivityDates()).sort();
+      return ds.length?{from:ds[0],to:ds[ds.length-1]}:{from:today(),to:today()};
+    }
+    let from=statsFrom||today(),to=statsTo||today();
+    if(from>to){const t=from;from=to;to=t;statsFrom=from;statsTo=to;}
+    return {from,to};
+  }
+  function inStatsRange(d,r){return !!d&&d>=r.from&&d<=r.to;}
+  function mcqStats(r){
+    let qbank=0,mini=0,misc=0,gt=0;
+    Object.keys(appState.mcqCounts||{}).forEach(d=>{if(inStatsRange(d,r))qbank+=Number(appState.mcqCounts[d]||0);});
+    (appState.mcqActivities||[]).forEach(x=>{if(!inStatsRange(x.date,r))return;const q=Math.max(0,Number(x.questions)||0);if(x.type==='mini')mini+=q;else if(x.type==='misc')misc+=q;else qbank+=q;});
+    (appState.grandTests||[]).forEach(x=>{if(inStatsRange(x.date,r))gt+=Math.max(0,Number(x.total)||0);});
+    return {qbank,mini,misc,gt,total:qbank+mini+misc+gt};
+  }
+  function statsData(r){
+    const tasks=(appState.tasks||[]).filter(x=>inStatsRange(x.date,r));
+    const focus=(appState.focusSessions||[]).filter(x=>inStatsRange(x.date,r));
+    const sleep=(appState.sleepLogs||[]).filter(x=>inStatsRange(x.date,r));
+    const nut=(appState.nutritionLogs||[]).filter(x=>inStatsRange(x.date,r));
+    const gym=(appState.gymLogs||[]).filter(x=>inStatsRange(x.date,r));
+    const reviews=(appState.mistakeReviewLogs||[]).filter(x=>inStatsRange(x.date,r));
+    const mistakes=(appState.mistakes||[]).filter(x=>inStatsRange(x.date,r));
+    const ids=(appState.mcqIds||[]).filter(x=>inStatsRange(x.date,r));
+    const gts=(appState.grandTests||[]).filter(x=>inStatsRange(x.date,r));
+    const focusH=focus.reduce((a,x)=>a+Number(x.durationSeconds||0),0)/3600;
+    const protein=nut.reduce((a,x)=>a+Number(x.protein||0),0);
+    const kcal=nut.reduce((a,x)=>a+Number(x.kcal||0),0);
+    const sleepH=sleep.reduce((a,x)=>a+Number(x.hours||0),0);
+    return {tasks,focus,sleep,nut,gym,reviews,mistakes,ids,gts,mcq:mcqStats(r),focusH,protein,kcal,sleepH};
+  }
+  function statCard(label,value,detail){return `<div class="rounded-2xl p-3 bg-themeCardSoft border border-themeBorder"><div class="text-[9px] font-black uppercase text-themeMuted">${label}</div><div class="text-xl font-black text-themeText mt-1">${value}</div><div class="text-[9px] text-themeMuted mt-1">${detail||''}</div></div>`;}
+  function fmtHours(h){h=Number(h)||0;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh?`${hh}h ${mm?mm+'m':''}`:(mm?`${mm}m`:'0 h');}
+  function activityCount(date){
+    const r={from:date,to:date};
+    const d=statsData(r);
+    return d.mcq.total+d.tasks.length+d.focus.length+d.sleep.length+d.nut.length+d.gym.length+d.reviews.length+d.mistakes.length+d.ids.length;
+  }
+  function setStatsMode(mode){
+    statsMode=mode;localStorage.setItem('trackability_stats_mode_v20',mode);
+    if(mode==='today'){statsFrom=statsTo=today();}
+    renderStatistics();
+  }
+  window.setStatsMode=setStatsMode;
+  window.setStatsCustomFrom=function(v){statsFrom=v||today();statsRangeSelecting='to';localStorage.setItem('trackability_stats_from_v20',statsFrom);renderStatistics();};
+  window.setStatsCustomTo=function(v){statsTo=v||statsFrom||today();statsRangeSelecting='from';localStorage.setItem('trackability_stats_to_v20',statsTo);renderStatistics();};
+  window.shiftStatsCalendarMonth=function(delta){statsCalMonth.setMonth(statsCalMonth.getMonth()+delta);renderStatistics();};
+  window.toggleStatsCalendar=function(){statsCalExpanded=!statsCalExpanded;renderStatistics();};
+  window.statsCalendarPick=function(date){
+    statsMode='custom';
+    if(statsRangeSelecting==='from' || !statsFrom || (statsFrom&&statsTo&&statsFrom!==statsTo)){
+      statsFrom=date;statsTo=date;statsRangeSelecting='to';
+    }else{
+      statsTo=date;statsRangeSelecting='from';
+    }
+    if(statsFrom>statsTo){const t=statsFrom;statsFrom=statsTo;statsTo=t;}
+    localStorage.setItem('trackability_stats_mode_v20','custom');localStorage.setItem('trackability_stats_from_v20',statsFrom);localStorage.setItem('trackability_stats_to_v20',statsTo);
+    renderStatistics();
+  };
+  function renderStatsCalendar(){
+    const wrap=document.getElementById('statsCalendarCard');if(!wrap)return;
+    const y=statsCalMonth.getFullYear(),m=statsCalMonth.getMonth(),first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),r=statsRange(),activity=collectActivityDates();
+    let h=`<div class="flex items-center justify-between gap-2"><div><div class="text-[10px] font-black uppercase text-themeMuted">ACTIVITY CALENDAR</div><div class="text-xs font-black text-themeAccent">${monthTitle(statsCalMonth)}</div></div><div class="flex items-center gap-1"><button onclick="shiftStatsCalendarMonth(-1)" class="px-2.5 py-1.5 rounded-lg bg-themeCardSoft border border-themeBorder text-themeAccent">‹</button><button onclick="shiftStatsCalendarMonth(1)" class="px-2.5 py-1.5 rounded-lg bg-themeCardSoft border border-themeBorder text-themeAccent">›</button><button onclick="toggleStatsCalendar()" class="px-2.5 py-1.5 rounded-lg bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">${statsCalExpanded?'Minimize':'Expand'}</button></div></div>`;
+    if(statsCalExpanded){
+      h+=`<div class="grid grid-cols-7 gap-1 text-center text-[8px] font-black text-themeMuted"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div><div class="grid grid-cols-7 gap-1">`;
+      for(let i=0;i<first;i++)h+='<span class="h-10"></span>';
+      for(let day=1;day<=days;day++){
+        const date=`${y}-${pad(m+1)}-${pad(day)}`,has=activity.has(date),isFrom=statsMode==='custom'&&date===statsFrom,isTo=statsMode==='custom'&&date===statsTo,inRange=statsMode==='custom'&&date>=statsFrom&&date<=statsTo,isToday=date===today();
+        h+=`<button onclick="statsCalendarPick('${date}')" title="${has?'Activity recorded':'No activity'}" class="h-10 rounded-xl border ${isFrom||isTo?'bg-themeAccent text-white border-themeAccent':inRange?'bg-themeAccent/15 border-themeAccent/40 text-themeAccent':has?'bg-themeCardSoft border-themeBorder text-themeText':'bg-themeCardSoft/40 border-themeBorder text-themeMuted'} flex flex-col items-center justify-center"><span class="text-[9px] font-black">${day}</span>${has?'<span class="w-1.5 h-1.5 rounded-full bg-current mt-0.5"></span>':''}${isToday&&!isFrom&&!isTo?'<span class="text-[7px] font-black">TODAY</span>':''}</button>`;
+      }
+      h+='</div>';
+      h+=`<div class="text-[9px] text-themeMuted">${statsMode==='custom'?`Tap a date to set ${statsRangeSelecting==='from'?'the start':'the end'} of the range.`:'Calendar shows where activity was recorded. Select Custom Range to choose dates.'}</div>`;
+    }
+    wrap.innerHTML=h;
+    if(window.lucide)lucide.createIcons();
+  }
+  window.renderStatistics=function(){
+    const summary=document.getElementById('statsDailySummary');if(!summary)return;
+    const r=statsRange(),d=statsData(r),activeDays=new Set(Array.from(collectActivityDates()).filter(x=>inStatsRange(x,r))).size;
+    const done=d.tasks.filter(x=>x.completed).length,avgSleep=d.sleep.length?d.sleepH/d.sleep.length:0,avgProtein=activeDays?d.protein/activeDays:0,avgKcal=activeDays?d.kcal/activeDays:0;
+    const title=statsMode==='today'?'TODAY':statsMode==='custom'?'CUSTOM RANGE':'TOTAL';
+    const subtitle=statsMode==='today'?fmtDate(r.from):statsMode==='total'?'All recorded activity':`${fmtDate(r.from)} → ${fmtDate(r.to)}`;
+    const buttons=`<div class="grid grid-cols-3 gap-1.5"><button onclick="setStatsMode('today')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='today'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Today</button><button onclick="setStatsMode('custom')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='custom'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Custom Range</button><button onclick="setStatsMode('total')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='total'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Total</button></div>`;
+    const custom=statsMode==='custom'?`<div class="grid grid-cols-2 gap-2"><label class="text-[9px] font-black uppercase text-themeMuted">From<input type="date" value="${esc(statsFrom)}" onchange="setStatsCustomFrom(this.value)" class="mt-1 w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></label><label class="text-[9px] font-black uppercase text-themeMuted">To<input type="date" value="${esc(statsTo)}" onchange="setStatsCustomTo(this.value)" class="mt-1 w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></label></div>`:'';
+    summary.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeText">${title}</h4><p class="text-[9px] text-themeMuted mt-0.5">${subtitle}</p></div><span class="text-[9px] font-black text-themeAccent">${activeDays} active day${activeDays===1?'':'s'}</span></div>${buttons}${custom}</div><div class="grid grid-cols-2 gap-2">${statCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`)}${statCard('📚 Focus',fmtHours(d.focusH),`${d.focus.length} sessions`)}${statCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}${statCard('📝 Grand Tests',d.gts.length,`${d.gts.reduce((a,x)=>a+Number(x.total||0),0)} questions`)}${statCard('🏋️ Gym',d.gym.length,'workout logs')}${statCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,d.sleep.length?`avg ${avgSleep.toFixed(1)} h/log`:'no logs')}${statCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(avgProtein)} g / active day`)}${statCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(avgKcal).toLocaleString()} / active day`)}${statCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}${statCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}</div>`;
+    const head=document.querySelector('#tab-statistics h3');if(head)head.textContent='ACTIVITY STATISTICS';
+    const sub=head?.parentElement?.querySelector('p');if(sub)sub.textContent='Choose today, a custom date range, or all recorded activity.';
+    renderStatsCalendar();
+    if(window.lucide)lucide.createIcons();
+  };
+
+  /* =========================================================
+     3) PROTEIN / KCAL BAR CHART — actual saved monthly data
+     ========================================================= */
+  let nutritionChartMonth=new Date();nutritionChartMonth.setDate(1);
+  let nutritionChartTab='protein';
+  window.setNutritionChartTab=function(tab){nutritionChartTab=tab==='kcal'?'kcal':'protein';renderNutritionChart();};
+  window.shiftNutritionChartMonth=function(delta){nutritionChartMonth.setMonth(nutritionChartMonth.getMonth()+delta);renderNutritionChart();};
+  function nutritionMonthRows(){
+    const y=nutritionChartMonth.getFullYear(),m=nutritionChartMonth.getMonth(),days=new Date(y,m+1,0).getDate(),map={};
+    (appState.nutritionLogs||[]).forEach(x=>{if(String(x.date||'').slice(0,7)!==`${y}-${pad(m+1)}`)return;const d=String(x.date).slice(8,10);map[d]=(map[d]||0)+Number(nutritionChartTab==='protein'?x.protein||0:x.kcal||0);});
+    return Array.from({length:days},(_,i)=>({day:String(i+1),value:Number(map[pad(i+1)]||0)}));
+  }
+  function renderNutritionChart(){
+    const host=document.getElementById('nutritionChartCard');if(!host)return;
+    const rows=nutritionMonthRows(),max=nutritionChartTab==='protein'?300:5000,unit=nutritionChartTab==='protein'?'g':'kcal',title=nutritionChartTab==='protein'?'PROTEIN':'CALORIES';
+    const W=Math.max(700,rows.length*38),H=260,L=42,R=14,T=18,B=45,plotH=H-T-B,plotW=W-L-R,bw=Math.max(12,Math.min(24,plotW/rows.length*.62));
+    let svg=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${title} chart for ${monthTitle(nutritionChartMonth)}">`;
+    for(let i=0;i<=5;i++){const v=max*i/5,y=H-B-(plotH*i/5);svg+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="currentColor" opacity="${i===0?'.35':'.10'}"/><text x="${L-7}" y="${y+4}" text-anchor="end" font-size="9" fill="currentColor">${Math.round(v).toLocaleString()}</text>`;}
+    rows.forEach((r,i)=>{const x=L+(i+.5)*(plotW/rows.length),v=Math.min(max,Math.max(0,r.value)),h=v/max*plotH,y=H-B-h;svg+=`<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${Math.max(v?2:0,h)}" rx="5" fill="currentColor" opacity="${v?'.82':'.10'}"><title>${monthTitle(nutritionChartMonth)} • ${r.day} • ${r.value.toLocaleString()} ${unit}</title></rect><text x="${x}" y="${H-B+17}" text-anchor="middle" font-size="9" font-weight="800" fill="currentColor">${r.day}</text>`;});
+    svg+='</svg>';
+    host.innerHTML=`<div class="rounded-3xl p-4 bg-themeCard border border-themeBorder"><div class="flex items-center justify-between gap-2"><div><h4 class="text-xs font-black uppercase">📊 PROTEIN & KCAL</h4><p class="text-[9px] text-themeMuted">Daily totals for ${esc(monthTitle(nutritionChartMonth))}</p></div><div class="flex items-center gap-1"><button onclick="shiftNutritionChartMonth(-1)" class="px-2 py-1 rounded-lg bg-themeCardSoft border border-themeBorder text-themeAccent">‹</button><button onclick="shiftNutritionChartMonth(1)" class="px-2 py-1 rounded-lg bg-themeCardSoft border border-themeBorder text-themeAccent">›</button></div></div><div class="grid grid-cols-2 gap-1.5 mt-3"><button onclick="setNutritionChartTab('protein')" class="py-2 rounded-xl text-[10px] font-black ${nutritionChartTab==='protein'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">🥛 Protein</button><button onclick="setNutritionChartTab('kcal')" class="py-2 rounded-xl text-[10px] font-black ${nutritionChartTab==='kcal'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">🔥 Kcal</button></div><div class="overflow-x-auto mt-3 pb-1 custom-scroll"><div style="min-width:${W}px">${svg}</div></div><div class="text-[9px] text-themeMuted mt-1">Y-axis: 0–${max.toLocaleString()} ${unit}. One bar represents the total logged for that date.</div></div>`;
+    if(window.lucide)lucide.createIcons();
+  }
+  function ensureNutritionChartHost(){
+    let host=document.getElementById('nutritionChartCard');
+    if(host)return host;
+    const table=document.getElementById('nutritionTableContainer');if(!table)return null;
+    host=document.createElement('div');host.id='nutritionChartCard';host.className='mt-3';table.parentNode.insertBefore(host,table.nextSibling);return host;
+  }
+  window.renderNutritionTracker=function(){
+    if(typeof oldRenderNutritionTracker==='function') oldRenderNutritionTracker();
+    ensureNutritionChartHost();renderNutritionChart();
+  };
+
+  function initV20(){
+    normalizeTaskMCQTypes();
+    ensureNutritionChartHost();
+    renderNutritionChart();
+    renderStatistics();
+    if(window.lucide)lucide.createIcons();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(initV20,250));else setTimeout(initV20,250);
+})();
+</script>
+
 </body>
 </html>
