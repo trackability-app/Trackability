@@ -168,7 +168,7 @@
     .timeblock-now::before { content: ''; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-color); }
 
     .schedule-full-content { flex: 1; min-height: 0; overflow-y: auto; }
-    .fullscreen-animation-stage{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.9}.fs-water-fill{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(to top,var(--accent-glow),transparent);transition:height 1s linear}.fs-water-wave{position:absolute;left:-10%;width:120%;height:80px;border-radius:50%;border-top:3px solid var(--accent-color);opacity:.35;animation:waterWave 4s ease-in-out infinite}.wave-one{bottom:52%}.wave-two{bottom:48%;animation-delay:-2s}@keyframes waterWave{0%,100%{transform:translateX(-2%) rotate(0)}50%{transform:translateX(2%) rotate(2deg)}}.fs-circle-visual{position:absolute;width:min(72vw,520px);height:min(72vw,520px);left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid var(--accent-color);border-radius:50%;opacity:.18;animation:circlePulse 3s ease-in-out infinite}.fs-circle-inner{position:absolute;inset:9%;border:1px dashed var(--accent-color);border-radius:50%;animation:circleSpin 18s linear infinite}@keyframes circlePulse{0%,100%{transform:translate(-50%,-50%) scale(.92);opacity:.12}50%{transform:translate(-50%,-50%) scale(1.04);opacity:.28}}@keyframes circleSpin{to{transform:rotate(360deg)}}.fs-dots-visual{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px}.fs-dots-visual span{width:9px;height:9px;border-radius:50%;background:var(--accent-color);opacity:.18;animation:dotFloat 1.8s ease-in-out infinite}.fs-dots-visual span:nth-child(2){animation-delay:.12s}.fs-dots-visual span:nth-child(3){animation-delay:.24s}.fs-dots-visual span:nth-child(4){animation-delay:.36s}.fs-dots-visual span:nth-child(5){animation-delay:.48s}.fs-dots-visual span:nth-child(6){animation-delay:.60s}.fs-dots-visual span:nth-child(7){animation-delay:.72s}.fs-dots-visual span:nth-child(8){animation-delay:.84s}@keyframes dotFloat{0%,100%{transform:translateY(10px) scale(.8);opacity:.12}50%{transform:translateY(-10px) scale(1.5);opacity:.45}}.achievement-overlay{position:fixed;inset:0;z-index:120;pointer-events:none;overflow:hidden}.achievement-piece{position:absolute;top:-40px;font-size:24px;animation:achievementFall 2.8s cubic-bezier(.2,.7,.3,1) forwards}@keyframes achievementFall{0%{transform:translate3d(0,-30px,0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate3d(var(--dx),110vh,0) rotate(540deg);opacity:0}}@media (prefers-reduced-motion:reduce){.fs-water-wave,.fs-circle-visual,.fs-circle-inner,.fs-dots-visual span,.achievement-piece{animation:none!important}.fs-water-fill{transition:none!important}}
+    .achievement-overlay{position:fixed;inset:0;z-index:120;pointer-events:none;overflow:hidden}.achievement-piece{position:absolute;top:-40px;font-size:24px;animation:achievementFall 2.8s cubic-bezier(.2,.7,.3,1) forwards}@keyframes achievementFall{0%{transform:translate3d(0,-30px,0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate3d(var(--dx),110vh,0) rotate(540deg);opacity:0}}@media (prefers-reduced-motion:reduce){.achievement-piece{animation:none!important}}
   </style>
 </head>
 <body class="dark-obsidian h-screen overflow-hidden flex flex-col antialiased">
@@ -301,7 +301,7 @@
             <div class="w-56 h-56 rounded-full border-4 border-themeCardSoft flex flex-col items-center justify-center relative shadow-inner">
               <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 224 224" aria-hidden="true">
                 <circle cx="112" cy="112" r="104" fill="none" stroke="var(--card-soft)" stroke-width="4" opacity="0.9"></circle>
-                <circle id="timerRingVisual" cx="112" cy="112" r="104" fill="none" stroke="var(--accent-color)" stroke-width="4" stroke-linecap="round" stroke-dasharray="653.45" stroke-dashoffset="653.45" class="transition-[stroke-dashoffset] duration-1000 ease-linear"></circle>
+                <circle id="timerRingVisual" cx="112" cy="112" r="104" fill="none" stroke="var(--accent-color)" stroke-width="4" stroke-linecap="round" stroke-dasharray="653.45" stroke-dashoffset="653.45" style="transition:stroke-dashoffset 1s linear"></circle>
               </svg>
 
               <span id="focusActiveTagIndicator" class="text-[10px] font-black uppercase tracking-wider text-themeAccent bg-themeAccent/10 px-2.5 py-0.5 rounded-full mb-1">
@@ -1355,7 +1355,7 @@
       <div class="flex justify-between items-start gap-3">
         <div>
           <h3 class="text-sm font-black">Settings</h3>
-          <p class="text-[10px] text-themeMuted mt-1">Personalize TRACKEBILITY and manage your account.</p>
+          <p id="settingsAccountIdentity" class="text-[10px] text-themeMuted mt-1">Personalize TRACKEBILITY and manage your account.</p>
         </div>
         <button onclick="closeModal('settingsModal')" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
@@ -1822,7 +1822,8 @@
     }
 
     function renderHome() {
-      document.getElementById('navProfileName').textContent = appState.profileName || 'Doctor';
+      const displayName=(currentUser&&appState.cloudProfile?.name)||appState.profileName||'Doctor';
+      document.getElementById('navProfileName').textContent = displayName;
       document.getElementById('homeExamTitleDisplay').textContent = appState.examTitle || 'NEET PG 2027';
       document.getElementById('homeExamDateBadge').textContent = `Target: ${appState.examDate || '2027-03-14'}`;
 
@@ -3389,7 +3390,11 @@
       const f=document.getElementById('settingsFontSummary'); if(f)f.textContent=(FONT_LABELS[appState.fontStyle]||'Default')+' • tap to change';
       const z=document.getElementById('settingsTextSizeSummary'); if(z)z.textContent=TEXT_SIZE_LABELS[appState.fontSize]||'Normal';
       const i=document.getElementById('settingsIconSummary'); if(i)i.textContent=(TRACK_ICON_PALETTES[appState.iconColor||'coral-amber']?.name||'Coral Amber')+' • Home icon';
-      const a=document.getElementById('settingsAccountSummary'); if(a){ const email=currentUser?.email||''; const name=appState.cloudProfile?.name||appState.profileName||''; a.textContent=currentUser ? ('Logged in: '+(name ? name+' • ' : '')+email) : 'Not signed in • tap to sign in'; }
+      const email=currentUser?.email||'';
+      const name=(currentUser&&appState.cloudProfile?.name)||appState.profileName||'';
+      const a=document.getElementById('settingsAccountSummary'); if(a){ a.textContent=currentUser ? ('Logged in: '+(name ? name+' • ' : '')+email) : 'Not signed in • tap to sign in'; }
+      const h=document.getElementById('navProfileName'); if(h) h.textContent=name||'Doctor';
+      const sh=document.getElementById('settingsAccountIdentity'); if(sh) sh.textContent=currentUser ? (name ? `Signed in as ${name}` : 'Signed in • account profile name not set') : 'Personalize TRACKEBILITY and manage your account.';
     }
     function renderThemePicker(){
       const grid=document.getElementById('themePickerGrid'); if(!grid)return;
@@ -4545,7 +4550,7 @@
     const byDate={};monthLogs.forEach(x=>{const h=Number(x.hours)||0;byDate[x.date]=(byDate[x.date]||0)+h;});
     const monthPoints=Object.keys(byDate).sort().map(date=>({date,hours:byDate[date]}));
     const max=Math.max(8,...monthPoints.map(x=>x.hours));
-    const bars=monthPoints.map(x=>{const h=Math.max(0,Number(x.hours)||0);const bh=h?Math.max(10,Math.round(h/max*82)):4;const day=new Date(x.date+'T00:00:00').getDate();return `<div class="sleep-month-bar-wrap" title="${esc(x.date)} • ${h.toFixed(1)} h"><div class="sleep-month-bar" style="height:${bh}px"></div><span>${day}</span></div>`;}).join('');
+    const bars=monthPoints.map(x=>{const h=Math.max(0,Number(x.hours)||0);const bh=h?Math.max(10,Math.round(h/max*82)):4;const day=new Date(x.date+'T00:00:00').getDate();return `<div class="sleep-month-bar-wrap" title="${esc(x.date)} • ${h.toFixed(1)} h"><div class="sleep-month-bar" style="height:${bh}px"></div><span>${String(day).padStart(2,'0')}/${String(x.date).slice(5,7)}</span></div>`;}).join('');
     return `<div class="sleep-summary-card">
       <div class="flex items-start justify-between gap-3">
         <div><div class="text-[8px] font-black uppercase text-themeMuted">Sleep Summary • ${selectedDate.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div><div class="text-xs font-black text-themeText mt-1">${latest?`${esc(latest.sleepTime||'')} • ${selectedHours.toFixed(1)} h`:'No sleep logged for this date'}</div></div>
@@ -5119,9 +5124,9 @@
   .daily-summary-detail{font-size:9px;color:var(--muted-color);margin-top:4px;overflow-wrap:anywhere;}
   .stats-gt-chart-scroll{overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;}
   .stats-gt-chart-scroll svg{display:block;min-width:520px;}
-  .sleep-month-chart{display:flex;align-items:flex-end;gap:7px;min-height:105px;overflow-x:auto;padding:8px 2px 2px;scrollbar-width:thin;}
-  .sleep-month-bar-wrap{flex:0 0 22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100px;font-size:8px;color:var(--muted-color);}
-  .sleep-month-bar{width:18px;max-height:82px;border-radius:7px 7px 3px 3px;background:var(--accent-color);opacity:.9;min-height:4px;}
+  .sleep-month-chart{display:flex;align-items:flex-end;gap:9px;min-height:105px;overflow-x:auto;padding:8px 4px 2px;scrollbar-width:thin;}
+  .sleep-month-bar-wrap{flex:0 0 32px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100px;font-size:8px;color:var(--muted-color);}
+  .sleep-month-bar{width:20px;max-height:82px;border-radius:7px 7px 3px 3px;background:var(--accent-color);opacity:.9;min-height:4px;}
 </style>
 <script id="trackability-daily-stats-layer">
 (function(){
@@ -5430,7 +5435,21 @@
     const tests=typeof trackerSelectedDate!=='undefined'&&trackerSelectedDate?all.filter(x=>x.date===trackerSelectedDate):all;
     const best=all.reduce((m,g)=>Math.max(m,Number(g.score)||0),0);
     const bestEl=document.getElementById('gtBestScoreCard'),countEl=document.getElementById('gtTotalCountCard');if(bestEl)bestEl.textContent=best+' marks';if(countEl)countEl.textContent=String(all.length);
-    c.innerHTML=tests.length?tests.map(g=>`<div class="p-3.5 rounded-2xl bg-themeCard border border-themeBorder space-y-2"><div class="flex justify-between gap-2"><div class="min-w-0"><span class="font-bold text-sm block">${esc(g.name||'Grand Test')}</span><span class="text-[9px] text-themeMuted">${esc(g.date||'')}${g.platform?' • '+esc(g.platform):''}</span></div><span class="text-base font-black text-themeAccent">${Number(g.score)||0} marks</span></div><div class="text-[9px] text-themeMuted">✓ ${Number(g.correct)||0} correct • ✕ ${Number(g.wrong)||0} wrong • ${Number(g.total||0)} total Q</div><button onclick="undoGT('${esc(g.id||'')}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black">Remove</button></div>`).join(''):'<p class="text-center text-xs text-themeMuted py-6">No Grand Tests recorded for this date.</p>';
+    c.innerHTML=tests.length?tests.map(g=>`<div class="p-4 rounded-2xl bg-themeCard border border-themeBorder space-y-3">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <span class="text-[9px] font-black text-themeMuted block">${esc(g.date||'')}</span>
+          <span class="font-black text-sm text-themeText block mt-0.5 truncate">${esc(g.name||'Grand Test')}</span>
+        </div>
+        <span class="text-4xl leading-none font-black font-mono text-themeAccent whitespace-nowrap">${Number(g.score)||0}</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-xl bg-themeCardSoft px-2 py-2"><span class="block text-[8px] uppercase font-black text-themeMuted">Correct</span><b class="block text-sm text-emerald-400 mt-0.5">${Number(g.correct)||0}</b></div>
+        <div class="rounded-xl bg-themeCardSoft px-2 py-2"><span class="block text-[8px] uppercase font-black text-themeMuted">Wrong</span><b class="block text-sm text-rose-400 mt-0.5">${Number(g.wrong)||0}</b></div>
+        <div class="rounded-xl bg-themeCardSoft px-2 py-2"><span class="block text-[8px] uppercase font-black text-themeMuted">Total Qs</span><b class="block text-sm text-themeText mt-0.5">${Number(g.total||0)}</b></div>
+      </div>
+      <button onclick="undoGT('${esc(g.id||'')}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black">Remove</button>
+    </div>`).join(''):'<p class="text-center text-xs text-themeMuted py-6">No Grand Tests recorded for this date.</p>';
     window.renderGTScoreChart();
     if(window.lucide)lucide.createIcons();
   };
@@ -5492,7 +5511,7 @@
 .tb-sleep-yaxis{width:34px;flex:0 0 34px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding:3px 0 27px;color:var(--text-muted);font-size:8px;font-weight:800;}
 .tb-sleep-plot{flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin;}
 .tb-sleep-bars{height:208px;min-width:100%;display:flex;align-items:flex-end;gap:9px;padding:3px 8px 0;border-left:1px solid var(--border-color);border-bottom:1px solid var(--border-color);}
-.tb-sleep-bar-col{flex:0 0 30px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;}
+.tb-sleep-bar-col{flex:0 0 34px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;}
 .tb-sleep-bar{width:22px;min-height:3px;border-radius:7px 7px 3px 3px;box-shadow:0 2px 9px rgba(0,0,0,.16);}
 .tb-sleep-bar.green{background:#22c55e;}
 .tb-sleep-bar.yellow{background:#facc15;}
@@ -5897,6 +5916,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const a=document.getElementById('accountProfileAgeInput'); if(a) a.value=p.age ?? '';
       const c=document.getElementById('accountProfileCourseInput'); if(c) c.value=p.course || appState.course || 'NEET PG';
       const d=document.getElementById('accountProfileExamDateInput'); if(d) d.value=p.exam_date || appState.examDate || '';
+      updateSettingsSummaries();
     } else {
       setAccountMode(accountMode);
       const name=document.getElementById('accountNameInput'); if(name && !name.value) name.value=appState.profileName==='Doctor'?'':(appState.profileName||'');
