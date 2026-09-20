@@ -179,7 +179,7 @@
         </div>
         <div class="flex items-center gap-1">
           <span class="text-xs text-themeMuted font-medium">Hello,</span>
-          <span id="navProfileName" class="text-xs font-bold text-themeText cursor-pointer hover:text-themeAccent" onclick="openModal('settingsModal')">Doctor</span>
+          <span id="navProfileName" class="text-xs font-bold text-themeText cursor-pointer hover:text-themeAccent" onclick="openSettingsModal()">Doctor</span>
           <span class="text-xs">👋</span>
         </div>
       </div>
@@ -189,7 +189,7 @@
       <button onclick="openModal('searchModal')" title="Global Search" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
         <i data-lucide="search" class="w-4 h-4"></i>
       </button>
-      <button onclick="openModal('settingsModal')" title="Settings & Customization" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
+      <button onclick="openSettingsModal()" title="Settings & Customization" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
         <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
       <button onclick="openAccountModal()" title="Account & Cloud Sync" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
@@ -214,7 +214,7 @@
           <div id="homeCountdownPrecisionTicker" class="text-[10px] font-mono font-bold text-white bg-black/45 px-2 py-0.5 rounded-md border border-white/15 w-fit">00h 00m 00s</div>
           <p id="homeDailyQuote" class="text-[10px] sm:text-[11px] font-bold italic text-white/90 mt-2 max-w-[250px] drop-shadow">Consistency beats intensity every single time.</p>
         </div>
-        <div class="relative z-10 text-right flex flex-col items-end justify-center cursor-pointer max-w-[46%] home-hero-copy" onclick="openModal('settingsModal')" title="Tap to edit exam & date">
+        <div class="relative z-10 text-right flex flex-col items-end justify-center cursor-pointer max-w-[46%] home-hero-copy" onclick="openSettingsModal()" title="Tap to edit exam & date">
           <div class="flex items-center gap-1.5 mb-0.5"><span class="text-[9px] font-black uppercase tracking-widest text-white/75">TARGET</span><i data-lucide="edit-3" class="w-3 h-3 text-white/80"></i></div>
           <h2 id="homeExamTitleDisplay" class="text-lg sm:text-xl font-black tracking-tight text-white drop-shadow truncate w-full">NEET PG 2027</h2>
           <span id="homeExamDateBadge" class="text-[10px] font-semibold text-white/80 mt-0.5">Target: 2027-03-14</span>
@@ -1353,81 +1353,154 @@
 
   <!-- SETTINGS MODAL -->
   <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[85vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center">
+    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-themeBorder overflow-hidden max-h-[88vh] flex flex-col">
+      <div class="p-5 pb-3 flex justify-between items-center shrink-0">
         <div>
-          <h3 class="text-sm font-black">App Settings & Customization</h3>
-          <p class="text-[11px] text-themeMuted">Configure for any examination</p>
+          <h3 class="text-sm font-black">Settings</h3>
+          <p class="text-[10px] text-themeMuted mt-0.5">Personalize and manage TRACKEBILITY</p>
         </div>
-        <button onclick="closeModal('settingsModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="closeModal('settingsModal')" class="text-themeMuted p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-themeMuted">Student / Doctor Name</label>
-        <input type="text" id="settingsProfileNameInput" placeholder="Your Name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-themeMuted">Target Examination & Target Date</label>
-        <input type="text" id="settingsExamTitleInput" placeholder="Exam Name (e.g. NEET PG 2027, UPSC, USMLE)" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText mb-1" />
-        <input type="date" id="settingsExamDateInput" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-themeMuted">Themes</label>
-        <div class="grid grid-cols-3 gap-2">
-          <button onclick="setTheme('dark-obsidian')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#0b0f19] text-slate-100">🌌 Obsidian</button>
-          <button onclick="setTheme('dark-oled')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-black text-white">⚫ OLED</button>
-          <button onclick="setTheme('dark-burgundy')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#120407] text-rose-200">🍷 Burgundy</button>
-          <button onclick="setTheme('dark-emerald')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#04130c] text-emerald-300">🌲 Emerald</button>
-          <button onclick="setTheme('dark-midnight')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#060b1a] text-sky-200">🌃 Midnight</button>
-          <button onclick="setTheme('dark-forest')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#03110b] text-emerald-200">🌿 Forest</button>
-          <button onclick="setTheme('dark-plum')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#100718] text-purple-200">🪻 Plum</button>
-          <button onclick="setTheme('theme-light')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-white text-black">☀️ Clean Light</button>
-          <button onclick="setTheme('theme-warm')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#faf6f0] text-amber-900">🤎 Beige</button>
-          <button onclick="setTheme('light-sky')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#eff8ff] text-sky-900">💧 Sky</button>
-          <button onclick="setTheme('light-mint')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#effcf6] text-emerald-900">🍃 Mint</button>
-          <button onclick="setTheme('light-lavender')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#f7f5ff] text-violet-900">💜 Lavender</button>
-          <button onclick="setTheme('light-rose')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#fff5f7] text-rose-900">🌸 Rose</button>
-          <button onclick="setTheme('light-slate')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#f1f5f9] text-slate-900">🩶 Slate</button>
+      <div class="px-5 pb-3 shrink-0">
+        <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-themeAccent/15 border border-themeAccent/20 flex items-center justify-center shrink-0"><i data-lucide="user-round" class="w-4 h-4 text-themeAccent"></i></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">Connected account</div>
+            <div id="settingsConnectedAccount" class="text-[11px] font-black text-themeText truncate">Guest mode</div>
+            <div id="settingsConnectedStatus" class="text-[8px] text-themeMuted mt-0.5">Data stays on this device</div>
+          </div>
+          <button onclick="openAccountModal()" class="px-2.5 py-1.5 rounded-lg bg-themeCard border border-themeBorder text-[9px] font-black text-themeAccent">Manage</button>
         </div>
       </div>
 
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-themeMuted">Typography / Font Family</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="setFontStyle('font-space')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Space Grotesk'">Space Grotesk</button>
-          <button onclick="setFontStyle('font-dmsans')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'DM Sans'">DM Sans</button>
-          <button onclick="setFontStyle('font-poppins')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Poppins'">Poppins</button>
-          <button onclick="setFontStyle('font-josefin')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Josefin Sans'">Josefin Sans</button>
-          <button onclick="setFontStyle('font-indie')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Indie Flower'">Indie Flower</button>
-          <button onclick="setFontStyle('font-righteous')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Righteous'">Righteous</button>
-          <button onclick="setFontStyle('font-lobster')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Lobster Two'">Lobster Two</button>
-          <button onclick="setFontStyle('font-anton')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Anton'">Anton</button>
-          <button onclick="setFontStyle('font-nanum')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Nanum Gothic'">Nanum Gothic</button>
-        </div>
+      <div class="px-5 pb-3 shrink-0 grid grid-cols-3 gap-1.5">
+        <button id="settingsTabGeneral" onclick="openSettingsTab('general')" class="py-2 rounded-xl bg-themeAccent text-white text-[10px] font-black">General</button>
+        <button id="settingsTabAppearance" onclick="openSettingsTab('appearance')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Appearance</button>
+        <button id="settingsTabSupport" onclick="openSettingsTab('support')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Support & Info</button>
       </div>
 
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-themeMuted">Overall Text & UI Size</label>
-        <div class="grid grid-cols-4 gap-1.5">
-          <button onclick="setFontSize('ui-text-small')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-[10px] font-black">A−</button>
-          <button onclick="setFontSize('ui-text-normal')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-[11px] font-black">A</button>
-          <button onclick="setFontSize('ui-text-large')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-xs font-black">A+</button>
-          <button onclick="setFontSize('ui-text-xlarge')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-sm font-black">A++</button>
+      <div class="px-5 pb-5 overflow-y-auto custom-scroll space-y-4" id="settingsScrollArea">
+        <!-- GENERAL -->
+        <div id="settingsPanelGeneral" class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-themeMuted">Student / Doctor Name</label>
+            <input type="text" id="settingsProfileNameInput" placeholder="Your Name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-themeMuted">Target Examination & Target Date</label>
+            <input type="text" id="settingsExamTitleInput" placeholder="Exam Name (e.g. NEET PG 2027, UPSC, USMLE)" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText mb-1" />
+            <input type="date" id="settingsExamDateInput" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+          </div>
+
+          <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between gap-3">
+            <div class="min-w-0"><div class="text-xs font-black">Recycle Bin</div><p class="text-[9px] text-themeMuted mt-0.5">Deleted items are kept for 30 days, then permanently removed.</p></div>
+            <button onclick="openRecycleBin()" class="shrink-0 px-3 py-2 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent"><span id="recycleBinCount">0</span> items</button>
+          </div>
+
+          <div class="space-y-2 pt-2 border-t border-themeBorder">
+            <label class="text-xs font-bold text-themeMuted">Backup & Portability</label>
+            <div class="flex gap-2">
+              <button onclick="exportDataBackup()" class="flex-1 py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-bold active:scale-95 transition">Export JSON</button>
+              <button onclick="document.getElementById('importFileInput').click()" class="flex-1 py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-bold active:scale-95 transition">Restore JSON</button>
+              <input type="file" id="importFileInput" onchange="importDataBackup(event)" class="hidden" accept=".json" />
+            </div>
+          </div>
+
+          <button onclick="saveGeneralSettings()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-bold shadow active:scale-95 transition">Apply & Save Settings</button>
+        </div>
+
+        <!-- APPEARANCE -->
+        <div id="settingsPanelAppearance" class="hidden space-y-4">
+          <div class="space-y-2">
+            <div><h4 class="text-xs font-black">Themes</h4><p class="text-[9px] text-themeMuted mt-0.5">Choose the app appearance.</p></div>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setTheme('dark-obsidian')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#0b0f19] text-slate-100">🌌 Obsidian</button>
+              <button onclick="setTheme('dark-oled')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-black text-white">⚫ OLED</button>
+              <button onclick="setTheme('dark-burgundy')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#120407] text-rose-200">🍷 Burgundy</button>
+              <button onclick="setTheme('dark-emerald')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#04130c] text-emerald-300">🌲 Emerald</button>
+              <button onclick="setTheme('dark-midnight')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#060b1a] text-sky-200">🌃 Midnight</button>
+              <button onclick="setTheme('dark-forest')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#03110b] text-emerald-200">🌿 Forest</button>
+              <button onclick="setTheme('dark-plum')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#100718] text-purple-200">🪻 Plum</button>
+              <button onclick="setTheme('theme-light')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-white text-black">☀️ Clean Light</button>
+              <button onclick="setTheme('theme-warm')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#faf6f0] text-amber-900">🤎 Beige</button>
+              <button onclick="setTheme('light-sky')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#eff8ff] text-sky-900">💧 Sky</button>
+              <button onclick="setTheme('light-mint')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#effcf6] text-emerald-900">🍃 Mint</button>
+              <button onclick="setTheme('light-lavender')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#f7f5ff] text-violet-900">💜 Lavender</button>
+              <button onclick="setTheme('light-rose')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#fff5f7] text-rose-900">🌸 Rose</button>
+              <button onclick="setTheme('light-slate')" class="py-2 text-[11px] font-bold rounded-xl border border-themeBorder bg-[#f1f5f9] text-slate-900">🩶 Slate</button>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-3 border-t border-themeBorder">
+            <div><h4 class="text-xs font-black">Fonts</h4><p class="text-[9px] text-themeMuted mt-0.5">Change the app font family.</p></div>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="setFontStyle('font-space')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Space Grotesk'">Space Grotesk</button>
+              <button onclick="setFontStyle('font-dmsans')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'DM Sans'">DM Sans</button>
+              <button onclick="setFontStyle('font-poppins')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Poppins'">Poppins</button>
+              <button onclick="setFontStyle('font-josefin')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Josefin Sans'">Josefin Sans</button>
+              <button onclick="setFontStyle('font-indie')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Indie Flower'">Indie Flower</button>
+              <button onclick="setFontStyle('font-righteous')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Righteous'">Righteous</button>
+              <button onclick="setFontStyle('font-lobster')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Lobster Two'">Lobster Two</button>
+              <button onclick="setFontStyle('font-anton')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Anton'">Anton</button>
+              <button onclick="setFontStyle('font-nanum')" class="py-2 text-xs font-bold rounded-xl border border-themeBorder bg-themeCardSoft" style="font-family:'Nanum Gothic'">Nanum Gothic</button>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-3 border-t border-themeBorder">
+            <div><h4 class="text-xs font-black">Text Size</h4><p class="text-[9px] text-themeMuted mt-0.5">Adjust the overall app text size.</p></div>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button onclick="setFontSize('ui-text-small')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-[10px] font-black">A−</button>
+              <button onclick="setFontSize('ui-text-normal')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-[11px] font-black">A</button>
+              <button onclick="setFontSize('ui-text-large')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-xs font-black">A+</button>
+              <button onclick="setFontSize('ui-text-xlarge')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-sm font-black">A++</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUPPORT & INFO -->
+        <div id="settingsPanelSupport" class="hidden space-y-2">
+          <button onclick="shareTrackability()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
+            <i data-lucide="share-2" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Share with friends</b><small class="text-[9px] text-themeMuted">Share the TRACKEBILITY website/app link</small></span>
+          </button>
+          <button onclick="goToTrackabilityWebsite()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
+            <i data-lucide="globe-2" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Go to website</b><small class="text-[9px] text-themeMuted">Open www.trackability.in</small></span>
+          </button>
+          <button onclick="openFAQModal()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
+            <i data-lucide="circle-help" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">FAQ & Help</b><small class="text-[9px] text-themeMuted">Frequently asked questions and help</small></span>
+          </button>
+          <button onclick="contactTrackabilitySupport()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
+            <i data-lucide="mail" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Feedback / Contact Support</b><small class="text-[9px] text-themeMuted">Send an email to trackability.app@gmail.com</small></span>
+          </button>
+          <button onclick="openLegalModal('privacy')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Privacy Policy</b><small class="text-[9px] text-themeMuted">Privacy information</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
+          <button onclick="openLegalModal('terms')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Terms & Conditions</b><small class="text-[9px] text-themeMuted">Terms for using TRACKEBILITY</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="space-y-2 pt-2 border-t border-themeBorder">
-        <label class="text-xs font-bold text-themeMuted">Backup & Portability</label>
-        <div class="flex gap-2">
-          <button onclick="exportDataBackup()" class="flex-1 py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-bold active:scale-95 transition">Export JSON</button>
-          <button onclick="document.getElementById('importFileInput').click()" class="flex-1 py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-bold active:scale-95 transition">Restore JSON</button>
-          <input type="file" id="importFileInput" onchange="importDataBackup(event)" class="hidden" accept=".json" />
-        </div>
-      </div>
+  <!-- RECYCLE BIN MODAL -->
+  <div id="recycleBinModal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder max-h-[85vh] overflow-y-auto custom-scroll">
+      <div class="flex justify-between items-center mb-3"><div><h3 class="text-sm font-black">Recycle Bin</h3><p class="text-[9px] text-themeMuted mt-0.5">Items are automatically permanently deleted after 30 days.</p></div><button onclick="closeModal('recycleBinModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div id="recycleBinList" class="space-y-2"></div>
+    </div>
+  </div>
 
-      <button onclick="saveGeneralSettings()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-bold shadow active:scale-95 transition">Apply & Save Settings</button>
+  <!-- FAQ MODAL -->
+  <div id="faqModal" class="hidden fixed inset-0 z-[71] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder max-h-[80vh] overflow-y-auto custom-scroll">
+      <div class="flex justify-between items-center mb-3"><h3 class="text-sm font-black">FAQ & Help</h3><button onclick="closeModal('faqModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="p-4 rounded-2xl bg-themeCardSoft border border-themeBorder text-xs text-themeMuted">FAQ content will be added here later.</div>
+    </div>
+  </div>
+
+  <!-- LEGAL MODAL -->
+  <div id="legalModal" class="hidden fixed inset-0 z-[71] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder max-h-[80vh] overflow-y-auto custom-scroll">
+      <div class="flex justify-between items-center mb-3"><h3 id="legalModalTitle" class="text-sm font-black">Privacy Policy</h3><button onclick="closeModal('legalModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div id="legalModalContent" class="p-4 rounded-2xl bg-themeCardSoft border border-themeBorder text-xs text-themeMuted">Content will be added here later.</div>
     </div>
   </div>
 
@@ -1561,7 +1634,8 @@
       sleepLogs: [],
       mistakeReviewLogs: [],
       nutritionLogs: [],
-      achievementCelebrations: {}
+      achievementCelebrations: {},
+      recycleBin: []
     };
 
     function loadPersistedState() {
@@ -1574,6 +1648,7 @@
         } catch(e) {}
       }
       appState.tasks = appState.tasks || [];
+      appState.recycleBin = Array.isArray(appState.recycleBin) ? appState.recycleBin : [];
       appState.sleepLogs = appState.sleepLogs || [];
       appState.mistakeReviewLogs = appState.mistakeReviewLogs || [];
       appState.achievementCelebrations = appState.achievementCelebrations || {};
@@ -6144,5 +6219,175 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
+<script>
+/* ============================================================
+   SETTINGS / RECYCLE BIN / SUPPORT & INFO
+   ============================================================ */
+(function(){
+  const RECYCLE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+  const esc = window.escapeHtml || (v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])));
+
+  function cleanupRecycleBin(){
+    if(!window.appState && typeof appState==='undefined') return;
+    appState.recycleBin = Array.isArray(appState.recycleBin) ? appState.recycleBin : [];
+    const now=Date.now();
+    appState.recycleBin=appState.recycleBin.filter(x=>now-Number(x.deletedAt||0) < RECYCLE_MAX_AGE);
+  }
+  window.cleanupRecycleBin=cleanupRecycleBin;
+
+  function recycleAdd(type,label,data,meta){
+    cleanupRecycleBin();
+    appState.recycleBin.unshift({id:'rb_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),type,label,data,meta:meta||{},deletedAt:Date.now()});
+    cleanupRecycleBin();
+  }
+  window.recycleAdd=recycleAdd;
+
+  function updateRecycleCount(){
+    cleanupRecycleBin();
+    const n=document.getElementById('recycleBinCount'); if(n)n.textContent=String((appState.recycleBin||[]).length);
+    if(window.saveState) saveState();
+  }
+
+  function settingsTabButton(active){
+    ['general','appearance','support'].forEach(t=>{
+      const b=document.getElementById('settingsTab'+t.charAt(0).toUpperCase()+t.slice(1));
+      if(!b)return;
+      b.className=t===active?'py-2 rounded-xl bg-themeAccent text-white text-[10px] font-black':'py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black';
+    });
+  }
+  window.openSettingsTab=function(tab){
+    tab=['general','appearance','support'].includes(tab)?tab:'general';
+    ['general','appearance','support'].forEach(t=>document.getElementById('settingsPanel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden',t!==tab));
+    settingsTabButton(tab);
+    updateSettingsAccountCard();
+    updateRecycleCount();
+    if(window.lucide)lucide.createIcons();
+  };
+
+  function updateSettingsAccountCard(){
+    const email=(typeof currentUser!=='undefined' && currentUser?.email)||'';
+    const account=document.getElementById('settingsConnectedAccount');
+    const status=document.getElementById('settingsConnectedStatus');
+    if(account)account.textContent=email||'Guest mode';
+    if(status)status.textContent=email?'Cloud account connected • Sync enabled':'No account connected • Data stays on this device';
+  }
+  window.updateSettingsAccountCard=updateSettingsAccountCard;
+
+  window.openSettingsModal=function(){
+    try{
+      const n=document.getElementById('settingsProfileNameInput'); if(n)n.value=appState.profileName||'Doctor';
+      const e=document.getElementById('settingsExamTitleInput'); if(e)e.value=appState.examTitle||'NEET PG 2027';
+      const d=document.getElementById('settingsExamDateInput'); if(d)d.value=appState.examDate||'';
+    }catch(e){}
+    openModal('settingsModal');
+    openSettingsTab('general');
+  };
+
+  window.shareTrackability=async function(){
+    const url='https://www.trackability.in';
+    const data={title:'TRACKEBILITY',text:'Track your study, tasks, tests, MCQs and progress with TRACKEBILITY.',url};
+    try{
+      if(navigator.share){await navigator.share(data);return;}
+      await navigator.clipboard.writeText(url);
+      showToast('Website link copied');
+    }catch(err){
+      if(err?.name==='AbortError')return;
+      try{await navigator.clipboard.writeText(url);showToast('Website link copied');}
+      catch(e){window.prompt('Copy the TRACKEBILITY link:',url);}
+    }
+  };
+  window.goToTrackabilityWebsite=function(){window.open('https://www.trackability.in','_blank','noopener,noreferrer');};
+  window.contactTrackabilitySupport=function(){window.location.href='mailto:trackability.app@gmail.com?subject=TRACKEBILITY%20Feedback%20%2F%20Support';};
+  window.openFAQModal=function(){openModal('faqModal');if(window.lucide)lucide.createIcons();};
+  window.openLegalModal=function(kind){
+    const title=document.getElementById('legalModalTitle'),content=document.getElementById('legalModalContent');
+    if(kind==='terms'){title.textContent='Terms & Conditions';content.textContent='Terms & Conditions content will be added here later.';}
+    else{title.textContent='Privacy Policy';content.textContent='Privacy Policy content will be added here later.';}
+    openModal('legalModal');if(window.lucide)lucide.createIcons();
+  };
+
+  window.openRecycleBin=function(){
+    cleanupRecycleBin();
+    renderRecycleBin();
+    openModal('recycleBinModal');
+    if(window.lucide)lucide.createIcons();
+  };
+  window.renderRecycleBin=function(){
+    cleanupRecycleBin();
+    const list=document.getElementById('recycleBinList'); if(!list)return;
+    const items=appState.recycleBin||[];
+    if(!items.length){list.innerHTML='<div class="p-6 text-center rounded-2xl bg-themeCardSoft border border-themeBorder text-[10px] text-themeMuted">Recycle Bin is empty.</div>';updateRecycleCount();return;}
+    list.innerHTML=items.map(x=>{
+      const days=Math.max(0,Math.ceil((RECYCLE_MAX_AGE-(Date.now()-Number(x.deletedAt||Date.now())))/86400000));
+      return `<div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><span class="text-[8px] font-black uppercase text-themeAccent">${esc(x.type)}</span><div class="text-xs font-black text-themeText truncate mt-0.5">${esc(x.label||'Deleted item')}</div><div class="text-[8px] text-themeMuted mt-1">Auto-deletes in ~${days} day${days===1?'':'s'}</div></div><div class="flex gap-1.5 shrink-0"><button onclick="restoreRecycleItem('${esc(x.id)}')" class="px-2 py-1.5 rounded-lg bg-themeCard border border-themeBorder text-[9px] font-black text-emerald-400">Restore</button><button onclick="permanentDeleteRecycleItem('${esc(x.id)}')" class="px-2 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-[9px] font-black text-rose-400">Delete</button></div></div></div>`;
+    }).join('');
+    updateRecycleCount();
+  };
+
+  window.restoreRecycleItem=function(id){
+    cleanupRecycleBin();
+    const idx=appState.recycleBin.findIndex(x=>x.id===id); if(idx<0)return;
+    const item=appState.recycleBin[idx];
+    if(!confirm(`Restore "${item.label||'this item'}"?`))return;
+    const d=item.data||{};
+    try{
+      if(item.type==='Task'){appState.tasks=appState.tasks||[];appState.tasks.push(d);}
+      else if(item.type==='Subject'){appState.subjects=appState.subjects||[];appState.subjects.push(d);}
+      else if(item.type==='Chapter'){const s=(appState.subjects||[]).find(x=>x.id===item.meta.subjectId);if(!s)throw new Error('The original subject no longer exists.');s.chapters=s.chapters||[];s.chapters.push(d);}
+      else if(item.type==='Grand Test'){appState.grandTests=appState.grandTests||[];appState.grandTests.push(d);}
+      else if(item.type==='Q-Bank / Mini Test'){appState.mcqActivities=appState.mcqActivities||[];appState.mcqActivities.push(d);}
+      else if(item.type==='Nutrition'){appState.nutritionLogs=appState.nutritionLogs||[];appState.nutritionLogs.push(d);}
+      else if(item.type==='Workout'){appState.gymLogs=appState.gymLogs||[];appState.gymLogs.push(d);}
+      else if(item.type==='MCQ ID'){appState.mcqIds=appState.mcqIds||[];appState.mcqIds.push(d);}
+      else if(item.type==='Sleep'){appState.sleepLogs=appState.sleepLogs||[];appState.sleepLogs.push(d);}
+      else if(item.type==='Review'){appState.mistakeReviewLogs=appState.mistakeReviewLogs||[];appState.mistakeReviewLogs.push(d);}
+      else throw new Error('This item type cannot be restored yet.');
+      appState.recycleBin.splice(idx,1);saveState();renderRecycleBin();refreshAllViews?.();
+      try{renderActiveTracker?.();renderTrackerMiniCalendar?.();renderStatistics?.();}catch(e){}
+      showToast('Item restored');
+    }catch(err){showToast(err.message||'Could not restore item','alert-circle');}
+  };
+
+  window.permanentDeleteRecycleItem=function(id){
+    const idx=(appState.recycleBin||[]).findIndex(x=>x.id===id);if(idx<0)return;
+    const item=appState.recycleBin[idx];
+    if(!confirm(`Permanently delete "${item.label||'this item'}"? This cannot be undone.`))return;
+    appState.recycleBin.splice(idx,1);saveState();renderRecycleBin();showToast('Permanently deleted','trash-2');
+  };
+
+  function recycleDelete(type,label,data,meta){recycleAdd(type,label,JSON.parse(JSON.stringify(data)),meta);}
+
+  // Replace destructive actions with recycle-bin aware versions.
+  window.deleteActiveTask=function(){
+    const id=typeof activeTaskIdForAction!=='undefined'?activeTaskIdForAction:null;const t=(appState.tasks||[]).find(x=>x.id===id);if(!t)return;
+    if(!confirm(`Delete task "${t.name||'Untitled task'}"?`))return;
+    recycleDelete('Task',t.name||'Untitled task',t);appState.tasks=appState.tasks.filter(x=>x.id!==id);saveState();closeModal('taskActionsModal');refreshAllViews();updateRecycleCount();showToast('Task moved to Recycle Bin');
+  };
+  window.deleteChapter=function(subId,chId){
+    const s=(appState.subjects||[]).find(x=>x.id===subId),ch=s?.chapters?.find(x=>x.id===chId);if(!s||!ch)return;
+    if(!confirm(`Delete chapter "${ch.name}"?`))return;
+    recycleDelete('Chapter',`${s.name} • ${ch.name}`,ch,{subjectId:s.id,subjectName:s.name});s.chapters=s.chapters.filter(x=>x.id!==chId);saveState();renderSyllabus();renderHomeSyllabusCard();updateRecycleCount();showToast('Chapter moved to Recycle Bin');
+  };
+  window.confirmDeleteCurrentSubject=function(){
+    const id=document.getElementById('editSubjectSelect')?.value,s=(appState.subjects||[]).find(x=>x.id===id);if(!s)return;
+    if(!confirm(`Delete subject "${s.name}" and its chapters?`))return;
+    recycleDelete('Subject',s.name,s);appState.subjects=appState.subjects.filter(x=>x.id!==id);selectedSubjectId=appState.subjects[0]?.id||'';saveState();closeModal('editSubjectModal');populateSubjectDropdowns();renderSyllabus();renderHome();updateRecycleCount();showToast('Subject moved to Recycle Bin');
+  };
+  window.deleteNutritionLog=function(id){const x=(appState.nutritionLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Delete this nutrition log?'))return;recycleDelete('Nutrition',`${x.date||''} • ${Number(x.protein||0)}g • ${Number(x.kcal||0)} kcal`,x);appState.nutritionLogs=appState.nutritionLogs.filter(a=>a.id!==id);saveState();renderNutritionTracker();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('Nutrition log moved to Recycle Bin');};
+  window.deleteGymLog=function(id){const x=(appState.gymLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Delete this workout log?'))return;recycleDelete('Workout',`${x.date||''} • ${x.split||'Workout'}`,x);appState.gymLogs=appState.gymLogs.filter(a=>a.id!==id);saveState();renderGymTracker();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('Workout moved to Recycle Bin');};
+  window.deleteMcqId=function(id){const x=(appState.mcqIds||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Delete this MCQ ID entry?'))return;recycleDelete('MCQ ID',x.name||x.id,x);appState.mcqIds=appState.mcqIds.filter(a=>a.id!==id);saveState();renderMcqIdTracker();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('MCQ ID moved to Recycle Bin');};
+  window.undoGT=function(id){const x=(appState.grandTests||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Remove "${x.name}"? It will be kept in Recycle Bin for 30 days.`))return;recycleDelete('Grand Test',x.name||'Grand Test',x);appState.grandTests=appState.grandTests.filter(a=>a.id!==id);saveState();renderGTTracker();renderHome();renderTrackerMiniCalendar();renderStatistics();updateRecycleCount();showToast('GT moved to Recycle Bin');};
+  window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':'Q-Bank'} "${x.name}"?`))return;recycleDelete('Q-Bank / Mini Test',x.name||'MCQ entry',x);appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();updateRecycleCount();showToast('MCQ entry moved to Recycle Bin');};
+  window.deleteSleepEntry=function(id){const x=(appState.sleepLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Remove this sleep record?'))return;recycleDelete('Sleep',`${x.date||''} • ${x.hours||0} hours`,x);appState.sleepLogs=appState.sleepLogs.filter(a=>a.id!==id);if(x.taskId){const t=(appState.tasks||[]).find(a=>a.id===x.taskId);if(t){t.completed=false;t.trackerLogged=false;t.sleepLogId=null;}}saveState();refreshAllViews();renderSleepTracker();updateRecycleCount();showToast('Sleep record moved to Recycle Bin');};
+  window.deleteReviewLog=function(id){const x=(appState.mistakeReviewLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Remove this review record?'))return;recycleDelete('Review',x.title||'Mistake Book Review',x);appState.mistakeReviewLogs=appState.mistakeReviewLogs.filter(a=>a.id!==id);if(x.taskId){const t=(appState.tasks||[]).find(a=>a.id===x.taskId);if(t){t.completed=false;t.trackerLogged=false;t.reviewLogId=null;}}saveState();refreshAllViews();renderMistakeReviewTracker();updateRecycleCount();showToast('Review moved to Recycle Bin');};
+
+  // Keep the connected account visible after authentication changes.
+  document.addEventListener('DOMContentLoaded',function(){
+    try{cleanupRecycleBin();saveState();}catch(e){}
+    setTimeout(function(){updateSettingsAccountCard();updateRecycleCount();if(window.lucide)lucide.createIcons();},250);
+  });
+  setInterval(function(){try{cleanupRecycleBin();updateRecycleCount();}catch(e){}},60*60*1000);
+})();
+</script>
 </body>
 </html>
