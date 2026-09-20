@@ -6949,6 +6949,169 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   function formatStatsHours(h){h=Number(h)||0;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh?`${hh}h ${mm?mm+'m':''}`:(mm?mm+'m':'0 h');}
 
+
+  /* ---------- Final fixes: MCQ Misc label, custom Statistics range, nutrition charts ---------- */
+
+  /* MCQ history: preserve Misc / Other as its own source label. */
+  const __tbOriginalMCQEntriesForDate = mcqEntriesForDate;
+  mcqEntriesForDate = function(date){
+    ensureMCQActivityStore();
+    const arr=[];
+    const practice=Number((appState.mcqCounts||{})[date]||0);
+    if(practice)arr.push({type:'Practice',name:'Practice MCQs',questions:practice});
+    (appState.grandTests||[]).filter(x=>x.date===date).forEach(g=>arr.push({type:'GT',id:g.id,name:g.name,questions:Number(g.total)||0,score:g.score}));
+    appState.mcqActivities.filter(x=>x.date===date).forEach(x=>{
+      const label=x.type==='mini'?'Mini Test':(x.type==='misc'?'Misc / Other':'Q-Bank');
+      arr.push({type:label,id:x.id,name:x.name,questions:Number(x.questions)||0,notes:x.notes,platform:x.platform});
+    });
+    return arr;
+  };
+
+  /* Re-render MCQ history with correct Misc / Other edit/delete controls. */
+  const __tbHistoryRenderer = renderSelectedMCQDay;
+  renderSelectedMCQDay = function(date){
+    const e=document.getElementById('mcqHistorySelectedDay');if(!e)return;
+    const entries=mcqEntriesForDate(date),total=getDailyMCQTotalV2(date);
+    e.innerHTML=`<div class="p-3 rounded-2xl bg-themeCard border border-themeBorder"><div class="flex justify-between items-center"><b class="text-xs">${date}</b><b class="text-themeAccent">${total} MCQs</b></div><div class="space-y-1 mt-2">${entries.length?entries.map(x=>{
+      const edit=x.type==='Q-Bank'?`<button onclick="openQBankModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button>`:
+        x.type==='Mini Test'?`<button onclick="openMiniTestModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button>`:
+        x.type==='Misc / Other'?`<button onclick="openMiscMCQModal('${esc(x.id)}')" class="text-[8px] text-themeAccent">Edit</button>`:'';
+      const del=(x.id&&(x.type==='Q-Bank'||x.type==='Mini Test'||x.type==='Misc / Other'))?`<button onclick="deleteMCQActivity('${esc(x.id)}')" class="text-[8px] text-rose-400">Delete</button>`:'';
+      return `<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">${esc(x.type)}</span><b class="block text-[10px]">${esc(x.name)}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}${x.notes?`<p class="text-[8px] text-themeMuted">${esc(x.notes)}</p>`:''}</div><div class="text-right shrink-0"><b class="text-emerald-400">${x.questions}</b><div class="flex gap-1 justify-end mt-1">${edit}${del}</div></div></div>`;
+    }).join(''):'<span class="text-[9px] text-themeMuted">No detailed source entries.</span>'}</div></div>`;
+  };
+
+  /* ---------- Custom Statistics ---------- */
+  let tbStatsMode=localStorage.getItem('trackability_stats_mode')||'today';
+  let tbStatsStart=localStorage.getItem('trackability_stats_start')||today();
+  let tbStatsEnd=localStorage.getItem('trackability_stats_end')||today();
+  let tbStatsCalendarDate=dateOf(tbStatsStart||today());
+  let tbStatsCalendarOpen=true;
+
+  function tbStatsRange(){
+    let a=tbStatsStart||today(),b=tbStatsEnd||today();
+    if(tbStatsMode==='today')a=b=today();
+    if(tbStatsMode==='total'){
+      const ds=collectDates();
+      if(ds.length){a=ds[0];b=ds[ds.length-1];}
+      else a=b=today();
+    }
+    if(a>b){const t=a;a=b;b=t;}
+    return {startS:a,endS:b};
+  }
+  function tbStatsDateList(r){
+    const out=[],a=dateOf(r.startS),b=dateOf(r.endS);
+    for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1))out.push(ymd(d));
+    return out;
+  }
+  function tbStatsActivityDates(){
+    const set=new Set();
+    const add=a=>(a||[]).forEach(x=>x?.date&&set.add(x.date));
+    add(appState.tasks);add(appState.focusSessions);add(appState.sleepLogs);add(appState.nutritionLogs);
+    add(appState.gymLogs);add(appState.mistakeReviewLogs);add(appState.mistakes);add(appState.mcqIds);
+    add(appState.grandTests);add(appState.mcqActivities);
+    Object.keys(appState.mcqCounts||{}).forEach(x=>set.add(x));
+    return set;
+  }
+  function tbStatsInRange(date,r){return date>=r.startS&&date<=r.endS;}
+  function tbStatsData(r){
+    const f=a=>(a||[]).filter(x=>tbStatsInRange(String(x.date||''),r));
+    const tasks=f(appState.tasks),focus=f(appState.focusSessions),sleep=f(appState.sleepLogs),nut=f(appState.nutritionLogs),gym=f(appState.gymLogs),reviews=f(appState.mistakeReviewLogs),mistakes=f(appState.mistakes),ids=f(appState.mcqIds),gts=f(appState.grandTests),acts=f(appState.mcqActivities);
+    let practice=0,qbank=0,mini=0,misc=0,gt=0;
+    Object.keys(appState.mcqCounts||{}).forEach(d=>{if(tbStatsInRange(d,r))practice+=Number(appState.mcqCounts[d]||0);});
+    gts.forEach(x=>gt+=Number(x.total||0));
+    acts.forEach(x=>{const q=Number(x.questions||0);if(x.type==='mini')mini+=q;else if(x.type==='misc')misc+=q;else qbank+=q;});
+    const focusH=focus.reduce((a,x)=>a+Number(x.durationSeconds||0),0)/3600;
+    const protein=nut.reduce((a,x)=>a+Number(x.protein||0),0),kcal=nut.reduce((a,x)=>a+Number(x.kcal||0),0),sleepH=sleep.reduce((a,x)=>a+Number(x.hours||0),0);
+    const activeDays=new Set([...tasks,...focus,...sleep,...nut,...gym,...reviews,...mistakes,...ids,...gts,...acts].map(x=>x.date).filter(Boolean));
+    return {tasks,focus,sleep,nut,gym,reviews,mistakes,ids,gts,focusH,protein,kcal,sleepH,activeDays,mcq:{practice,qbank,mini,misc,gt,total:practice+qbank+mini+misc+gt}};
+  }
+  function tbStatsFmtHours(h){h=Number(h)||0;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh?`${hh}h ${mm?mm+'m':''}`:(mm?`${mm}m`:'0 h');}
+  function tbStatsCard(label,value,detail,wide){return `<div class="rounded-2xl p-3 bg-themeCardSoft border border-themeBorder ${wide?'col-span-2':''}"><div class="text-[9px] font-black uppercase text-themeMuted">${label}</div><div class="text-xl font-black text-themeText mt-1">${value}</div><div class="text-[9px] text-themeMuted mt-1">${detail||''}</div></div>`;}
+
+  function tbStatsMonthCalendar(){
+    const wrap=document.getElementById('statsCalendarCard');if(!wrap)return;
+    const d=tbStatsCalendarDate,days=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),first=(new Date(d.getFullYear(),d.getMonth(),1).getDay()+6)%7;
+    const activity=tbStatsActivityDates();
+    let html=`<div class="flex items-center justify-between gap-2"><button onclick="tbStatsShiftMonth(-1)" class="p-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeAccent">‹</button><div class="text-center"><b class="text-xs text-themeAccent">${d.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</b><div class="text-[8px] text-themeMuted mt-0.5">Select dates for a custom range</div></div><button onclick="tbStatsShiftMonth(1)" class="p-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeAccent">›</button></div>`;
+    html+=`<div class="grid grid-cols-7 gap-1 mt-2 text-center text-[8px] font-black text-themeMuted"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="grid grid-cols-7 gap-1 mt-1">`;
+    for(let i=0;i<first;i++)html+='<span></span>';
+    for(let day=1;day<=days;day++){
+      const date=ymd(new Date(d.getFullYear(),d.getMonth(),day)),isStart=date===tbStatsStart,isEnd=date===tbStatsEnd,inSel=tbStatsMode==='custom'&&date>=tbStatsStart&&date<=tbStatsEnd;
+      html+=`<button onclick="tbStatsPickDate('${date}')" class="min-h-[40px] rounded-xl border ${isStart||isEnd?'border-themeAccent bg-themeAccent/15':inSel?'border-themeBorder bg-themeCardSoft':'border-transparent bg-themeCardSoft'} text-[10px] font-bold text-themeText relative">${day}${activity.has(date)?'<span class="block text-[7px] text-themeAccent">•</span>':''}</button>`;
+    }
+    html+='</div><div class="flex justify-between items-center pt-2"><span class="text-[8px] text-themeMuted">First tap = From • second tap = To</span><button onclick="tbStatsToggleCalendar()" class="px-2.5 py-1.5 rounded-xl bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">'+(tbStatsCalendarOpen?'Minimize':'Show calendar')+'</button></div>';
+    if(tbStatsCalendarOpen)wrap.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-2">${html}</div>`;
+    else wrap.innerHTML=`<div class="flex justify-end"><button onclick="tbStatsToggleCalendar()" class="px-2.5 py-1.5 rounded-xl bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">Show calendar</button></div>`;
+  }
+  window.tbStatsToggleCalendar=function(){tbStatsCalendarOpen=!tbStatsCalendarOpen;tbStatsMonthCalendar();};
+  window.tbStatsShiftMonth=function(delta){tbStatsCalendarDate.setMonth(tbStatsCalendarDate.getMonth()+Number(delta||0));tbStatsMonthCalendar();};
+  window.tbStatsPickDate=function(date){
+    if(tbStatsMode!=='custom'||!tbStatsStart||tbStatsStart===tbStatsEnd){tbStatsStart=date;tbStatsEnd=date;tbStatsMode='custom';}
+    else if(date<tbStatsStart){tbStatsStart=date;}
+    else if(date>tbStatsEnd){tbStatsEnd=date;}
+    else {tbStatsStart=date;tbStatsEnd=date;}
+    localStorage.setItem('trackability_stats_start',tbStatsStart);localStorage.setItem('trackability_stats_end',tbStatsEnd);localStorage.setItem('trackability_stats_mode','custom');
+    tbStatsCalendarDate=dateOf(date);renderStatistics();
+  };
+  window.tbStatsApplyDates=function(){
+    const a=document.getElementById('tbStatsFrom')?.value||today(),b=document.getElementById('tbStatsTo')?.value||today();
+    tbStatsStart=a;tbStatsEnd=b;tbStatsMode='custom';localStorage.setItem('trackability_stats_start',a);localStorage.setItem('trackability_stats_end',b);localStorage.setItem('trackability_stats_mode','custom');tbStatsCalendarDate=dateOf(a);renderStatistics();
+  };
+  window.tbStatsSetMode=function(mode){
+    tbStatsMode=mode;
+    if(mode==='today'){tbStatsStart=tbStatsEnd=today();}
+    if(mode==='custom'){if(!tbStatsStart)tbStatsStart=today();if(!tbStatsEnd)tbStatsEnd=today();}
+    localStorage.setItem('trackability_stats_mode',tbStatsMode);localStorage.setItem('trackability_stats_start',tbStatsStart);localStorage.setItem('trackability_stats_end',tbStatsEnd);renderStatistics();
+  };
+  window.renderStatistics=function(){
+    const c=document.getElementById('statsDailySummary');if(!c)return;
+    const r=tbStatsRange(),d=tbStatsData(r),days=d.activeDays.size||1,done=d.tasks.filter(x=>x.completed).length;
+    const modeButtons=[['today','Today'],['custom','Custom Range'],['total','Total']].map(([k,l])=>`<button onclick="tbStatsSetMode('${k}')" class="flex-1 min-w-[92px] py-2 rounded-xl text-[10px] font-black ${tbStatsMode===k?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">${l}</button>`).join('');
+    c.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3">
+      <div class="flex gap-1.5">${modeButtons}</div>
+      <div class="text-center"><div class="text-[10px] font-black uppercase text-themeAccent">${tbStatsMode==='today'?'TODAY':tbStatsMode==='total'?'TOTAL ACTIVITY':'CUSTOM DATE RANGE'}</div><div class="text-[10px] text-themeMuted mt-1">${r.startS} → ${r.endS}</div></div>
+      ${tbStatsMode==='custom'?`<div class="grid grid-cols-2 gap-2"><div><label class="block text-[8px] font-black text-themeMuted mb-1">FROM</label><input id="tbStatsFrom" type="date" value="${r.startS}" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></div><div><label class="block text-[8px] font-black text-themeMuted mb-1">TO</label><input id="tbStatsTo" type="date" value="${r.endS}" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></div></div><button onclick="tbStatsApplyDates()" class="w-full py-2.5 rounded-xl bg-themeAccent text-white text-[10px] font-black">Apply Date Range</button>`:''}
+    </div>
+    <div class="grid grid-cols-2 gap-2">${tbStatsCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`,true)}
+      ${tbStatsCard('📚 Focus',tbStatsFmtHours(d.focusH),`${d.focus.length} sessions`)}
+      ${tbStatsCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}
+      ${tbStatsCard('📝 Grand Tests',d.gts.length,`${d.mcq.gt} questions`)}
+      ${tbStatsCard('🏋️ Gym',d.gym.length,'workout logs')}
+      ${tbStatsCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,`${d.sleep.length?Math.round(d.sleepH/d.sleep.length*10)/10:0} h / log`)}
+      ${tbStatsCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(d.protein/days)} g / active day`)}
+      ${tbStatsCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(d.kcal/days).toLocaleString()} / active day`)}
+      ${tbStatsCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}
+      ${tbStatsCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}
+    </div>`;
+    tbStatsMonthCalendar();
+    const head=document.querySelector('#tab-statistics h3');if(head)head.textContent='ACTIVITY STATISTICS';
+    const sub=head?.parentElement?.querySelector('p');if(sub)sub.textContent='Choose today, a custom date range, or all recorded activity.';
+    if(window.lucide)lucide.createIcons();
+  };
+
+  /* ---------- Protein / kcal bar charts ---------- */
+  let tbNutritionChartTab='protein';
+  window.setNutritionChartTab=function(tab){tbNutritionChartTab=tab;renderNutritionChart();};
+  function renderNutritionChart(){
+    const host=document.getElementById('nutritionChartWrap');if(!host)return;
+    const anchor=trackerSelectedDate||today();
+    let cursor=new Date();
+    try{cursor=trackerCalState('nutrition',anchor).cursor;}catch(e){cursor=dateOf(anchor);}
+    const prefix=`${cursor.getFullYear()}-${pad(cursor.getMonth()+1)}`;
+    const logs=(appState.nutritionLogs||[]).filter(x=>String(x.date||'').startsWith(prefix));
+    const byDate={};logs.forEach(x=>{byDate[x.date]=(byDate[x.date]||0)+Number(tbNutritionChartTab==='protein'?x.protein||0:x.kcal||0);});
+    const daysIn=new Date(cursor.getFullYear(),cursor.getMonth()+1,0).getDate(),max=tbNutritionChartTab==='protein'?300:5000,unit=tbNutritionChartTab==='protein'?'g':'kcal',label=tbNutritionChartTab==='protein'?'Protein':'Calories';
+    let bars='';
+    for(let day=1;day<=daysIn;day++){
+      const date=`${prefix}-${pad(day)}`,value=Number(byDate[date]||0),height=Math.min(100,(value/max)*100);
+      bars+=`<div class="flex flex-col items-center justify-end h-48 min-w-[28px]"><div class="text-[7px] text-themeMuted mb-1">${value?Math.round(value):''}</div><div title="${date}: ${Math.round(value)} ${unit}" class="w-4 rounded-t-md bg-themeAccent transition-all" style="height:${Math.max(value?2:0,height)}%"></div><span class="text-[7px] text-themeMuted mt-1">${day}</span></div>`;
+    }
+    host.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeMuted">Nutrition Chart</h4><p class="text-[9px] text-themeMuted">${cursor.toLocaleDateString('en-US',{month:'long',year:'numeric'})} • Y-axis max ${max.toLocaleString()} ${unit}</p></div><div class="flex gap-1"><button onclick="setNutritionChartTab('protein')" class="px-2.5 py-1.5 rounded-xl text-[9px] font-black ${tbNutritionChartTab==='protein'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Protein</button><button onclick="setNutritionChartTab('kcal')" class="px-2.5 py-1.5 rounded-xl text-[9px] font-black ${tbNutritionChartTab==='kcal'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Kcal</button></div></div><div class="flex gap-2 mt-2"><div class="w-10 h-48 flex flex-col justify-between text-[7px] text-themeMuted text-right pr-1"><span>${max}</span><span>${Math.round(max*.75)}</span><span>${Math.round(max*.5)}</span><span>${Math.round(max*.25)}</span><span>0</span></div><div class="flex-1 overflow-x-auto custom-scroll"><div class="min-w-max flex items-end gap-1 border-b border-themeBorder px-1">${bars}</div></div></div><div class="text-[8px] text-themeMuted text-center">${label} per day • dates are shown on the X-axis</div></div>`;
+  }
+  const __tbNutritionBase=window.renderNutritionTracker;
+  window.renderNutritionTracker=function(){if(typeof __tbNutritionBase==='function')__tbNutritionBase();let mod=document.getElementById('trackerMod-nutrition');if(!mod)return;let host=document.getElementById('nutritionChartWrap');if(!host){host=document.createElement('div');host.id='nutritionChartWrap';const first=mod.firstElementChild;if(first)first.after(host);else mod.appendChild(host);}renderNutritionChart();};
+
   function init(){
     removeOldLogoUI();ensureMiscChooser();
     /* First launch is intentionally white/light until the user reaches the theme screen. */
