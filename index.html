@@ -147,8 +147,137 @@
 .timer-complete-ring{animation:trackFocusCompleteGlow 1.1s ease-in-out infinite alternate;}
 @keyframes trackFocusCompleteGlow{from{filter:drop-shadow(0 0 5px currentColor);opacity:.85;}to{filter:drop-shadow(0 0 18px currentColor);opacity:1;}}
 </style>
+
+<style id="trackability-onboarding-style">
+  #trackabilityOnboarding{position:fixed;inset:0;z-index:200;background:var(--bg-color,#07111f);color:var(--text-color,#fff);overflow-y:auto;opacity:1;transition:opacity .55s ease,transform .65s cubic-bezier(.2,.8,.2,1)}
+  #trackabilityOnboarding.ob-hide{opacity:0;transform:scale(1.035);pointer-events:none}
+  .ob-shell{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px 18px 34px;position:relative;overflow:hidden}
+  .ob-orb{position:absolute;width:280px;height:280px;border-radius:50%;background:var(--accent-color,#6366f1);opacity:.10;filter:blur(50px);animation:obFloat 7s ease-in-out infinite}
+  .ob-orb.one{top:-90px;left:-90px}.ob-orb.two{right:-110px;bottom:-100px;animation-delay:-3s}
+  @keyframes obFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(18px,-20px,0) scale(1.08)}}
+  .ob-card{width:min(520px,100%);min-height:600px;display:flex;flex-direction:column;position:relative;z-index:2}
+  .ob-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .ob-brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.16em;font-size:12px}
+  .ob-dot{width:12px;height:12px;border-radius:4px;background:var(--accent-color);box-shadow:0 0 24px var(--accent-glow)}
+  .ob-progress{font-family:monospace;font-size:10px;font-weight:800;color:var(--muted-color)}
+  .ob-stage{flex:1;display:flex;align-items:center}
+  .ob-screen{width:100%;display:none;animation:obIn .55s cubic-bezier(.2,.8,.2,1)}
+  .ob-screen.active{display:block}
+  @keyframes obIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+  .ob-kicker{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-color);margin-bottom:12px}
+  .ob-title{font-size:clamp(34px,9vw,58px);line-height:.98;font-weight:900;letter-spacing:-.045em;margin:0 0 16px}
+  .ob-subtitle{font-size:15px;line-height:1.65;color:var(--muted-color);max-width:460px}
+  .ob-tagline{font-size:clamp(18px,4.8vw,27px);font-weight:800;line-height:1.2;margin:10px 0 16px}
+  .ob-hero-logo{width:82px;height:82px;border-radius:25px;margin-bottom:24px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent-color),transparent 72%),var(--card-color);border:1px solid var(--border-color);box-shadow:0 20px 70px var(--accent-glow);animation:obLogo 3s ease-in-out infinite}
+  .ob-hero-logo span{font-size:32px;font-weight:1000;letter-spacing:-.08em}
+  @keyframes obLogo{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+  .ob-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px}
+  .ob-feature,.ob-choice,.ob-theme,.ob-font{border:1px solid var(--border-color);background:color-mix(in srgb,var(--card-color) 78%,transparent);border-radius:18px;padding:14px;text-align:left;transition:.22s ease;cursor:pointer}
+  .ob-feature:hover,.ob-choice:hover,.ob-theme:hover,.ob-font:hover{transform:translateY(-3px);border-color:var(--accent-color);box-shadow:0 12px 35px var(--accent-glow)}
+  .ob-icon{font-size:21px;margin-bottom:8px}.ob-feature b,.ob-choice b{display:block;font-size:12px}.ob-feature span,.ob-choice span{display:block;color:var(--muted-color);font-size:10px;margin-top:4px;line-height:1.4}
+  .ob-choices{display:grid;gap:12px;margin-top:26px}.ob-choice{padding:18px;display:flex;align-items:center;gap:14px}.ob-choice .ob-choice-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--card-soft-color);font-size:20px;flex:none}.ob-choice.selected{border-color:var(--accent-color);box-shadow:0 0 0 1px var(--accent-color),0 12px 35px var(--accent-glow)}
+  .ob-form{display:grid;gap:12px;margin-top:22px}.ob-field label{display:block;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-color);margin-bottom:6px}.ob-field input,.ob-field select{width:100%;border:1px solid var(--border-color);background:var(--card-soft-color);color:var(--text-color);border-radius:14px;padding:13px 14px;outline:none;font:inherit}.ob-field input:focus,.ob-field select:focus{border-color:var(--accent-color);box-shadow:0 0 0 3px var(--accent-glow)}
+  .ob-theme-grid,.ob-font-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:20px}.ob-theme,.ob-font{padding:13px}.ob-theme small,.ob-font small{display:block;color:var(--muted-color);font-size:9px;margin-top:3px}.ob-theme.selected,.ob-font.selected{border-color:var(--accent-color);box-shadow:0 0 0 1px var(--accent-color)}
+  .ob-swatch{height:42px;border-radius:11px;margin-bottom:9px;border:1px solid rgba(255,255,255,.12)}
+  .ob-actions{display:flex;gap:10px;margin-top:26px}.ob-btn{border:0;border-radius:15px;padding:13px 17px;font:inherit;font-size:12px;font-weight:900;cursor:pointer;transition:.2s ease}.ob-btn.primary{background:var(--accent-color);color:#fff;flex:1;box-shadow:0 12px 32px var(--accent-glow)}.ob-btn.secondary{background:var(--card-soft-color);color:var(--text-color);border:1px solid var(--border-color)}.ob-btn:hover{transform:translateY(-2px)}.ob-btn:active{transform:scale(.97)}
+  .ob-next{margin-top:28px;display:flex;align-items:center;gap:8px;color:var(--accent-color);font-size:12px;font-weight:900;cursor:pointer;width:max-content}.ob-next .arrow{transition:.2s}.ob-next:hover .arrow{transform:translateX(5px)}
+  .ob-note{font-size:10px;color:var(--muted-color);margin-top:12px;line-height:1.5}.ob-note a{color:var(--accent-color);font-weight:800;text-decoration:none}.ob-note a:hover{text-decoration:underline}
+  .ob-ready{text-align:center}.ob-ready .ob-title{font-size:clamp(40px,10vw,66px)}.ob-ready-ring{width:116px;height:116px;border-radius:50%;margin:0 auto 28px;border:1px solid var(--border-color);display:grid;place-items:center;background:radial-gradient(circle,var(--accent-glow),transparent 68%);animation:obReady 1.5s ease-in-out infinite}.ob-ready-ring span{font-size:42px}.ob-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px}.ob-summary div{padding:11px;border:1px solid var(--border-color);border-radius:14px;background:var(--card-soft-color);text-align:left}.ob-summary small{display:block;font-size:8px;text-transform:uppercase;color:var(--muted-color);font-weight:900}.ob-summary b{display:block;font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@keyframes obReady{0%,100%{transform:scale(1)}50%{transform:scale(1.07);box-shadow:0 0 50px var(--accent-glow)}}
+  @media(max-width:420px){.ob-shell{padding:20px 15px 25px}.ob-card{min-height:590px}.ob-grid{gap:8px}.ob-feature{padding:11px}.ob-theme-grid,.ob-font-grid{gap:7px}.ob-theme,.ob-font{padding:10px}}
+</style>
 </head>
 <body class="dark-obsidian h-screen overflow-hidden flex flex-col antialiased">
+
+  <!-- FIRST-LAUNCH ONBOARDING -->
+  <div id="trackabilityOnboarding" aria-modal="true" role="dialog">
+    <div class="ob-shell">
+      <div class="ob-orb one"></div><div class="ob-orb two"></div>
+      <div class="ob-card">
+        <div class="ob-top"><div class="ob-brand"><span class="ob-dot"></span> TRACKEBILITY</div><div id="obProgress" class="ob-progress">01 / 07</div></div>
+        <div class="ob-stage">
+          <section class="ob-screen active" data-ob-screen="0">
+            <div class="ob-hero-logo"><span>TR</span></div>
+            <div class="ob-kicker">Welcome</div>
+            <h1 class="ob-title">Welcome to<br>TRACKEBILITY</h1>
+            <div class="ob-tagline">Track your effort. Master your goal.</div>
+            <p class="ob-subtitle">A personal command center for your study, focus, tasks, tests, revision and progress.</p>
+            <div class="ob-actions"><a class="ob-btn secondary" href="https://www.trackability.in" target="_blank" rel="noopener">Learn More ↗</a><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
+            <p class="ob-note">Explore the website for the full TRACKEBILITY story, then come back here to build your workspace.</p>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="1">
+            <div class="ob-kicker">Why Trackability?</div><h2 class="ob-title">Your goals deserve more than a to-do list.</h2>
+            <p class="ob-subtitle">TRACKEBILITY turns daily effort into something you can see, understand and improve.</p>
+            <div class="ob-grid">
+              <div class="ob-feature"><div class="ob-icon">📚</div><b>Know what you've studied</b><span>Organize subjects, chapters and revision.</span></div>
+              <div class="ob-feature"><div class="ob-icon">⏱️</div><b>Know where your time goes</b><span>Use Focus and Pomodoro sessions to stay intentional.</span></div>
+              <div class="ob-feature"><div class="ob-icon">📊</div><b>See your progress</b><span>Turn your activity into meaningful statistics.</span></div>
+              <div class="ob-feature"><div class="ob-icon">🎯</div><b>Know what to improve</b><span>Track tests, MCQs, mistakes and goals.</span></div>
+            </div><div class="ob-next" onclick="obNext()">NEXT <span class="arrow">→</span></div>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="2">
+            <div class="ob-kicker">Your toolkit</div><h2 class="ob-title">One place.<br>Your entire journey.</h2>
+            <p class="ob-subtitle">From your next focused session to your long-term progress, keep the important pieces connected.</p>
+            <div class="ob-grid">
+              <div class="ob-feature"><div class="ob-icon">📚</div><b>Subjects & Chapters</b><span>Build your syllabus.</span></div>
+              <div class="ob-feature"><div class="ob-icon">⏱️</div><b>Focus & Pomodoro</b><span>Protect your focus.</span></div>
+              <div class="ob-feature"><div class="ob-icon">📝</div><b>MCQs & Tests</b><span>Record performance.</span></div>
+              <div class="ob-feature"><div class="ob-icon">🔄</div><b>Revision & Mistakes</b><span>Close your weak areas.</span></div>
+              <div class="ob-feature"><div class="ob-icon">📅</div><b>Tasks & Schedule</b><span>Plan your day.</span></div>
+              <div class="ob-feature"><div class="ob-icon">🏋️</div><b>Life Trackers</b><span>Gym, sleep & nutrition.</span></div>
+            </div><div class="ob-next" onclick="obNext()">NEXT <span class="arrow">→</span></div>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="3">
+            <div class="ob-kicker">Get started</div><h2 class="ob-title">How do you want to begin?</h2>
+            <p class="ob-subtitle">Create an account to keep your data synced, or start locally as a guest. You can connect an account later.</p>
+            <div class="ob-choices">
+              <div id="obChoiceAccount" class="ob-choice selected" onclick="obChooseMode('account')"><div class="ob-choice-icon">☁️</div><div><b>Create Account</b><span>Keep your TRACKEBILITY data synced across devices.</span></div></div>
+              <div id="obChoiceGuest" class="ob-choice" onclick="obChooseMode('guest')"><div class="ob-choice-icon">👤</div><div><b>Continue as Guest</b><span>Start immediately and connect an account later.</span></div></div>
+            </div><div class="ob-actions"><button class="ob-btn primary" onclick="obNext()">CONTINUE →</button></div>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="4">
+            <div class="ob-kicker">Your journey</div><h2 class="ob-title">Let's set up your workspace.</h2>
+            <p class="ob-subtitle">These details personalize your dashboard. You can change them later in Settings.</p>
+            <div class="ob-form">
+              <div class="ob-field"><label>Name</label><input id="obName" type="text" placeholder="What should we call you?"></div>
+              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal</label><input id="obCourse" type="text" placeholder="NEET PG, JEE, etc."></div></div>
+              <div class="ob-field"><label>Exam / Goal Name</label><input id="obExam" type="text" placeholder="e.g. NEET PG 2027"></div>
+              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Target Date</label><input id="obDate" type="date"></div><div class="ob-field"><label>Target Time (optional)</label><input id="obTime" type="time"></div></div>
+            </div><div class="ob-actions"><button class="ob-btn primary" onclick="obSaveProfile();obNext()">NEXT →</button></div>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="5">
+            <div class="ob-kicker">Make it yours</div><h2 class="ob-title">Choose your look.</h2><p class="ob-subtitle">Pick a theme and font. You can change both whenever you want.</p>
+            <div class="ob-theme-grid">
+              <div class="ob-theme selected" data-theme="dark-obsidian" onclick="obPickTheme(this,'dark-obsidian')"><div class="ob-swatch" style="background:linear-gradient(135deg,#111827,#6366f1)"></div><b>Obsidian</b><small>Dark • Indigo</small></div>
+              <div class="ob-theme" data-theme="dark-midnight" onclick="obPickTheme(this,'dark-midnight')"><div class="ob-swatch" style="background:linear-gradient(135deg,#060b1a,#38bdf8)"></div><b>Midnight</b><small>Dark • Sky</small></div>
+              <div class="ob-theme" data-theme="theme-light" onclick="obPickTheme(this,'theme-light')"><div class="ob-swatch" style="background:linear-gradient(135deg,#fff,#6366f1)"></div><b>Clean Light</b><small>Light • Indigo</small></div>
+              <div class="ob-theme" data-theme="light-mint" onclick="obPickTheme(this,'light-mint')"><div class="ob-swatch" style="background:linear-gradient(135deg,#fff,#059669)"></div><b>Mint</b><small>Light • Green</small></div>
+            </div>
+            <div class="ob-kicker" style="margin-top:25px">Font</div>
+            <div class="ob-font-grid">
+              <div class="ob-font selected" data-font="font-space" onclick="obPickFont(this,'font-space')" style="font-family:'Space Grotesk'"><b>Space Grotesk</b><small>Modern & bold</small></div>
+              <div class="ob-font" data-font="font-dmsans" onclick="obPickFont(this,'font-dmsans')" style="font-family:'DM Sans'"><b>DM Sans</b><small>Clean & friendly</small></div>
+              <div class="ob-font" data-font="font-poppins" onclick="obPickFont(this,'font-poppins')" style="font-family:'Poppins'"><b>Poppins</b><small>Rounded & modern</small></div>
+              <div class="ob-font" data-font="font-josefin" onclick="obPickFont(this,'font-josefin')" style="font-family:'Josefin Sans'"><b>Josefin Sans</b><small>Distinctive & elegant</small></div>
+            </div>
+            <div class="ob-actions"><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="6">
+            <div class="ob-ready"><div class="ob-ready-ring"><span>🚀</span></div><div class="ob-kicker">All set</div><h2 class="ob-title">Your journey<br>starts now.</h2><p class="ob-subtitle" style="margin:auto">Plan it. Focus on it. Track it. Improve it.</p>
+              <div class="ob-summary"><div><small>Name</small><b id="obSummaryName">Guest</b></div><div><small>Goal</small><b id="obSummaryGoal">Not set</b></div><div><small>Date</small><b id="obSummaryDate">Not set</b></div><div><small>Mode</small><b id="obSummaryMode">Account</b></div></div>
+              <div class="ob-actions"><button class="ob-btn primary" onclick="obStart()">START TRACKEBILITY 🚀</button></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center pointer-events-none w-full max-w-xs px-4"></div><div id="achievementOverlay" class="achievement-overlay hidden"></div>
@@ -1578,6 +1707,7 @@
       profileAge: '',
       examTitle: '',
       examDate: '',
+      examTime: '',
       course: '',
       quote: 'Consistency beats intensity every single time.',
       dailyFocusGoalMinutes: 0,
@@ -6628,6 +6758,44 @@ document.addEventListener('DOMContentLoaded',function(){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,50));
   else setTimeout(bind,50);
   window.__integrateTrackabilityAccount=bind;
+})();
+</script>
+
+<script id="trackability-onboarding-script">
+(function(){
+  const KEY='trackability_onboarding_v1';
+  let step=0, mode='account', pickedTheme='dark-obsidian', pickedFont='font-space';
+  const $=id=>document.getElementById(id);
+  function screens(){return [...document.querySelectorAll('#trackabilityOnboarding .ob-screen')];}
+  function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===6)updateSummary();}
+  window.obNext=function(){if(step===4)obSaveProfile();if(step<6){step++;update();}};
+  window.obChooseMode=function(v){mode=v;$('obChoiceAccount').classList.toggle('selected',v==='account');$('obChoiceGuest').classList.toggle('selected',v==='guest');$('obSummaryMode').textContent=v==='account'?'Account':'Guest';};
+  window.obSaveProfile=function(){
+    if(typeof appState==='undefined')return;
+    appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=($('obCourse').value||'').trim();appState.examTitle=($('obExam').value||'').trim();appState.examDate=$('obDate').value||'';
+    try{saveState();}catch(e){}
+  };
+  window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setTheme==='function')setTheme(v);else document.body.className=v+' '+pickedFont+' h-screen overflow-hidden flex flex-col antialiased';};
+  window.obPickFont=function(el,v){pickedFont=v;document.querySelectorAll('.ob-font').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setFontStyle==='function')setFontStyle(v);};
+  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obExam').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';}
+  window.obStart=function(){
+    obSaveProfile();
+    try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;saveState();}catch(e){}
+    localStorage.setItem(KEY,'1');
+    const el=$('trackabilityOnboarding');el.classList.add('ob-hide');
+    setTimeout(()=>{el.style.display='none';try{if(typeof refreshAllViews==='function')refreshAllViews();if(window.lucide)lucide.createIcons();}catch(e){};
+      if(mode==='account' && typeof openAccountModal==='function')setTimeout(()=>openAccountModal(),250);
+    },650);
+  };
+  function boot(){
+    const el=$('trackabilityOnboarding');if(!el)return;
+    const complete=localStorage.getItem(KEY)==='1';
+    if(complete){el.style.display='none';return;}
+    update();
+    // Keep the app underneath inert until the first-run journey is complete.
+    document.body.classList.add('overflow-hidden');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,40));else setTimeout(boot,40);
 })();
 </script>
 </body>
