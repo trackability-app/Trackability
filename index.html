@@ -289,7 +289,10 @@
 
           <div class="relative py-4 flex flex-col items-center justify-center">
             <div class="w-56 h-56 rounded-full border-4 border-themeCardSoft flex flex-col items-center justify-center relative shadow-inner">
-              <div id="timerRingVisual" class="absolute inset-0 rounded-full border-4 border-transparent border-t-themeAccent transition-all duration-300"></div>
+              <svg id="timerProgressSvg" class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 224 224" aria-hidden="true">
+                <circle cx="112" cy="112" r="103" fill="none" stroke="currentColor" stroke-width="7" opacity=".10"></circle>
+                <circle id="timerProgressCircle" cx="112" cy="112" r="103" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-dasharray="647.17" stroke-dashoffset="647.17" class="text-themeAccent" style="transition:stroke-dashoffset .35s linear;"></circle>
+              </svg>
 
               <span id="focusActiveTagIndicator" class="text-[10px] font-black uppercase tracking-wider text-themeAccent bg-themeAccent/10 px-2.5 py-0.5 rounded-full mb-1">
                 STUDY SESSION
@@ -2495,6 +2498,25 @@
       }
     }
 
+    function updateTimerProgress() {
+      const circle = document.getElementById('timerProgressCircle');
+      if (!circle) return;
+      const circumference = 2 * Math.PI * 103;
+      let progress = 0;
+      if (isPomoMode) {
+        const total = Math.max(1, (pomoPhase === 'work' ? pomoWorkMins : pomoBreakMins) * 60);
+        progress = Math.max(0, Math.min(1, 1 - (pomoRemainingSec / total)));
+      } else {
+        const total = Math.max(1, timerSelectedTargetMins * 60);
+        progress = Math.max(0, Math.min(1, timerElapsedSeconds / total));
+      }
+      circle.style.strokeDasharray = String(circumference);
+      circle.style.strokeDashoffset = String(circumference * (1 - progress));
+      circle.classList.toggle('text-emerald-400', progress >= 0.9);
+      circle.classList.toggle('text-themeAccent', progress < 0.9);
+      circle.style.filter = progress >= 0.9 ? 'drop-shadow(0 0 7px currentColor)' : '';
+    }
+
     function updateTimerDisplay() {
       let display = "00:00:00";
       if (!isPomoMode) {
@@ -2512,6 +2534,7 @@
         document.getElementById('focusModeLabel').textContent = `🍅 Pomodoro ${pomoPhase.toUpperCase()} (${pomoCurrentCycle}/${pomoTotalCycles})`;
       }
       document.getElementById('fullscreenTimerDisplay').textContent = display;
+      updateTimerProgress();
       updateFullscreenAnimation();
       updateHomeActiveFocusTimer();
     }
@@ -5121,7 +5144,7 @@
     const byDate={};monthLogs.forEach(x=>{byDate[x.date]=(byDate[x.date]||0)+(Number(x.hours)||0);});
     const points=Object.keys(byDate).sort().map(date=>({date,hours:byDate[date]}));
     const max=8, ticks=[8,7,6,5,4,3,2,1,0];
-    const bars=points.map(p=>{const h=Math.max(0,Number(p.hours)||0),pct=Math.min(100,h/max*100);let cls=h>=7?'green':h<5?'red':h>=6?'yellow':'mid';return `<div class="tb-sleep-bar-col" title="${escF(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${Number(p.date.slice(-2))}</span></div>`;}).join('');
+    const bars=points.map(p=>{const h=Math.max(0,Number(p.hours)||0),pct=Math.min(100,h/max*100);let cls=h>=7?'green':h<5?'red':h>=6?'yellow':'mid';return `<div class="tb-sleep-bar-col" title="${escF(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${(()=>{const dd=new Date(p.date+'T00:00:00');return Number.isNaN(dd.getTime())?p.date:`${dd.toLocaleString('en-IN',{day:'2-digit'})} ${dd.toLocaleString('en-IN',{month:'short'})}`;})()}</span></div>`;}).join('');
     const plot=points.length?`<div class="tb-sleep-yaxis">${ticks.map(v=>`<span>${v}h</span>`).join('')}</div><div class="tb-sleep-plot"><div class="tb-sleep-bars">${bars}</div></div>`:'<div class="text-[9px] text-themeMuted py-8 text-center w-full">No sleep records in this month.</div>';
     const total=points.reduce((a,p)=>a+p.hours,0),avg=points.length?total/points.length:0;
     return `<div class="sleep-summary-card"><div class="flex items-start justify-between gap-3"><div><div class="text-[8px] font-black uppercase text-themeMuted">Sleep Summary • ${monthText(sd)}</div><div class="text-sm font-black text-themeText mt-1">${total.toFixed(1)} h total</div></div><div class="text-right"><div class="text-sm font-black text-themeAccent">${avg.toFixed(1)} h</div><div class="text-[8px] text-themeMuted">average / logged day</div></div></div><div class="mt-3"><div class="text-[8px] font-black uppercase text-themeMuted mb-1">Hours of sleep</div><div class="tb-sleep-chart-wrap">${plot}</div><div class="tb-sleep-legend mt-2"><span><i class="g"></i> ≥7h</span><span><i class="y"></i> 6–&lt;7h</span><span><i class="o"></i> 5–&lt;6h</span><span><i class="r"></i> &lt;5h</span></div></div></div>`;
@@ -5346,15 +5369,15 @@
 .tb-sleep-chart-box{display:flex;gap:7px;min-height:235px;margin-top:8px;}
 .tb-sleep-yaxis{width:34px;flex:0 0 34px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding:3px 0 27px;color:var(--text-muted);font-size:8px;font-weight:800;}
 .tb-sleep-plot{flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin;}
-.tb-sleep-bars{height:208px;min-width:100%;display:flex;align-items:flex-end;gap:9px;padding:3px 8px 0;border-left:1px solid var(--border-color);border-bottom:1px solid var(--border-color);}
-.tb-sleep-bar-col{flex:0 0 30px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;}
+.tb-sleep-bars{height:208px;min-width:100%;display:flex;align-items:flex-end;gap:9px;padding:3px 8px 28px;border-left:1px solid var(--border-color);border-bottom:1px solid var(--border-color);}
+.tb-sleep-bar-col{flex:0 0 42px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative;}
 .tb-sleep-bar{width:22px;min-height:3px;border-radius:7px 7px 3px 3px;box-shadow:0 2px 9px rgba(0,0,0,.16);}
 .tb-sleep-bar.green{background:#22c55e;}
 .tb-sleep-bar.yellow{background:#facc15;}
 .tb-sleep-bar.orange{background:#f97316;}
 .tb-sleep-bar.red{background:#ef4444;}
 .tb-sleep-bar-label{font-size:7px;font-weight:900;margin-bottom:3px;color:var(--text-color);}
-.tb-sleep-date{font-size:8px;font-weight:900;margin-top:5px;color:var(--text-muted);}
+.tb-sleep-date{font-size:7px;font-weight:900;margin-top:5px;color:var(--text-muted);white-space:nowrap;line-height:1;}
 .tb-sleep-legend{display:flex;gap:8px;flex-wrap:wrap;font-size:8px;color:var(--text-muted);font-weight:800;}
 .tb-sleep-legend span{display:inline-flex;align-items:center;gap:3px;}
 .tb-sleep-legend i{width:7px;height:7px;border-radius:50%;display:inline-block;}
@@ -5494,14 +5517,12 @@ window.renderGTTracker=function(){
   if(be)be.textContent=best+' marks';if(ce)ce.textContent=String(all.length);
   renderGTChartInTracker(all);
   c.innerHTML=all.length?all.map(g=>{
-    const attempted=Number(g.attempted??((Number(g.correct)||0)+(Number(g.wrong)||0)));
     return `<div class="p-3.5 rounded-2xl bg-themeCard border border-themeBorder space-y-2 tb-gt-detail">
-      <div class="flex justify-between gap-2">
-        <div class="min-w-0"><span class="font-bold text-sm block">${F(g.name||'Grand Test')}</span><span class="text-[9px] text-themeMuted">${F(g.date||'')}${g.platform?' • '+F(g.platform):''}</span></div>
-        <span class="text-base font-black text-themeAccent">${Number(g.score)||0} marks</span>
+      <div class="flex justify-between items-center gap-2">
+        <span class="font-bold text-sm block min-w-0 truncate">${F(g.name||'Grand Test')}</span>
+        <span class="text-lg font-black text-themeAccent whitespace-nowrap">${Number(g.score)||0} marks</span>
       </div>
-      <div class="text-[9px] text-themeMuted">✓ ${Number(g.correct||0)} correct • ✕ ${Number(g.wrong||0)} wrong • ${attempted} attempted • ${Number(g.total||0)} total questions</div>
-      <div class="text-[9px] text-themeMuted">Score calculation: (4 × ${Number(g.correct||0)}) − (1 × ${Number(g.wrong||0)}) = <b class="text-themeText">${Number(g.score)||0}</b></div>
+      <div class="text-[10px] font-bold text-themeMuted">✓ ${Number(g.correct||0)} correct &nbsp; • &nbsp; ✕ ${Number(g.wrong||0)} wrong</div>
       <button onclick="undoGT('${F(g.id||'')}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black">Remove</button>
     </div>`;
   }).join(''):'<p class="text-center text-xs text-themeMuted py-6">No Grand Tests recorded yet.</p>';
@@ -5519,7 +5540,7 @@ function sleepChartFinal(logs,selected){
   const bars=points.map(p=>{
     const h=Math.max(0,p.hours),pct=Math.min(100,h/max*100);
     const cls=h>=7?'green':h>=6?'yellow':h>=5?'orange':'red';
-    return `<div class="tb-sleep-bar-col" title="${F(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${Number(p.date.slice(-2))}</span></div>`;
+    return `<div class="tb-sleep-bar-col" title="${F(p.date)} • ${h.toFixed(1)} hours"><span class="tb-sleep-bar-label">${h.toFixed(1)}</span><div class="tb-sleep-bar ${cls}" style="height:${Math.max(3,pct)}%"></div><span class="tb-sleep-date">${(()=>{const dd=new Date(p.date+'T00:00:00');return Number.isNaN(dd.getTime())?p.date:`${dd.toLocaleString('en-IN',{day:'2-digit'})} ${dd.toLocaleString('en-IN',{month:'short'})}`;})()}</span></div>`;
   }).join('');
   const total=points.reduce((a,p)=>a+p.hours,0),avg=points.length?total/points.length:0;
   return `<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder">
@@ -5765,6 +5786,7 @@ document.addEventListener('DOMContentLoaded',function(){
          PASSWORD_RECOVERY event while Supabase processes the URL. */
       sb.auth.onAuthStateChange(function(event,session){
         currentUser=session?.user || null;
+        try{ updateSettingsAccountCard(); }catch(e){}
         if(event==='PASSWORD_RECOVERY'){
           setTimeout(function(){
             openPasswordResetModal();
@@ -5780,8 +5802,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
       const result=await sb.auth.getSession();
       currentUser=result.data?.session?.user || null;
+      try{ updateSettingsAccountCard(); }catch(e){}
       if(currentUser) await finishSignedInBootstrap();
       populateAccountUI();
+      try{ updateSettingsAccountCard(); }catch(e){}
     }catch(err){
       console.error('Supabase initialization error',err);
       accountToast('Cloud connection could not start','alert-circle');
@@ -5935,6 +5959,7 @@ document.addEventListener('DOMContentLoaded',function(){
         saveLocalOnly();
         if(data.session){
           currentUser=data.user;
+          try{ updateSettingsAccountCard(); }catch(e){}
           await finishSignedInBootstrap();
           populateAccountUI();
           accountToast('Account created and data synced ☁️');
@@ -5946,6 +5971,7 @@ document.addEventListener('DOMContentLoaded',function(){
         const {data,error}=await sb.auth.signInWithPassword({email,password});
         if(error) throw error;
         currentUser=data.user;
+        try{ updateSettingsAccountCard(); }catch(e){}
         await finishSignedInBootstrap();
         populateAccountUI();
         accountToast('Signed in successfully ☁️');
