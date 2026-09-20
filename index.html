@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>TRACKEBILITY_update5 — Your Study. Your Progress. Your Exam.</title>
+  <title>TRACKEBILITY — Major Update 3</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1527,8 +1527,8 @@
   <script>
     // Offline/CDN safety: the app remains functional even if the icon CDN is temporarily unavailable.
     window.lucide = window.lucide || { createIcons: function() {} };
-    const STORAGE_KEY = 'TRACKEBILITY_V5';
-    const OLD_STORAGE_KEY = 'TRACKEBILITY_NEET_PG_2027_V4';
+    const STORAGE_KEY = 'TRACKEBILITY_MAJOR_UPDATE_3';
+    const OLD_STORAGE_KEY = null;
 
     function getLocalYMD(dateObj = new Date()) {
       const year = dateObj.getFullYear();
@@ -1614,27 +1614,24 @@
     ];
 
     let appState = {
-      profileName: 'Doctor',
+      profileName: '',
       profileAge: '',
-      examTitle: 'NEET PG 2027',
-      examDate: '2027-03-14',
+      examTitle: '',
+      examDate: '',
       course: 'NEET PG',
       quote: 'Consistency beats intensity every single time.',
       dailyFocusGoalMinutes: 300,
-      streak: 7,
+      streak: 0,
       theme: 'dark-obsidian',
       fontStyle: 'font-space',
       fontSize: 'ui-text-normal',
       appLogo: 'original',
       goalMonthOffset: 0,
       showHomeMCQ: true,
+      onboardingCompleted: false,
       subjects: [],
       mcqSources: ['Marrow', 'PrepLadder', 'BTR', 'Cerebellum', 'Bhatia', 'PYQ Exam'],
-      tasks: [
-        { id: 'tsk_1', name: 'Surgery Video: Trauma Management', date: getLocalYMD(), startTime: '09:00', endTime: '11:00', duration: 120, completed: false, subjectId: 'sub_1', chapterId: 'ch_su_4', color: '#6366f1' },
-        { id: 'tsk_2', name: 'Trauma MCQ Session (36)', date: getLocalYMD(), startTime: '11:30', endTime: '12:10', duration: 40, completed: true, subjectId: 'sub_1', chapterId: 'ch_su_4', color: '#10b981' },
-        { id: 'tsk_3', name: 'PYQ Ortho Review', date: getLocalYMD(), startTime: null, endTime: null, duration: 30, completed: true, subjectId: 'sub_3', chapterId: 'ch_or_1', color: '#f59e0b' }
-      ],
+      tasks: [],
       focusSessions: [],
       mistakes: [],
       mcqIds: [],
@@ -1650,18 +1647,27 @@
 
     function loadPersistedState() {
       let saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) saved = localStorage.getItem(OLD_STORAGE_KEY);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
           appState = Object.assign(appState, parsed);
-          if (typeof appState.showHomeMCQ !== 'boolean') appState.showHomeMCQ = true;
-          // Remove the old built-in subject preset once. User-created subjects are preserved.
-          if (Array.isArray(appState.subjects) && appState.subjects.length === defaultCanonical19.length && appState.subjects.every((x,i)=>x && x.id === defaultCanonical19[i]?.id)) {
-            appState.subjects = [];
-          }
         } catch(e) {}
       }
+      if (typeof appState.showHomeMCQ !== 'boolean') appState.showHomeMCQ = true;
+      if (typeof appState.onboardingCompleted !== 'boolean') appState.onboardingCompleted = false;
+
+      // Major Update 3: remove only the old built-in/sample records. User-created
+      // records use generated ids and are preserved.
+      const seededSubjectIds = new Set(defaultCanonical19.map(s=>s.id));
+      const seededChapterIds = new Set(defaultCanonical19.flatMap(s=>(s.chapters||[]).map(c=>c.id)));
+      appState.subjects = (appState.subjects||[])
+        .filter(s=>!seededSubjectIds.has(s.id))
+        .map(s=>({...s, chapters:(s.chapters||[]).filter(c=>!seededChapterIds.has(c.id))}));
+      appState.tasks = (appState.tasks||[]).filter(t=>!['tsk_1','tsk_2','tsk_3'].includes(t.id));
+      // Remove the old example profile values; real user-entered values are kept.
+      if(appState.profileName==='Doctor') appState.profileName='';
+      if(appState.examTitle==='NEET PG 2027') appState.examTitle='';
+      if(appState.examDate==='2027-03-14') appState.examDate='';
       appState.tasks = appState.tasks || [];
       appState.recycleBin = Array.isArray(appState.recycleBin) ? appState.recycleBin : [];
       appState.sleepLogs = appState.sleepLogs || [];
@@ -1676,11 +1682,11 @@
       applyBodyClasses();
       applyAppLogo();
       renderAppLogoPicker();
-      document.getElementById('settingsProfileNameInput').value = appState.profileName || 'Doctor';
+      document.getElementById('settingsProfileNameInput').value = appState.profileName || '';
       const ageInput=document.getElementById('settingsAgeInput'); if(ageInput) ageInput.value=appState.profileAge ?? appState.cloudProfile?.age ?? '';
-      document.getElementById('settingsExamTitleInput').value = appState.examTitle || 'NEET PG 2027';
-      document.getElementById('settingsExamDateInput').value = appState.examDate || '2027-03-14';
-      document.getElementById('navProfileName').textContent = appState.profileName || 'Doctor';
+      document.getElementById('settingsExamTitleInput').value = appState.examTitle || '';
+      document.getElementById('settingsExamDateInput').value = appState.examDate || '';
+      document.getElementById('navProfileName').textContent = appState.profileName || 'Your Name';
     }
 
     function saveState() {
@@ -1813,9 +1819,9 @@
     }
 
     function renderHome() {
-      document.getElementById('navProfileName').textContent = appState.profileName || 'Doctor';
-      document.getElementById('homeExamTitleDisplay').textContent = appState.examTitle || 'NEET PG 2027';
-      document.getElementById('homeExamDateBadge').textContent = `Target: ${appState.examDate || '2027-03-14'}`;
+      document.getElementById('navProfileName').textContent = appState.profileName || 'Your Name';
+      document.getElementById('homeExamTitleDisplay').textContent = appState.examTitle || 'Set your target exam';
+      document.getElementById('homeExamDateBadge').textContent = appState.examDate ? `Target: ${appState.examDate}` : 'Set your target date';
 
       const now = new Date();
       document.getElementById('currentDateHeader').textContent = now.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -5917,7 +5923,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const d=document.getElementById('accountProfileExamDateInput'); if(d) d.value=p.exam_date || appState.examDate || '';
     } else {
       setAccountMode(accountMode);
-      const name=document.getElementById('accountNameInput'); if(name && !name.value) name.value=appState.profileName==='Doctor'?'':(appState.profileName||'');
+      const name=document.getElementById('accountNameInput'); if(name && !name.value) name.value=appState.profileName||'';
       const course=document.getElementById('accountCourseInput'); if(course) course.value=appState.course || 'NEET PG';
       const date=document.getElementById('accountExamDateInput'); if(date) date.value=appState.examDate || '';
     }
@@ -5985,7 +5991,7 @@ document.addEventListener('DOMContentLoaded',function(){
           saveLocalOnly();
         }else{
           const meta=currentUser.user_metadata||{};
-          const name=meta.name || appState.profileName || 'Doctor';
+          const name=meta.name || appState.profileName || '';
           const age=meta.age ?? '';
           const course=(meta.course==='INI-CET'||meta.course==='INICET')?'INI-CET':'NEET PG';
           const exam_date=meta.exam_date || appState.examDate || '';
@@ -6069,7 +6075,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const dbCourse=profile.course==='INI-CET' || profile.course==='INICET' ? 'INICET' : 'NEETPG';
     const payload={
       id:currentUser.id,
-      name:profile.name||'Doctor',
+      name:profile.name||'',
       age:profile.age===''||profile.age==null?null:Number(profile.age),
       course:dbCourse,
       exam_date:profile.exam_date||null,
@@ -6097,7 +6103,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(button){button.disabled=true;button.textContent='Please wait…';}
     try{
       if(accountMode==='signup'){
-        const name=(appState.profileName||'Doctor').trim() || 'Doctor';
+        const name=(appState.profileName||'').trim() || 'Doctor';
         const age=appState.profileAge ?? appState.cloudProfile?.age ?? '';
         const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
         const examDate=appState.examDate || null;
@@ -6207,7 +6213,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   async function saveCloudProfile(){
     if(!sb || !currentUser){accountToast('Sign in first','alert-circle');return;}
-    const name=(appState.profileName||'Doctor').trim()||'Doctor';
+    const name=(appState.profileName||'').trim()||'Doctor';
     const age=appState.profileAge ?? appState.cloudProfile?.age ?? '';
     const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
     const examDate=appState.examDate||'';
@@ -6373,7 +6379,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(typeof originalSaveGeneralSettings==='function') originalSaveGeneralSettings();
     if(currentUser){
       const profile={
-        name:appState.profileName||'Doctor',
+        name:appState.profileName||'',
         age:appState.profileAge ?? appState.cloudProfile?.age ?? '',
         course:appState.course || appState.cloudProfile?.course || 'NEET PG',
         exam_date:appState.examDate || ''
@@ -6449,16 +6455,16 @@ document.addEventListener('DOMContentLoaded',function(){
     const name=(appState.cloudProfile?.name||appState.profileName||'').trim();
     const account=document.getElementById('settingsConnectedAccount');
     const status=document.getElementById('settingsConnectedStatus');
-    if(account)account.textContent=email?(name && name!=='Doctor'?name:email):'Guest mode';
+    if(account)account.textContent=email?(name?name:email):'Guest mode';
     if(status)status.textContent=email?email:'No account connected • Data stays on this device';
   }
   window.updateSettingsAccountCard=updateSettingsAccountCard;
 
   window.openSettingsModal=function(){
     try{
-      const n=document.getElementById('settingsProfileNameInput'); if(n)n.value=appState.profileName||'Doctor';
+      const n=document.getElementById('settingsProfileNameInput'); if(n)n.value=appState.profileName||'';
       const a=document.getElementById('settingsAgeInput'); if(a)a.value=appState.profileAge ?? appState.cloudProfile?.age ?? '';
-      const e=document.getElementById('settingsExamTitleInput'); if(e)e.value=appState.examTitle||'NEET PG 2027';
+      const e=document.getElementById('settingsExamTitleInput'); if(e)e.value=appState.examTitle||'';
       const d=document.getElementById('settingsExamDateInput'); if(d)d.value=appState.examDate||'';
       const hm=document.getElementById('settingsShowHomeMCQ'); if(hm)hm.checked=appState.showHomeMCQ!==false;
     }catch(e){}
@@ -6627,6 +6633,52 @@ document.addEventListener('DOMContentLoaded',function(){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,50));
   else setTimeout(bind,50);
   window.__integrateTrackabilityAccount=bind;
+})();
+</script>
+<!-- ==================== MAJOR UPDATE 3 ONBOARDING ==================== -->\n<style id="major-update-3-onboarding-styles">\n  #majorUpdate3Onboarding{position:fixed;inset:0;z-index:99999;background:var(--bg-color,#0b1020);color:var(--text-color,#fff);display:flex;align-items:center;justify-content:center;padding:18px;}\n  #majorUpdate3Onboarding.hidden{display:none!important;}\n  .mu3-shell{width:min(560px,100%);max-height:94vh;overflow:auto;border:1px solid var(--border-color,#334155);background:var(--card-color,#111827);border-radius:30px;padding:28px;box-shadow:0 30px 90px rgba(0,0,0,.45);}\n  .mu3-progress{display:flex;gap:6px;margin-bottom:24px}.mu3-dot{height:5px;flex:1;border-radius:999px;background:var(--border-color,#334155)}.mu3-dot.active{background:var(--accent-color,#6366f1)}\n  .mu3-slide{display:none}.mu3-slide.active{display:block}.mu3-icon{font-size:42px;margin-bottom:12px}.mu3-title{font-size:28px;font-weight:900;letter-spacing:-.03em}.mu3-sub{font-size:13px;line-height:1.7;color:var(--muted-color,#94a3b8);margin-top:8px}.mu3-feature{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--border-color,#334155);border-radius:16px;background:var(--card-soft-color,#172033);margin-top:9px}.mu3-feature b{font-size:13px}.mu3-feature span{display:block;font-size:11px;color:var(--muted-color,#94a3b8);margin-top:2px}.mu3-input{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--border-color,#334155);background:var(--card-soft-color,#172033);color:var(--text-color,#fff);outline:none;font-size:13px}.mu3-label{font-size:11px;font-weight:800;color:var(--muted-color,#94a3b8);margin-bottom:6px;display:block}.mu3-actions{display:flex;justify-content:space-between;gap:10px;margin-top:24px}.mu3-btn{padding:12px 18px;border-radius:14px;border:1px solid var(--border-color,#334155);font-size:12px;font-weight:800}.mu3-primary{background:var(--accent-color,#6366f1);color:#fff;border-color:transparent;flex:1}.mu3-back{background:var(--card-soft-color,#172033);color:var(--text-color,#fff)}\n</style>\n<div id="majorUpdate3Onboarding" class="hidden" aria-modal="true" role="dialog">\n  <div class="mu3-shell">\n    <div class="mu3-progress" id="mu3Progress"><i class="mu3-dot active"></i><i class="mu3-dot"></i><i class="mu3-dot"></i><i class="mu3-dot"></i></div>\n    <div class="mu3-slide active" data-slide="0">\n      <div class="mu3-icon">📚</div><div class="mu3-title">Welcome to TRACKEBILITY</div>\n      <p class="mu3-sub">Your study, productivity and progress tracker — designed so you build the system around your own exam and routine.</p>\n      <div class="mu3-feature"><b>Everything starts empty</b><span>No preset subjects, chapters, tasks, tests or personal information.</span></div>\n    </div>\n    <div class="mu3-slide" data-slide="1">\n      <div class="mu3-icon">🎯</div><div class="mu3-title">Plan & Focus</div>\n      <div class="mu3-feature"><b>📚 Subjects & Chapters</b><span>Create your own syllabus structure.</span></div>\n      <div class="mu3-feature"><b>⏱️ Focus / Pomodoro</b><span>Track focused study sessions and time.</span></div>\n      <div class="mu3-feature"><b>📅 Tasks & Schedule</b><span>Plan study blocks, recurring tasks and reminders.</span></div>\n    </div>\n    <div class="mu3-slide" data-slide="2">\n      <div class="mu3-icon">📊</div><div class="mu3-title">Track Everything</div>\n      <div class="mu3-feature"><b>📝 MCQs & Tests</b><span>Track GT, Q-Bank and Mini Test performance.</span></div>\n      <div class="mu3-feature"><b>🏋️ Gym • 😴 Sleep • ❌ Mistakes</b><span>Keep your other progress logs in the same place.</span></div>\n      <div class="mu3-feature"><b>📈 Statistics</b><span>See your study and performance trends over time.</span></div>\n      <div class="mu3-feature"><b>☁️ Sync</b><span>Sign in with the same account on another device to access your synced data.</span></div>\n    </div>\n    <div class="mu3-slide" data-slide="3">\n      <div class="mu3-icon">👋</div><div class="mu3-title">Set up your workspace</div>\n      <p class="mu3-sub">Enter these once. TRACKEBILITY will use them across your Home screen and exam countdown.</p>\n      <div style="display:grid;gap:12px;margin-top:18px">\n        <div><label class="mu3-label" for="mu3Name">Your name</label><input id="mu3Name" class="mu3-input" autocomplete="name" placeholder="Enter your name"></div>\n        <div><label class="mu3-label" for="mu3Age">Age</label><input id="mu3Age" class="mu3-input" type="number" min="1" max="120" placeholder="Enter your age"></div>\n        <div><label class="mu3-label" for="mu3Exam">Target exam</label><input id="mu3Exam" class="mu3-input" placeholder="e.g. NEET PG 2027"></div>\n        <div><label class="mu3-label" for="mu3Date">Target exam date</label><input id="mu3Date" class="mu3-input" type="date"></div>\n      </div>\n    </div>\n    <div class="mu3-actions"><button id="mu3Back" class="mu3-btn mu3-back hidden" type="button">Back</button><button id="mu3Next" class="mu3-btn mu3-primary" type="button">Next</button></div>\n  </div>\n</div>\n<script id="major-update-3-onboarding-script">
+(function(){
+  let slide=0;
+  function root(){return document.getElementById('majorUpdate3Onboarding');}
+  function hasExplicitProfile(){return !!((appState.profileName||'').trim() && (appState.examTitle||'').trim() && (appState.examDate||''));}
+  function show(){
+    const r=root();if(!r)return;
+    if(appState.onboardingCompleted || hasExplicitProfile()){appState.onboardingCompleted=true;saveState();r.classList.add('hidden');return;}
+    r.classList.remove('hidden');slide=0;render();
+  }
+  function render(){
+    document.querySelectorAll('#majorUpdate3Onboarding .mu3-slide').forEach((el,i)=>el.classList.toggle('active',i===slide));
+    document.querySelectorAll('#majorUpdate3Onboarding .mu3-dot').forEach((el,i)=>el.classList.toggle('active',i===slide));
+    const back=document.getElementById('mu3Back'),next=document.getElementById('mu3Next');
+    back.classList.toggle('hidden',slide===0); next.textContent=slide===3?'Start TRACKEBILITY':'Next';
+    if(slide===3){
+      document.getElementById('mu3Name').value=appState.profileName||'';
+      document.getElementById('mu3Age').value=appState.profileAge||'';
+      document.getElementById('mu3Exam').value=appState.examTitle||'';
+      document.getElementById('mu3Date').value=appState.examDate||'';
+    }
+    if(window.lucide)lucide.createIcons();
+  }
+  function finish(){
+    const name=(document.getElementById('mu3Name').value||'').trim();
+    const age=(document.getElementById('mu3Age').value||'').trim();
+    const exam=(document.getElementById('mu3Exam').value||'').trim();
+    const date=document.getElementById('mu3Date').value||'';
+    if(!name||!age||!exam||!date){showToast('Please complete your profile setup','alert-circle');return;}
+    appState.profileName=name;appState.profileAge=Number(age);appState.examTitle=exam;appState.examDate=date;appState.onboardingCompleted=true;
+    saveState();
+    try{document.getElementById('settingsProfileNameInput').value=name;document.getElementById('settingsAgeInput').value=age;document.getElementById('settingsExamTitleInput').value=exam;document.getElementById('settingsExamDateInput').value=date;}catch(e){}
+    root().classList.add('hidden');
+    try{renderHome();refreshAllViews();}catch(e){}
+    try{window.updateSettingsAccountCard&&window.updateSettingsAccountCard();}catch(e){}
+    showToast('Workspace ready — welcome to TRACKEBILITY!');
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const n=document.getElementById('mu3Next'),b=document.getElementById('mu3Back');
+    n.addEventListener('click',()=>{if(slide<3){slide++;render();}else finish();});
+    b.addEventListener('click',()=>{if(slide>0){slide--;render();}});
+    setTimeout(show,180);
+  });
+  window.openMajorUpdate3Onboarding=show;
 })();
 </script>
 </body>
