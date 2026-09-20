@@ -143,6 +143,10 @@
     .schedule-full-content { flex: 1; min-height: 0; overflow-y: auto; }
     .fullscreen-animation-stage{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.9}.fs-water-fill{position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(to top,var(--accent-glow),transparent);transition:height 1s linear}.fs-water-wave{position:absolute;left:-10%;width:120%;height:80px;border-radius:50%;border-top:3px solid var(--accent-color);opacity:.35;animation:waterWave 4s ease-in-out infinite}.wave-one{bottom:52%}.wave-two{bottom:48%;animation-delay:-2s}@keyframes waterWave{0%,100%{transform:translateX(-2%) rotate(0)}50%{transform:translateX(2%) rotate(2deg)}}.fs-circle-visual{position:absolute;width:min(72vw,520px);height:min(72vw,520px);left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid var(--accent-color);border-radius:50%;opacity:.18;animation:circlePulse 3s ease-in-out infinite}.fs-circle-inner{position:absolute;inset:9%;border:1px dashed var(--accent-color);border-radius:50%;animation:circleSpin 18s linear infinite}@keyframes circlePulse{0%,100%{transform:translate(-50%,-50%) scale(.92);opacity:.12}50%{transform:translate(-50%,-50%) scale(1.04);opacity:.28}}@keyframes circleSpin{to{transform:rotate(360deg)}}.fs-dots-visual{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:18px}.fs-dots-visual span{width:9px;height:9px;border-radius:50%;background:var(--accent-color);opacity:.18;animation:dotFloat 1.8s ease-in-out infinite}.fs-dots-visual span:nth-child(2){animation-delay:.12s}.fs-dots-visual span:nth-child(3){animation-delay:.24s}.fs-dots-visual span:nth-child(4){animation-delay:.36s}.fs-dots-visual span:nth-child(5){animation-delay:.48s}.fs-dots-visual span:nth-child(6){animation-delay:.60s}.fs-dots-visual span:nth-child(7){animation-delay:.72s}.fs-dots-visual span:nth-child(8){animation-delay:.84s}@keyframes dotFloat{0%,100%{transform:translateY(10px) scale(.8);opacity:.12}50%{transform:translateY(-10px) scale(1.5);opacity:.45}}.achievement-overlay{position:fixed;inset:0;z-index:120;pointer-events:none;overflow:hidden}.achievement-piece{position:absolute;top:-40px;font-size:24px;animation:achievementFall 2.8s cubic-bezier(.2,.7,.3,1) forwards}@keyframes achievementFall{0%{transform:translate3d(0,-30px,0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate3d(var(--dx),110vh,0) rotate(540deg);opacity:0}}@media (prefers-reduced-motion:reduce){.fs-water-wave,.fs-circle-visual,.fs-circle-inner,.fs-dots-visual span,.achievement-piece{animation:none!important}.fs-water-fill{transition:none!important}}
   </style>
+<style id="focus-completion-style">
+.timer-complete-ring{animation:trackFocusCompleteGlow 1.1s ease-in-out infinite alternate;}
+@keyframes trackFocusCompleteGlow{from{filter:drop-shadow(0 0 5px currentColor);opacity:.85;}to{filter:drop-shadow(0 0 18px currentColor);opacity:1;}}
+</style>
 </head>
 <body class="dark-obsidian h-screen overflow-hidden flex flex-col antialiased">
 
@@ -205,7 +209,7 @@
       <!-- 2. TODAY'S FOCUS -->
       <div class="rounded-3xl p-4 sm:p-5 bg-themeCard shadow-sm border border-themeBorder space-y-3.5 min-h-[150px]">
         <div class="flex justify-between items-center gap-2"><div class="flex items-center gap-2 min-w-0"><div class="w-2 h-2 rounded-full bg-themeAccent animate-pulse shrink-0"></div><span class="text-xs font-black uppercase tracking-wider text-themeMuted truncate">Today's Focus</span></div><span id="homeDailyGoalDisplay" class="text-[10px] font-bold text-themeMuted whitespace-nowrap">Goal: 5h 00m</span></div>
-        <div class="flex items-center justify-between gap-3"><div class="min-w-0"><div id="homeTodayStudyTime" class="text-3xl sm:text-4xl font-black tracking-tight text-themeText leading-none">0h 00m</div><span id="homeFocusPercentLabel" class="text-[10px] font-bold text-themeAccent">0% of goal</span></div><button onclick="switchTab('focus')" class="shrink-0 px-3.5 py-2 rounded-xl bg-themeAccent text-white text-[10px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition"><i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Focus Timer</button></div>
+        <div class="flex items-center justify-between gap-3"><div class="min-w-0"><div id="homeTodayStudyTime" class="text-3xl sm:text-4xl font-black tracking-tight text-themeText leading-none">0h 00m</div><span id="homeFocusPercentLabel" class="text-[10px] font-bold text-themeAccent">0% of goal</span></div></div>
         <div id="homeActiveFocusTimer" class="hidden w-full rounded-xl bg-themeCardSoft/80 px-3 py-2 items-center justify-between gap-2"><div class="min-w-0"><span id="homeActiveFocusType" class="text-[9px] font-black uppercase tracking-wider text-themeAccent block truncate">STUDY SESSION</span><span id="homeActiveFocusTarget" class="text-[9px] text-themeMuted font-semibold block truncate">Target: 50m</span></div><div id="homeActiveFocusTimerDisplay" class="shrink-0 text-base font-black font-mono tracking-tight text-themeText tabular-nums">00:00:00</div></div>
         <div class="w-full bg-themeCardSoft h-2 rounded-full overflow-hidden"><div id="homeStudyProgressBar" class="bg-gradient-to-r from-indigo-500 to-themeAccent h-full rounded-full transition-all duration-500" style="width:0%"></div></div>
       </div>
@@ -969,6 +973,16 @@
         <p class="text-[9px] text-themeMuted">Tracker-linked tasks update the relevant tracker when you mark the task done.</p>
       </div>
 
+      <div id="taskMCQTypeWrap" class="hidden space-y-1">
+        <label class="text-[10px] font-bold text-themeMuted">MCQ Type</label>
+        <select id="taskInputMCQType" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText focus:outline-none">
+          <option value="gt">Grand Test</option>
+          <option value="qbank">Q-Bank</option>
+          <option value="mini">Mini Test</option>
+        </select>
+        <p class="text-[9px] text-themeMuted">When this task is completed, the selected MCQ log opens and is synchronized with your MCQ totals.</p>
+      </div>
+
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-[10px] font-bold text-themeMuted">Date</label>
@@ -1366,6 +1380,15 @@
           </div>
 
           <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between gap-3">
+            <div class="min-w-0"><div class="text-xs font-black">Show MCQs on Home</div><p class="text-[9px] text-themeMuted mt-0.5">Show or hide the “MCQs Solved Today” section on the Home screen.</p></div>
+            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input id="settingsShowHomeMCQ" type="checkbox" class="sr-only peer" />
+              <div class="w-10 h-5 bg-themeCard border border-themeBorder rounded-full peer-checked:bg-themeAccent transition"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></div>
+            </label>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between gap-3">
             <div class="min-w-0"><div class="text-xs font-black">Recycle Bin</div><p class="text-[9px] text-themeMuted mt-0.5">Deleted items are kept for 30 days, then permanently removed.</p></div>
             <button onclick="openRecycleBin()" class="shrink-0 px-3 py-2 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent"><span id="recycleBinCount">0</span> items</button>
           </div>
@@ -1604,7 +1627,8 @@
       fontSize: 'ui-text-normal',
       appLogo: 'original',
       goalMonthOffset: 0,
-      subjects: defaultCanonical19,
+      showHomeMCQ: true,
+      subjects: [],
       mcqSources: ['Marrow', 'PrepLadder', 'BTR', 'Cerebellum', 'Bhatia', 'PYQ Exam'],
       tasks: [
         { id: 'tsk_1', name: 'Surgery Video: Trauma Management', date: getLocalYMD(), startTime: '09:00', endTime: '11:00', duration: 120, completed: false, subjectId: 'sub_1', chapterId: 'ch_su_4', color: '#6366f1' },
@@ -1631,6 +1655,11 @@
         try {
           const parsed = JSON.parse(saved);
           appState = Object.assign(appState, parsed);
+          if (typeof appState.showHomeMCQ !== 'boolean') appState.showHomeMCQ = true;
+          // Remove the old built-in subject preset once. User-created subjects are preserved.
+          if (Array.isArray(appState.subjects) && appState.subjects.length === defaultCanonical19.length && appState.subjects.every((x,i)=>x && x.id === defaultCanonical19[i]?.id)) {
+            appState.subjects = [];
+          }
         } catch(e) {}
       }
       appState.tasks = appState.tasks || [];
@@ -2142,17 +2171,10 @@
       const t = (appState.tasks || []).find(x => x.id === id);
       if (!t) return;
       if (t.completed) {
-        if (t.trackerType === 'mcq' && Number(t.mcqTaskCount) > 0) {
-          appState.mcqCounts = appState.mcqCounts || {};
-          const date = t.date || getLocalYMD();
-          appState.mcqCounts[date] = Math.max(0, (appState.mcqCounts[date] || 0) - Number(t.mcqTaskCount));
-          t.mcqTaskCount = 0;
-          t.trackerLogged = false;
-          t.completed = false;
-          saveState();
-          refreshAllViews();
-          showToast('MCQs removed and task marked pending');
-          return;
+        if (t.trackerType === 'mcq') {
+          if(t.mcqActivityId){appState.mcqActivities=(appState.mcqActivities||[]).filter(x=>x.id!==t.mcqActivityId);appState.grandTests=(appState.grandTests||[]).filter(x=>x.id!==t.mcqActivityId);}
+          else if(Number(t.mcqTaskCount)>0){appState.mcqCounts=appState.mcqCounts||{};const date=t.date||getLocalYMD();appState.mcqCounts[date]=Math.max(0,(appState.mcqCounts[date]||0)-Number(t.mcqTaskCount));}
+          t.mcqTaskCount=0;t.mcqActivityId=null;t.trackerLogged=false;t.completed=false;saveState();refreshAllViews();showToast('MCQ log removed and task marked pending');return;
         }
         t.completed = false;
         saveState();
@@ -2198,15 +2220,9 @@
         return;
       }
       if (t.trackerType === 'mcq') {
-        const value = prompt('How many MCQs did you solve in this task?', '25');
-        if (value === null) return;
-        const count = parseInt(value,10);
-        if (!Number.isFinite(count) || count < 0) { showToast('Enter a valid MCQ count', 'alert-circle'); return; }
-        appState.mcqCounts = appState.mcqCounts || {};
-        appState.mcqCounts[date] = Math.max(0, (appState.mcqCounts[date] || 0) + count);
-        t.mcqTaskCount = count;
-        t.completed = true; t.trackerLogged = true;
-        saveState(); refreshAllViews(); checkHomeAchievements(date); showToast(`🧠 ${count} MCQs logged & task completed`);
+        window.pendingMCQTaskId=t.id;
+        openAddMCQChooser(t.id);
+        showToast(`🧠 ${t.mcqType==='gt'?'Grand Test':t.mcqType==='mini'?'Mini Test':'Q-Bank'} entry required to complete this task`);
         return;
       }
       t.completed = true;
@@ -2250,6 +2266,8 @@
       document.getElementById('taskEditId').value = '';
       document.getElementById('taskInputName').value = '';
       document.getElementById('taskInputType').value = 'standard';
+      document.getElementById('taskInputMCQType').value = 'gt';
+      toggleTaskMCQTypeUI();
       document.getElementById('taskInputDate').value = selectedCalendarDate || getLocalYMD();
       document.getElementById('taskInputColor').value = '#6366f1';
       document.getElementById('taskHasTimeToggle').checked = false;
@@ -2269,6 +2287,8 @@
       document.getElementById('taskEditId').value = t.id;
       document.getElementById('taskInputName').value = t.name || '';
       document.getElementById('taskInputType').value = t.trackerType || 'standard';
+      document.getElementById('taskInputMCQType').value = t.mcqType || 'gt';
+      toggleTaskMCQTypeUI();
       document.getElementById('taskInputDate').value = t.date || getLocalYMD();
       document.getElementById('taskInputColor').value = t.color || '#6366f1';
       const hasTime = !!t.startTime;
@@ -2286,6 +2306,9 @@
 
     function toggleTaskTimeSpanInputs(enabled) { document.getElementById('taskTimeSpanFields').classList.toggle('hidden', !enabled); }
 
+    function toggleTaskMCQTypeUI() { const type=document.getElementById('taskInputType')?.value; document.getElementById('taskMCQTypeWrap')?.classList.toggle('hidden', type!=='mcq'); }
+    document.getElementById('taskInputType')?.addEventListener('change', toggleTaskMCQTypeUI);
+
     function saveTask() {
       const editId = document.getElementById('taskEditId').value;
       const name = document.getElementById('taskInputName').value.trim();
@@ -2293,6 +2316,7 @@
       const date = document.getElementById('taskInputDate').value || getLocalYMD();
       const color = document.getElementById('taskInputColor').value;
       const trackerType = document.getElementById('taskInputType').value || 'standard';
+      const mcqType = trackerType === 'mcq' ? (document.getElementById('taskInputMCQType')?.value || 'gt') : '';
       const hasTime = document.getElementById('taskHasTimeToggle').checked;
       const startTime = hasTime ? document.getElementById('taskInputStartTime').value : null;
       const endTime = hasTime ? document.getElementById('taskInputEndTime').value : null;
@@ -2310,7 +2334,7 @@
             t.trackerLogged = false;
             if (t.trackerType === 'mcq' && trackerType !== 'mcq') t.mcqTaskCount = 0;
           }
-          t.trackerType=trackerType;
+          t.trackerType=trackerType; t.mcqType=mcqType;
         }
         showToast('Task updated successfully');
       } else {
@@ -2349,6 +2373,7 @@
     let pomoPhase = 'work';
     let pomoRemainingSec = 25 * 60;
     let activeSessionConfig = null;
+    let focusTimerCompleted = false;
     let fullscreenAnimation = localStorage.getItem('TRACKEBILITY_FS_ANIM') || 'water';
 
     function setFocusType(t) {
@@ -2403,6 +2428,10 @@
         document.getElementById('fullscreenPlayText').textContent = 'Resume';
         document.getElementById('fullscreenPlayIcon').setAttribute('data-lucide', 'play');
       } else {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+          Notification.requestPermission().catch(()=>{});
+        }
+        focusTimerCompleted = false;
         if (!activeSessionConfig) {
           activeSessionConfig = {
             type: focusType === 'Other' ? appState.otherTypeName : focusType,
@@ -2451,6 +2480,9 @@
       timerRunning = false;
       timerElapsedSeconds = 0;
       activeSessionConfig = null;
+      focusTimerCompleted = false;
+      const completedRing = document.getElementById('timerProgressCircle');
+      if (completedRing) { completedRing.classList.remove('timer-complete-ring'); completedRing.classList.remove('text-emerald-400'); completedRing.classList.add('text-themeAccent'); }
       lockFocusControls(false);
       if (isPomoMode) pomoRemainingSec = pomoWorkMins * 60;
       updateTimerDisplay();
@@ -2533,10 +2565,31 @@
     function finishAndSaveSession() {
       const dur = isPomoMode ? (pomoWorkMins * 60) : timerElapsedSeconds;
       if (dur < 25) { showToast('Focus session too brief to log (<25s)', 'alert-circle'); return; }
+      clearInterval(timerInterval);
+      timerRunning = false;
+      focusTimerCompleted = true;
       recordFocusSession(dur);
-      resetFocusTimer();
+      const ring = document.getElementById('timerProgressCircle');
+      if (ring) { ring.style.strokeDashoffset = '0'; ring.classList.add('timer-complete-ring'); ring.classList.remove('text-themeAccent'); ring.classList.add('text-emerald-400'); }
+      const display = document.getElementById('focusTimerDisplay');
+      const fsDisplay = document.getElementById('fullscreenTimerDisplay');
+      if (display) display.textContent = 'DONE';
+      if (fsDisplay) fsDisplay.textContent = 'DONE';
+      const label = document.getElementById('focusModeLabel');
+      if (label) label.textContent = '✓ Focus session complete';
+      const homeD=document.getElementById('homeLiveFocusDisplay'),homeInfo=document.getElementById('homeLiveFocusInfo'),homeStatus=document.getElementById('homeLiveFocusStatus'),homeBtn=document.getElementById('homeLiveFocusBtn');
+      if(homeD)homeD.textContent='DONE'; if(homeInfo)homeInfo.textContent='Focus session complete'; if(homeStatus)homeStatus.textContent='COMPLETE'; if(homeBtn){homeBtn.textContent='Open Focus';homeBtn.onclick=()=>switchTab('focus');}
+      lockFocusControls(false);
+      document.getElementById('focusPlayText').textContent = 'Start';
+      document.getElementById('focusPlayIcon').setAttribute('data-lucide', 'play');
+      document.getElementById('fullscreenPlayText').textContent = 'Start';
+      document.getElementById('fullscreenPlayIcon').setAttribute('data-lucide', 'play');
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        try { new Notification('TRACKEBILITY • Focus Complete', { body: `Your ${Math.round(dur/60)} minute focus session is complete.`, icon: document.querySelector('link[rel="icon"]')?.href }); } catch(e) {}
+      }
+      lucide.createIcons();
       closeFullscreenTimer();
-      showToast('✓ Focus session recorded!');
+      showToast('✓ Focus session complete!');
     }
 
     function recordFocusSession(durationSec) {
@@ -3382,6 +3435,8 @@
       appState.examTitle = document.getElementById('settingsExamTitleInput').value.trim() || 'NEET PG 2027';
       const date = document.getElementById('settingsExamDateInput').value;
       if (date) appState.examDate = date;
+      const hm=document.getElementById('settingsShowHomeMCQ');
+      if(hm) appState.showHomeMCQ = !!hm.checked;
       saveState();
       closeModal('settingsModal');
       renderHome();
@@ -3624,7 +3679,7 @@
   };
   window.saveGT=function(){
     const name=document.getElementById('gtName').value.trim();if(!name){showToast('Enter a GT name','alert-circle');return;}const date=document.getElementById('gtDate').value||getLocalYMD(),total=Math.max(1,parseInt(document.getElementById('gtTotal').value,10)||200),correct=Math.max(0,parseInt(document.getElementById('gtCorrect').value,10)||0),wrong=Math.max(0,parseInt(document.getElementById('gtWrong').value,10)||0);if(correct+wrong>total){showToast('Correct + wrong cannot exceed total questions','alert-circle');return;}
-    appState.grandTests=appState.grandTests||[];appState.grandTests.unshift({id:'gt_'+Date.now(),name,platform:document.getElementById('gtPlatform').value.trim(),score:correct*4-wrong,total,correct,wrong,attempted:correct+wrong,date});saveState();closeModal('gtModal');renderGTTracker();renderHome();renderTrackerMiniCalendar();renderStatistics();checkHomeAchievements(date);showToast(`GT logged • ${total} total questions synced`);
+    appState.grandTests=appState.grandTests||[];const gtRec={id:'gt_'+Date.now(),name,platform:document.getElementById('gtPlatform').value.trim(),score:correct*4-wrong,total,correct,wrong,attempted:correct+wrong,date,taskId:window.pendingMCQTaskId||null};appState.grandTests.unshift(gtRec);if(window.pendingMCQTaskId){const task=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=total;task.mcqActivityId=gtRec.id;}}window.pendingMCQTaskId='';saveState();closeModal('gtModal');renderGTTracker();renderHome();renderTrackerMiniCalendar();renderStatistics();checkHomeAchievements(date);showToast(`GT logged • ${total} total questions synced`);
     ['gtName','gtPlatform','gtCorrect','gtWrong'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   };
   window.undoGT=function(id){const g=(appState.grandTests||[]).find(x=>x.id===id);if(!g)return;if(!confirm(`Undo/remove "${g.name}"? ${Number(g.total||0)} GT questions will be removed from the Home MCQ total.`))return;appState.grandTests=appState.grandTests.filter(x=>x.id!==id);saveState();renderGTTracker();renderHome();renderTrackerMiniCalendar();renderStatistics();showToast('GT removed and Home MCQ total updated');};
@@ -3758,6 +3813,8 @@
     const rec={name,subjectId:document.getElementById(id+'Subject').value||'',platform:document.getElementById(id+'Platform').value||'',questions,notes:document.getElementById(id+'Notes').value.trim(),date,type,updatedAt:Date.now()};
     const edit=document.getElementById(id+'EditId').value;const idx=appState.mcqActivities.findIndex(x=>x.id===edit);
     if(idx>=0)Object.assign(appState.mcqActivities[idx],rec);else appState.mcqActivities.unshift(Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec));
+    const savedRec=idx>=0?appState.mcqActivities[idx]:appState.mcqActivities[0];
+    if(window.pendingMCQTaskId){const task=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=questions;task.mcqActivityId=savedRec.id;savedRec.taskId=task.id;}window.pendingMCQTaskId='';}
     saveState();closeModal(id);renderHome();openMCQHistoryModal();showToast(idx>=0?'MCQ entry updated':'MCQ entry logged');
   };
   window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':'Q-Bank'} "${x.name}"?`))return;appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();showToast('MCQ entry deleted');};
@@ -3765,25 +3822,44 @@
   /* ---------- Home redesign ---------- */
   function installHomeLayout(){
     const metric=document.getElementById('metricTodayMCQ');
-    if(metric){const card=metric.closest('.rounded-3xl');if(card&&!card.dataset.v2){card.dataset.v2='1';card.innerHTML=`<div class="flex justify-between items-center mb-2.5"><div class="flex items-center gap-2"><span class="text-xs font-black uppercase tracking-wider text-themeMuted">MCQs Solved Today</span><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i></div><span class="text-[9px] text-themeMuted">All sources combined</span></div><div class="flex items-center gap-3"><div class="min-w-[92px] cursor-pointer" onclick="openMCQHistoryModal()"><div id="metricTodayMCQ" class="text-5xl font-black leading-none tracking-tight text-emerald-400">0</div><span class="text-[9px] text-themeMuted">GT + Q-bank + Mini Test</span></div><div class="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-1.5"><button onclick="openGTModal()" class="py-2.5 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent">＋ GT</button><button onclick="openQBankModal()" class="py-2.5 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent">＋ Q-Bank</button><button onclick="openMiniTestModal()" class="py-2.5 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent">＋ Mini Test</button><button onclick="openMCQHistoryModal()" class="py-2.5 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent">History</button></div></div>`;}
+    if(metric){const card=metric.closest('.rounded-3xl');if(card&&!card.dataset.v2){card.dataset.v2='1';card.innerHTML=`<div class="flex justify-between items-center mb-2.5"><div class="flex items-center gap-2"><span class="text-xs font-black uppercase tracking-wider text-themeMuted">MCQs Solved Today</span><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i></div><span class="text-[9px] text-themeMuted">All sources combined</span></div><div class="flex items-center gap-3"><div class="min-w-[92px] cursor-pointer" onclick="openMCQHistoryModal()"><div id="metricTodayMCQ" class="text-5xl font-black leading-none tracking-tight text-emerald-400">0</div><span class="text-[9px] text-themeMuted">GT + Q-bank + Mini Test</span></div><div class="flex-1 grid grid-cols-2 gap-1.5"><button onclick="openAddMCQChooser()" class="py-2.5 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent">＋ Add MCQ</button><button onclick="openMCQHistoryModal()" class="py-2.5 rounded-xl bg-themeCard border border-themeBorder text-[10px] font-black text-themeAccent">History</button></div></div>`;}
     }
     const focus=document.getElementById('homeTodayStudyTime');
-    if(focus){const card=focus.closest('.rounded-3xl');if(card&&!card.dataset.v4){card.dataset.v4='1';const wrap=document.createElement('div');wrap.className='grid grid-cols-2 gap-2';wrap.innerHTML=`<div id="homeFocusCardCompact" class="rounded-2xl p-3 bg-themeCard border border-themeBorder space-y-2"><div class="flex justify-between items-center gap-1"><span class="text-[10px] font-black uppercase tracking-wider text-themeMuted">Today’s Focus</span><span id="homeDailyGoalDisplay" class="text-[9px] font-bold text-themeMuted">Goal: 5h 00m</span></div><div class="flex items-end justify-between gap-1"><div><div id="homeTodayStudyTime" class="text-2xl font-black leading-none">0h 00m</div><span id="homeFocusPercentLabel" class="text-[9px] font-bold text-themeAccent">0% of goal</span></div><button onclick="openHomeFocusGoals()" class="px-2 py-1.5 rounded-lg bg-themeAccent text-white text-[9px] font-bold whitespace-nowrap">Goals &amp; Streak</button></div><div class="w-full bg-themeCardSoft h-1.5 rounded-full overflow-hidden"><div id="homeStudyProgressBar" class="bg-themeAccent h-full rounded-full" style="width:0%"></div></div></div><div id="homeLiveFocusCard" class="rounded-2xl p-3 bg-themeCard border border-themeBorder space-y-2"><div class="flex justify-between items-center"><span class="text-[10px] font-black uppercase tracking-wider text-themeMuted">Live Focus</span><span id="homeLiveFocusStatus" class="text-[8px] font-black text-themeAccent">IDLE</span></div><div id="homeLiveFocusDisplay" class="text-2xl font-black font-mono tabular-nums">00:00:00</div><div id="homeLiveFocusInfo" class="text-[9px] text-themeMuted truncate">No active focus session</div><button id="homeLiveFocusBtn" onclick="toggleFocusTimer()" class="w-full py-1.5 rounded-lg bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">Open Focus</button></div>`;card.replaceWith(wrap);}}
+    if(focus){const card=focus.closest('.rounded-3xl');if(card&&!card.dataset.v3){card.dataset.v3='1';const wrap=document.createElement('div');wrap.className='grid grid-cols-2 gap-2';wrap.innerHTML=`<div id="homeFocusCardCompact" class="rounded-2xl p-3 bg-themeCard border border-themeBorder space-y-2"><div class="flex justify-between items-center gap-1"><span class="text-[10px] font-black uppercase tracking-wider text-themeMuted">Today’s Focus</span><span id="homeDailyGoalDisplay" class="text-[9px] font-bold text-themeMuted">Goal: 5h 00m</span></div><div class="flex items-end justify-between gap-1"><div><div id="homeTodayStudyTime" class="text-2xl font-black leading-none">0h 00m</div><span id="homeFocusPercentLabel" class="text-[9px] font-bold text-themeAccent">0% of goal</span></div></div><div class="w-full bg-themeCardSoft h-1.5 rounded-full overflow-hidden"><div id="homeStudyProgressBar" class="bg-themeAccent h-full rounded-full" style="width:0%"></div></div></div><div id="homeLiveFocusCard" class="rounded-2xl p-3 bg-themeCard border border-themeBorder space-y-2"><div class="flex justify-between items-center"><span class="text-[10px] font-black uppercase tracking-wider text-themeMuted">Live Focus</span><span id="homeLiveFocusStatus" class="text-[8px] font-black text-themeAccent">IDLE</span></div><div id="homeLiveFocusDisplay" class="text-2xl font-black font-mono tabular-nums">00:00:00</div><div id="homeLiveFocusInfo" class="text-[9px] text-themeMuted truncate">No active focus session</div><button id="homeLiveFocusBtn" onclick="toggleFocusTimer()" class="w-full py-1.5 rounded-lg bg-themeCardSoft border border-themeBorder text-[9px] font-black text-themeAccent">Open Focus</button></div>`;card.replaceWith(wrap);}}
     const taskHeader=document.querySelector('#homeEnlargedTasksList')?.previousElementSibling;if(taskHeader&&!taskHeader.dataset.v2){taskHeader.dataset.v2='1';taskHeader.classList.add('items-center');const title=taskHeader.querySelector('h4');if(title){title.textContent="Today's Tasks & Schedule";title.classList.remove('truncate');}const right=taskHeader.querySelector('.flex.items-center.gap-1');if(right){right.innerHTML=`<span id="homeTodayTasksCountBadge" class="text-[10px] font-black text-themeAccent bg-themeCardSoft px-2 py-0.5 rounded-full">0/0</span><button onclick="openAddTaskModal()" class="p-1.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeAccent"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>`;right.insertAdjacentHTML('beforeend','<button onclick="switchTab(\'tasks\')" class="px-2 py-1 rounded-xl bg-themeCardSoft border border-themeBorder text-[10px] font-bold text-themeAccent">View all →</button>');}}
     if(window.lucide)lucide.createIcons();
   }
   const baseRenderHome=window.renderHome;
   window.renderHome=function(){installHomeLayout();if(typeof baseRenderHome==='function')baseRenderHome();renderHomeLiveFocus();renderHomeMCQ();};
-  window.openHomeFocusGoals=function(){
-    switchTab('focus');
-    setTimeout(function(){ if(typeof switchFocusSubTab==='function') switchFocusSubTab('goals'); }, 0);
-  };
-  function renderHomeMCQ(){const e=document.getElementById('metricTodayMCQ');if(e)e.textContent=getDailyMCQTotalV2(getLocalYMD());}
+  function renderHomeMCQ(){
+    const e=document.getElementById('metricTodayMCQ');
+    const card=e?.closest('.rounded-3xl');
+    if(card) card.style.display = appState.showHomeMCQ===false ? 'none' : '';
+    if(e && appState.showHomeMCQ!==false) e.textContent=getDailyMCQTotalV2(getLocalYMD());
+  }
   function renderHomeLiveFocus(){
     const d=document.getElementById('homeLiveFocusDisplay'),info=document.getElementById('homeLiveFocusInfo'),status=document.getElementById('homeLiveFocusStatus'),btn=document.getElementById('homeLiveFocusBtn');if(!d)return;
     const active=!!activeSessionConfig||timerRunning;status.textContent=timerRunning?'RUNNING':active?'PAUSED':'IDLE';status.className='text-[8px] font-black '+(timerRunning?'text-emerald-400':'text-themeAccent');
+    if(focusTimerCompleted){d.textContent='DONE';info.textContent='Focus session complete';btn.textContent='Open Focus';btn.onclick=()=>switchTab('focus');return;}
     if(activeSessionConfig||timerRunning){const type=activeSessionConfig?.type||(focusType==='Other'?appState.otherTypeName:focusType),s=getSub(activeSessionConfig?.subjectId||document.getElementById('focusSubjectSelect')?.value),ch=s?.chapters?.find(c=>c.id===(activeSessionConfig?.chapterId||document.getElementById('focusChapterSelect')?.value));info.textContent=`${type} • ${s?.name||'General'}${ch?' • '+ch.name:''}`;let secs=isPomoMode?pomoRemainingSec:timerElapsedSeconds;d.textContent=`${pad(Math.floor(secs/3600))}:${pad(Math.floor(secs/60)%60)}:${pad(secs%60)}`;btn.textContent=timerRunning?'Pause':'Resume';btn.onclick=()=>toggleFocusTimer();}else{d.textContent='00:00:00';info.textContent='No active focus session';btn.textContent='Open Focus';btn.onclick=()=>switchTab('focus');}
   }
+
+  /* ---------- Unified Add MCQ chooser ---------- */
+  window.openAddMCQChooser=function(taskId=''){
+    let m=document.getElementById('addMCQChooserModal');
+    if(!m){
+      m=document.createElement('div');m.id='addMCQChooserModal';m.className='hidden fixed inset-0 z-[58] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4';
+      m.innerHTML=`<div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-3"><div class="flex justify-between items-center"><div><h3 class="text-sm font-black">Add MCQ</h3><p class="text-[10px] text-themeMuted">Choose where these questions came from.</p></div><button onclick="closeModal('addMCQChooserModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="grid grid-cols-1 gap-2"><button onclick="chooseMCQSource('gt')" class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-left"><b class="text-xs">📝 Grand Test</b><span class="block text-[9px] text-themeMuted mt-1">Log a GT and sync its questions with MCQ totals.</span></button><button onclick="chooseMCQSource('qbank')" class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-left"><b class="text-xs">📚 Q-Bank</b><span class="block text-[9px] text-themeMuted mt-1">Log Q-Bank questions.</span></button><button onclick="chooseMCQSource('mini')" class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-left"><b class="text-xs">🧪 Mini Test</b><span class="block text-[9px] text-themeMuted mt-1">Log a Mini Test.</span></button></div></div>`;document.body.appendChild(m);lucide.createIcons();
+    }
+    window.pendingMCQTaskId=taskId||'';openModal('addMCQChooserModal');
+  };
+  window.chooseMCQSource=function(type){
+    const task=window.pendingMCQTaskId?(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId):null;
+    closeModal('addMCQChooserModal');
+    if(type==='gt'){openGTModal();if(task&&document.getElementById('gtDate'))document.getElementById('gtDate').value=task.date||getLocalYMD();}
+    else if(type==='qbank'){openQBankModal();if(task&&document.getElementById('qbankModalDate'))document.getElementById('qbankModalDate').value=task.date||getLocalYMD();}
+    else {openMiniTestModal();if(task&&document.getElementById('miniTestModalDate'))document.getElementById('miniTestModalDate').value=task.date||getLocalYMD();}
+  };
 
   /* ---------- MCQ history: week strip + expandable month + detailed entries ---------- */
   let mcqWeekCursor=new Date();let mcqHistoryExpanded=false;let mcqSelectedDate='';
@@ -6384,6 +6460,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const a=document.getElementById('settingsAgeInput'); if(a)a.value=appState.profileAge ?? appState.cloudProfile?.age ?? '';
       const e=document.getElementById('settingsExamTitleInput'); if(e)e.value=appState.examTitle||'NEET PG 2027';
       const d=document.getElementById('settingsExamDateInput'); if(d)d.value=appState.examDate||'';
+      const hm=document.getElementById('settingsShowHomeMCQ'); if(hm)hm.checked=appState.showHomeMCQ!==false;
     }catch(e){}
     openModal('settingsModal');
     openSettingsTab('general');
@@ -6486,6 +6563,34 @@ document.addEventListener('DOMContentLoaded',function(){
   window.deleteMCQActivity=function(id){const x=(appState.mcqActivities||[]).find(a=>a.id===id);if(!x)return;if(!confirm(`Delete ${x.type==='mini'?'Mini Test':'Q-Bank'} "${x.name}"?`))return;recycleDelete('Q-Bank / Mini Test',x.name||'MCQ entry',x);appState.mcqActivities=appState.mcqActivities.filter(a=>a.id!==id);saveState();renderHome();openMCQHistoryModal();updateRecycleCount();showToast('MCQ entry moved to Recycle Bin');};
   window.deleteSleepEntry=function(id){const x=(appState.sleepLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Remove this sleep record?'))return;recycleDelete('Sleep',`${x.date||''} • ${x.hours||0} hours`,x);appState.sleepLogs=appState.sleepLogs.filter(a=>a.id!==id);if(x.taskId){const t=(appState.tasks||[]).find(a=>a.id===x.taskId);if(t){t.completed=false;t.trackerLogged=false;t.sleepLogId=null;}}saveState();refreshAllViews();renderSleepTracker();updateRecycleCount();showToast('Sleep record moved to Recycle Bin');};
   window.deleteReviewLog=function(id){const x=(appState.mistakeReviewLogs||[]).find(a=>a.id===id);if(!x)return;if(!confirm('Remove this review record?'))return;recycleDelete('Review',x.title||'Mistake Book Review',x);appState.mistakeReviewLogs=appState.mistakeReviewLogs.filter(a=>a.id!==id);if(x.taskId){const t=(appState.tasks||[]).find(a=>a.id===x.taskId);if(t){t.completed=false;t.trackerLogged=false;t.reviewLogId=null;}}saveState();refreshAllViews();renderMistakeReviewTracker();updateRecycleCount();showToast('Review moved to Recycle Bin');};
+
+  // ---------- MCQ/task synchronization ----------
+  const _trackabilitySaveMCQActivity = window.saveMCQActivity;
+  window.saveMCQActivity = function(type,id){
+    const editId=document.getElementById(id+'EditId')?.value||'';
+    if(typeof _trackabilitySaveMCQActivity==='function') _trackabilitySaveMCQActivity(type,id);
+    if(editId){
+      const rec=(appState.mcqActivities||[]).find(x=>x.id===editId);
+      if(rec?.taskId){const t=(appState.tasks||[]).find(x=>x.id===rec.taskId);if(t)t.mcqTaskCount=Number(rec.questions)||0;}
+      saveState();refreshAllViews();
+    }
+  };
+  const _trackabilityUndoGT = window.undoGT;
+  window.undoGT = function(id){
+    const g=(appState.grandTests||[]).find(x=>x.id===id);
+    const taskId=g?.taskId;
+    if(typeof _trackabilityUndoGT==='function') _trackabilityUndoGT(id);
+    if(taskId){const t=(appState.tasks||[]).find(x=>x.id===taskId);if(t){t.completed=false;t.trackerLogged=false;t.mcqTaskCount=0;t.mcqActivityId=null;}}
+    saveState();refreshAllViews();
+  };
+  const _trackabilityDeleteMCQActivity = window.deleteMCQActivity;
+  window.deleteMCQActivity = function(id){
+    const rec=(appState.mcqActivities||[]).find(x=>x.id===id);
+    const taskId=rec?.taskId;
+    if(typeof _trackabilityDeleteMCQActivity==='function') _trackabilityDeleteMCQActivity(id);
+    if(taskId){const t=(appState.tasks||[]).find(x=>x.id===taskId);if(t){t.completed=false;t.trackerLogged=false;t.mcqTaskCount=0;t.mcqActivityId=null;}}
+    saveState();refreshAllViews();
+  };
 
   // Keep the connected account visible after authentication changes.
   document.addEventListener('DOMContentLoaded',function(){
