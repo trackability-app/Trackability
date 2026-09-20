@@ -192,9 +192,6 @@
       <button onclick="openSettingsModal()" title="Settings & Customization" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
         <i data-lucide="settings" class="w-4 h-4"></i>
       </button>
-      <button onclick="openAccountModal()" title="Account & Cloud Sync" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText active:scale-95 transition">
-        <i data-lucide="cloud" class="w-4 h-4"></i>
-      </button>
     </div>
   </header>
 
@@ -1254,16 +1251,8 @@
         </div>
         <input id="accountEmailInput" type="email" autocomplete="email" placeholder="Email address" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
         <input id="accountPasswordInput" type="password" autocomplete="current-password" placeholder="Password" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-        <div id="accountSignupFields" class="hidden space-y-2">
-          <input id="accountNameInput" type="text" autocomplete="name" placeholder="Name" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-          <div class="grid grid-cols-2 gap-2">
-            <input id="accountAgeInput" type="number" min="13" max="100" placeholder="Age" class="p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-            <select id="accountCourseInput" class="p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText">
-              <option value="NEET PG">NEET PG</option>
-              <option value="INI-CET">INI-CET</option>
-            </select>
-          </div>
-          <input id="accountExamDateInput" type="date" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+        <div id="accountSignupFields" class="hidden p-3 rounded-2xl bg-themeCardSoft border border-themeBorder">
+          <p class="text-[9px] leading-relaxed text-themeMuted">Your name, age, target exam and target date are already taken from <b>Settings → General</b>. You only need to create your account here.</p>
         </div>
         <button id="accountPrimaryButton" onclick="submitAccountAuth()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-black">Sign In</button>
         <button id="accountForgotButton" onclick="sendPasswordReset()" class="w-full py-2 text-[10px] font-bold text-themeAccent">Forgot password?</button>
@@ -1278,17 +1267,10 @@
           </div>
           <p id="accountEmailDisplay" class="text-[10px] text-themeMuted mt-1 break-all"></p>
         </div>
-        <input id="accountProfileNameInput" type="text" placeholder="Name" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-        <div class="grid grid-cols-2 gap-2">
-          <input id="accountProfileAgeInput" type="number" min="13" max="100" placeholder="Age" class="p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-          <select id="accountProfileCourseInput" class="p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText">
-            <option value="NEET PG">NEET PG</option>
-            <option value="INI-CET">INI-CET</option>
-          </select>
+        <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder">
+          <p class="text-[10px] font-bold text-themeText">Profile is managed from Settings → General</p>
+          <p class="text-[9px] leading-relaxed text-themeMuted mt-1">Name, age, target exam and target date are entered once and then used throughout the app, including the home header and exam countdown.</p>
         </div>
-        <input id="accountProfileExamDateInput" type="date" class="w-full p-3 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-        <button id="accountSaveProfileButton" onclick="saveCloudProfile()" class="w-full py-2.5 rounded-xl bg-themeAccent text-white text-xs font-black transition-opacity">Save Profile</button>
-        <p class="text-[9px] leading-relaxed text-themeMuted -mt-1">Saves only your account profile: name, age, course and exam date.</p>
         <button id="accountSyncStudyButton" onclick="syncNowFromCloud()" class="w-full py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-black transition-opacity">☁️ Sync Study Data</button>
         <p class="text-[9px] leading-relaxed text-themeMuted -mt-1">Checks this device against the cloud and syncs your study data. If both copies changed, you choose which copy to keep.</p>
         <div class="pt-2 border-t border-themeBorder/60 space-y-2">
@@ -1374,10 +1356,11 @@
         </div>
       </div>
 
-      <div class="px-5 pb-3 shrink-0 grid grid-cols-3 gap-1.5">
+      <div class="px-5 pb-3 shrink-0 grid grid-cols-4 gap-1.5">
         <button id="settingsTabGeneral" onclick="openSettingsTab('general')" class="py-2 rounded-xl bg-themeAccent text-white text-[10px] font-black">General</button>
         <button id="settingsTabAppearance" onclick="openSettingsTab('appearance')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Appearance</button>
-        <button id="settingsTabSupport" onclick="openSettingsTab('support')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Support & Info</button>
+        <button id="settingsTabAccount" onclick="openSettingsTab('account')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Account</button>
+        <button id="settingsTabSupport" onclick="openSettingsTab('support')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Support</button>
       </div>
 
       <div class="px-5 pb-5 overflow-y-auto custom-scroll space-y-4" id="settingsScrollArea">
@@ -1386,6 +1369,11 @@
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-themeMuted">Student / Doctor Name</label>
             <input type="text" id="settingsProfileNameInput" placeholder="Your Name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-themeMuted">Age</label>
+            <input type="number" id="settingsAgeInput" min="13" max="100" placeholder="Age" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
           </div>
 
           <div class="space-y-1.5">
@@ -1457,6 +1445,11 @@
               <button onclick="setFontSize('ui-text-xlarge')" class="py-2 rounded-xl border border-themeBorder bg-themeCardSoft text-sm font-black">A++</button>
             </div>
           </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div id="settingsPanelAccount" class="hidden space-y-4">
+          <div id="settingsAccountContent" class="space-y-4"></div>
         </div>
 
         <!-- SUPPORT & INFO -->
@@ -1608,6 +1601,7 @@
 
     let appState = {
       profileName: 'Doctor',
+      profileAge: '',
       examTitle: 'NEET PG 2027',
       examDate: '2027-03-14',
       course: 'NEET PG',
@@ -1660,6 +1654,7 @@
       appState.tasks.forEach(t => { if (!t.trackerType) t.trackerType = 'standard'; if (typeof t.trackerLogged !== 'boolean') t.trackerLogged = false; });
       applyBodyClasses();
       document.getElementById('settingsProfileNameInput').value = appState.profileName || 'Doctor';
+      const ageInput=document.getElementById('settingsAgeInput'); if(ageInput) ageInput.value=appState.profileAge ?? appState.cloudProfile?.age ?? '';
       document.getElementById('settingsExamTitleInput').value = appState.examTitle || 'NEET PG 2027';
       document.getElementById('settingsExamDateInput').value = appState.examDate || '2027-03-14';
       document.getElementById('navProfileName').textContent = appState.profileName || 'Doctor';
@@ -3308,6 +3303,8 @@
 
     function saveGeneralSettings() {
       appState.profileName = document.getElementById('settingsProfileNameInput').value.trim() || 'Doctor';
+      const ageVal=(document.getElementById('settingsAgeInput')?.value||'').trim();
+      appState.profileAge = ageVal ? Number(ageVal) : '';
       appState.examTitle = document.getElementById('settingsExamTitleInput').value.trim() || 'NEET PG 2027';
       const date = document.getElementById('settingsExamDateInput').value;
       if (date) appState.examDate = date;
@@ -5807,6 +5804,7 @@ document.addEventListener('DOMContentLoaded',function(){
           const uiCourse=profile.course==='INICET'?'INI-CET':'NEET PG';
           appState.cloudProfile={name:profile.name||'',age:profile.age??'',course:uiCourse,exam_date:profile.exam_date||''};
           appState.profileName=profile.name || appState.profileName;
+          appState.profileAge=profile.age ?? appState.profileAge ?? '';
           appState.course=uiCourse;
           if(profile.exam_date) appState.examDate=profile.exam_date;
           saveLocalOnly();
@@ -5924,10 +5922,10 @@ document.addEventListener('DOMContentLoaded',function(){
     if(button){button.disabled=true;button.textContent='Please wait…';}
     try{
       if(accountMode==='signup'){
-        const name=(document.getElementById('accountNameInput')?.value||'').trim() || 'Doctor';
-        const age=(document.getElementById('accountAgeInput')?.value||'').trim();
-        const course=document.getElementById('accountCourseInput')?.value==='INI-CET'?'INI-CET':'NEET PG';
-        const examDate=document.getElementById('accountExamDateInput')?.value || appState.examDate || null;
+        const name=(appState.profileName||'Doctor').trim() || 'Doctor';
+        const age=appState.profileAge ?? appState.cloudProfile?.age ?? '';
+        const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
+        const examDate=appState.examDate || null;
         localStorage.setItem(PENDING_MIGRATION_KEY,'1');
         const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,age:age?Number(age):null,course,exam_date:examDate},emailRedirectTo:window.location.origin+window.location.pathname}});
         if(error) throw error;
@@ -6030,10 +6028,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
   async function saveCloudProfile(){
     if(!sb || !currentUser){accountToast('Sign in first','alert-circle');return;}
-    const name=(document.getElementById('accountProfileNameInput')?.value||'').trim()||'Doctor';
-    const age=(document.getElementById('accountProfileAgeInput')?.value||'').trim();
-    const course=document.getElementById('accountProfileCourseInput')?.value==='INI-CET'?'INI-CET':'NEET PG';
-    const examDate=document.getElementById('accountProfileExamDateInput')?.value||'';
+    const name=(appState.profileName||'Doctor').trim()||'Doctor';
+    const age=appState.profileAge ?? appState.cloudProfile?.age ?? '';
+    const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
+    const examDate=appState.examDate||'';
     const button=document.getElementById('accountSaveProfileButton');
     setAccountActionLoading('accountSaveProfileButton',true,'⟳ Saving profile…','Save Profile');
     setSyncStatus('Saving profile…');
@@ -6175,8 +6173,9 @@ document.addEventListener('DOMContentLoaded',function(){
   window.signOutTrackebility=signOutTrackebility;
 
   function openAccountModal(){
+    openModal('settingsModal');
+    if(typeof openSettingsTab==='function') openSettingsTab('account');
     populateAccountUI();
-    openModal('accountModal');
     if(window.lucide) lucide.createIcons();
   }
   window.openAccountModal=openAccountModal;
@@ -6196,7 +6195,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(currentUser){
       const profile={
         name:appState.profileName||'Doctor',
-        age:appState.cloudProfile?.age ?? '',
+        age:appState.profileAge ?? appState.cloudProfile?.age ?? '',
         course:appState.course || appState.cloudProfile?.course || 'NEET PG',
         exam_date:appState.examDate || ''
       };
@@ -6249,15 +6248,15 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function settingsTabButton(active){
-    ['general','appearance','support'].forEach(t=>{
+    ['general','appearance','account','support'].forEach(t=>{
       const b=document.getElementById('settingsTab'+t.charAt(0).toUpperCase()+t.slice(1));
       if(!b)return;
       b.className=t===active?'py-2 rounded-xl bg-themeAccent text-white text-[10px] font-black':'py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black';
     });
   }
   window.openSettingsTab=function(tab){
-    tab=['general','appearance','support'].includes(tab)?tab:'general';
-    ['general','appearance','support'].forEach(t=>document.getElementById('settingsPanel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden',t!==tab));
+    tab=['general','appearance','account','support'].includes(tab)?tab:'general';
+    ['general','appearance','account','support'].forEach(t=>document.getElementById('settingsPanel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden',t!==tab));
     settingsTabButton(tab);
     updateSettingsAccountCard();
     updateRecycleCount();
@@ -6276,6 +6275,7 @@ document.addEventListener('DOMContentLoaded',function(){
   window.openSettingsModal=function(){
     try{
       const n=document.getElementById('settingsProfileNameInput'); if(n)n.value=appState.profileName||'Doctor';
+      const a=document.getElementById('settingsAgeInput'); if(a)a.value=appState.profileAge ?? appState.cloudProfile?.age ?? '';
       const e=document.getElementById('settingsExamTitleInput'); if(e)e.value=appState.examTitle||'NEET PG 2027';
       const d=document.getElementById('settingsExamDateInput'); if(d)d.value=appState.examDate||'';
     }catch(e){}
@@ -6284,8 +6284,8 @@ document.addEventListener('DOMContentLoaded',function(){
   };
 
   window.shareTrackability=async function(){
-    const url='https://www.trackability.in';
-    const data={title:'TRACKEBILITY',text:'Track your study, tasks, tests, MCQs and progress with TRACKEBILITY.',url};
+    const url='https://bagulankit.github.io/Trackebility-0.5/';
+    const data={title:'TRACKEBILITY',text:'Try TRACKEBILITY — track study, tasks, tests, MCQs and progress.',url};
     try{
       if(navigator.share){await navigator.share(data);return;}
       await navigator.clipboard.writeText(url);
@@ -6387,6 +6387,35 @@ document.addEventListener('DOMContentLoaded',function(){
     setTimeout(function(){updateSettingsAccountCard();updateRecycleCount();if(window.lucide)lucide.createIcons();},250);
   });
   setInterval(function(){try{cleanupRecycleBin();updateRecycleCount();}catch(e){}},60*60*1000);
+})();
+</script>
+
+<script id="trackability-settings-account-integration">
+(function(){
+  function integrateAccountIntoSettings(){
+    const settingsPanel=document.getElementById('settingsPanelAccount');
+    const accountModal=document.getElementById('accountModal');
+    const accountHost=document.getElementById('settingsAccountContent');
+    if(!settingsPanel || !accountModal || !accountHost || accountHost.dataset.ready==='1') return;
+    const inner=accountModal.firstElementChild;
+    if(!inner) return;
+    while(inner.firstChild) accountHost.appendChild(inner.firstChild);
+    const closeBtn=accountHost.querySelector('button[onclick*="closeModal(\'accountModal\')"]');
+    if(closeBtn) closeBtn.setAttribute('onclick',"openSettingsTab('general')");
+    accountModal.classList.add('hidden');
+    accountModal.setAttribute('aria-hidden','true');
+    accountHost.dataset.ready='1';
+    if(window.lucide) lucide.createIcons();
+    try{ populateAccountUI(); }catch(e){}
+  }
+  function bind(){
+    integrateAccountIntoSettings();
+    const cloudBtn=[...document.querySelectorAll('button[title="Account & Cloud Sync"]')][0];
+    if(cloudBtn) cloudBtn.remove();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,50));
+  else setTimeout(bind,50);
+  window.__integrateTrackabilityAccount=bind;
 })();
 </script>
 </body>
