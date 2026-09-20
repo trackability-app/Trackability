@@ -14,6 +14,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Supabase CDN fallback: GitHub Pages/network hiccups should not leave
+   TRACKEBILITY stuck in "Cloud connection could not start". */
+(function(){
+  if(window.supabase && window.supabase.createClient) return;
+  var fallback=document.createElement('script');
+  fallback.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js';
+  fallback.async=false;
+  document.head.appendChild(fallback);
+})();
+</script>
 
   <script>
     tailwind.config = {
@@ -5894,12 +5905,26 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
 
-  async function initSupabase(){
-    if(!window.supabase || !window.supabase.createClient){
-      console.error('Supabase JS CDN failed to load.');
-      return;
+  async function waitForSupabaseClient(timeoutMs=10000){
+    const started=Date.now();
+    while(!(window.supabase && window.supabase.createClient)){
+      if(Date.now()-started>=timeoutMs) return false;
+      await new Promise(r=>setTimeout(r,200));
     }
+    return true;
+  }
+
+  async function initSupabase(){
+    if(sb) return sb;
     try{
+      const ready=await waitForSupabaseClient(10000);
+      if(!ready){
+        console.error('Supabase JS CDN failed to load.');
+        setSyncStatus('Cloud unavailable');
+        populateAccountUI();
+        accountToast('Cloud connection could not start','alert-circle');
+        return null;
+      }
       sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 
       /* Register before getSession so recovery links cannot miss the
@@ -5920,15 +5945,22 @@ document.addEventListener('DOMContentLoaded',function(){
       });
 
       const result=await sb.auth.getSession();
+      if(result.error) throw result.error;
       currentUser=result.data?.session?.user || null;
       if(currentUser) await finishSignedInBootstrap();
+      else setSyncStatus('Ready — sign in to sync');
       populateAccountUI();
+      updateSettingsSummaries();
+      return sb;
     }catch(err){
       console.error('Supabase initialization error',err);
+      sb=null;
+      setSyncStatus('Cloud unavailable');
+      populateAccountUI();
       accountToast('Cloud connection could not start','alert-circle');
+      return null;
     }
   }
-
   async function finishSignedInBootstrap(){
     /* One bootstrap at a time. There is deliberately NO cloud/device
        confirmation dialog. Existing cloud data is the source of truth for an
@@ -6317,6 +6349,10 @@ document.addEventListener('DOMContentLoaded',function(){
     populateAccountUI();
     openModal('accountModal');
     if(window.lucide) lucide.createIcons();
+    if(!sb){
+      setSyncStatus('Connecting to cloud…');
+      initSupabase();
+    }
   }
   window.openAccountModal=openAccountModal;
 
@@ -6344,16 +6380,16 @@ document.addEventListener('DOMContentLoaded',function(){
   };
 
   document.addEventListener('DOMContentLoaded',function(){
-    setTimeout(function(){
-      try{ initSupabase(); }catch(e){console.error(e);}
-      try{ renderHomeTrackabilityIcon(); updateSettingsSummaries(); }catch(e){}
-      const header=document.getElementById('navProfileName');
-      if(header && !header.dataset.accountBound){
-        header.dataset.accountBound='1';
-        header.title='Open account & cloud sync';
-        header.onclick=function(){openAccountModal();};
-      }
-    },100);
+    try{ renderHomeTrackabilityIcon(); updateSettingsSummaries(); }catch(e){}
+    const header=document.getElementById('navProfileName');
+    if(header && !header.dataset.accountBound){
+      header.dataset.accountBound='1';
+      header.title='Open account & cloud sync';
+      header.onclick=function(){openAccountModal();};
+    }
+    /* Start cloud initialization immediately; openAccountModal() also retries
+       if the connection is not ready yet. */
+    initSupabase().catch(function(e){console.error(e);});
   });
 
 })();
