@@ -193,7 +193,7 @@
     <div class="ob-shell">
       <div class="ob-orb one"></div><div class="ob-orb two"></div>
       <div class="ob-card">
-        <div class="ob-top"><div class="ob-brand"><span class="ob-dot"></span> TRACKABILITY</div><div id="obProgress" class="ob-progress">01 / 07</div></div>
+        <div class="ob-top"><div class="ob-brand"><span class="ob-dot"></span> TRACKABILITY</div><div id="obProgress" class="ob-progress">01 / 08</div></div>
         <div class="ob-stage">
           <section class="ob-screen active" data-ob-screen="0">
             <div class="ob-hero-logo"><span>TR</span></div>
@@ -250,6 +250,16 @@
           </section>
 
           <section class="ob-screen" data-ob-screen="5">
+            <div class="ob-kicker">Your exam format</div><h2 class="ob-title">What type of exam are you preparing for?</h2>
+            <p class="ob-subtitle">Choose the format that matches your preparation. You can change this later in Settings.</p>
+            <div class="ob-choices">
+              <div id="obChoiceMCQ" class="ob-choice selected" onclick="obPickExamMode('mcq')"><div class="ob-choice-icon">🧠</div><div><b>MCQ / Objective</b><span>Enable MCQ tracking, tests, question IDs and MCQ statistics.</span></div></div>
+              <div id="obChoiceTheory" class="ob-choice" onclick="obPickExamMode('theory')"><div class="ob-choice-icon">📖</div><div><b>Theory / Descriptive</b><span>Keep the workspace focused on study, tasks, revision and progress.</span></div></div>
+            </div>
+            <div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
+          </section>
+
+          <section class="ob-screen" data-ob-screen="6">
             <div class="ob-kicker">Make it yours</div><h2 class="ob-title">Choose your look.</h2><p class="ob-subtitle">Pick a theme and font. You can change both whenever you want.</p>
             <div class="ob-theme-grid">
               <div class="ob-theme" data-theme="dark-obsidian" onclick="obPickTheme(this,'dark-obsidian')"><div class="ob-swatch" style="background:linear-gradient(135deg,#111827,#6366f1)"></div><b>Obsidian</b><small>Dark • Indigo</small></div>
@@ -267,9 +277,9 @@
             <div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
           </section>
 
-          <section class="ob-screen" data-ob-screen="6">
+          <section class="ob-screen" data-ob-screen="7">
             <div class="ob-ready"><div class="ob-ready-ring"><span>🚀</span></div><div class="ob-kicker">All set</div><h2 class="ob-title">Your journey<br>starts now.</h2><p class="ob-subtitle" style="margin:auto">Plan it. Focus on it. Track it. Improve it.</p>
-              <div class="ob-summary"><div><small>Name</small><b id="obSummaryName">Guest</b></div><div><small>Goal</small><b id="obSummaryGoal">Not set</b></div><div><small>Date</small><b id="obSummaryDate">Not set</b></div><div><small>Mode</small><b id="obSummaryMode">Account</b></div></div>
+              <div class="ob-summary"><div><small>Name</small><b id="obSummaryName">Guest</b></div><div><small>Goal</small><b id="obSummaryGoal">Not set</b></div><div><small>Date</small><b id="obSummaryDate">Not set</b></div><div><small>Exam Format</small><b id="obSummaryExamMode">MCQ / Objective</b></div><div><small>Mode</small><b id="obSummaryMode">Account</b></div></div>
               <div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obStart()">START TRACKABILITY 🚀</button></div>
             </div>
           </section>
@@ -344,7 +354,7 @@
       </div>
 
       <!-- 3. MCQs -->
-      <div class="rounded-3xl p-4 bg-themeCardSoft/70 border border-themeBorder shadow-none">
+      <div id="homeMCQSection" data-mcq-module class="rounded-3xl p-4 bg-themeCardSoft/70 border border-themeBorder shadow-none">
         <div class="flex justify-between items-center mb-2.5"><div class="flex items-center gap-2"><span class="text-xs font-black uppercase tracking-wider text-themeMuted">MCQs Solved Today</span><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i></div><button onclick="openMCQHistoryModal()" class="text-[10px] font-bold text-themeAccent">History ↗</button></div>
         <div class="flex items-center gap-3 sm:gap-5">
           <div class="shrink-0 min-w-[76px] cursor-pointer" onclick="openMCQHistoryModal()"><div id="metricTodayMCQ" class="text-5xl sm:text-6xl font-black leading-none tracking-tight text-emerald-400">0</div><span class="text-[9px] text-themeMuted">Includes GT & tests</span></div>
@@ -662,8 +672,8 @@
     <section id="tab-tracker" class="hidden space-y-4">
       <div class="flex gap-2 overflow-x-auto custom-scroll pb-1">
         <button onclick="switchTrackerModule('mistakes')" id="trkBtn-mistakes" class="px-3.5 py-1.5 rounded-xl bg-themeAccent text-white text-xs font-bold whitespace-nowrap shadow">Mistake Book</button>
-        <button onclick="switchTrackerModule('mcqid')" id="trkBtn-mcqid" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">MCQ ID Tracker</button>
-        <button onclick="switchTrackerModule('gt')" id="trkBtn-gt" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">Grand Tests</button>
+        <button data-mcq-module onclick="switchTrackerModule('mcqid')" id="trkBtn-mcqid" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">MCQ ID Tracker</button>
+        <button data-mcq-module onclick="switchTrackerModule('gt')" id="trkBtn-gt" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">Grand Tests</button>
         <button onclick="switchTrackerModule('gym')" id="trkBtn-gym" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">Gym</button>
         <button onclick="switchTrackerModule('sleep')" id="trkBtn-sleep" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">Sleep</button>
         <button onclick="switchTrackerModule('reviews')" id="trkBtn-reviews" class="px-3.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-xs font-bold text-themeMuted whitespace-nowrap">Reviews</button>
@@ -696,7 +706,7 @@
         <div id="mistakesGroupedContainer" class="space-y-3"></div>
       </div>
 
-      <div id="trackerMod-mcqid" class="hidden space-y-3">
+      <div id="trackerMod-mcqid" data-mcq-module class="hidden space-y-3">
         <div class="flex justify-between items-center">
           <div>
             <h3 class="text-sm font-black">MCQ Repository</h3>
@@ -712,7 +722,7 @@
         <div id="mcqIdListContainer" class="space-y-2"></div>
       </div>
 
-      <div id="trackerMod-gt" class="hidden space-y-3">
+      <div id="trackerMod-gt" data-mcq-module class="hidden space-y-3">
         <div class="p-4 rounded-3xl bg-themeCard border border-themeBorder grid grid-cols-2 gap-2 text-center">
           <div>
             <span class="text-[10px] font-bold text-themeMuted uppercase">Best Score</span>
@@ -898,7 +908,7 @@
   <!-- ==================== MODALS ==================== -->
 
   <!-- MCQ HISTORY MODAL -->
-  <div id="mcqHistoryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="mcqHistoryModal" data-mcq-module class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-3.5 max-h-[85vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center">
         <div>
@@ -1339,7 +1349,7 @@
   </div>
 
   <!-- ADD GT MODAL -->
-  <div id="gtModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="gtModal" data-mcq-module class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-3">
       <div class="flex justify-between items-center">
         <h3 class="text-sm font-black">Record Grand Test (Mock Exam)</h3>
@@ -1510,7 +1520,7 @@
           </div>
 
           <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between gap-3">
-            <div class="min-w-0"><div class="text-xs font-black">Show MCQs on Home</div><p class="text-[9px] text-themeMuted mt-0.5">Show or hide the “MCQs Solved Today” section on the Home screen.</p></div>
+            <div class="min-w-0"><div class="text-xs font-black">MCQ Tracking</div><p class="text-[9px] text-themeMuted mt-0.5">Turn the complete MCQ module on or off across TRACKABILITY.</p></div>
             <label class="relative inline-flex items-center cursor-pointer shrink-0">
               <input id="settingsShowHomeMCQ" type="checkbox" class="sr-only peer" />
               <div class="w-10 h-5 bg-themeCard border border-themeBorder rounded-full peer-checked:bg-themeAccent transition"></div>
@@ -1751,6 +1761,8 @@
       appLogo: 'original',
       goalMonthOffset: 0,
       showHomeMCQ: true,
+      mcqEnabled: true,
+      examMode: 'mcq',
       subjects: [],
       mcqSources: ['Marrow', 'PrepLadder', 'BTR', 'Cerebellum', 'Bhatia', 'PYQ Exam'],
       tasks: [],
@@ -1819,6 +1831,8 @@
           appState = Object.assign(appState, parsed);
           if (isLegacyDemoState(appState)) resetTrackingData(appState);
           if (typeof appState.showHomeMCQ !== 'boolean') appState.showHomeMCQ = true;
+          if (typeof appState.mcqEnabled !== 'boolean') appState.mcqEnabled = appState.showHomeMCQ !== false;
+          if (appState.examMode !== 'mcq' && appState.examMode !== 'theory') appState.examMode = appState.mcqEnabled === false ? 'theory' : 'mcq';
           appState.subjects = Array.isArray(appState.subjects) ? appState.subjects : [];
           appState.tasks = Array.isArray(appState.tasks) ? appState.tasks : [];
         } catch(e) {}
@@ -3597,7 +3611,7 @@
       const date = document.getElementById('settingsExamDateInput').value;
       appState.examDate = date;
       const hm=document.getElementById('settingsShowHomeMCQ');
-      if(hm) appState.showHomeMCQ = !!hm.checked;
+      if(hm){ appState.mcqEnabled = !!hm.checked; appState.showHomeMCQ = !!hm.checked; appState.examMode = appState.mcqEnabled ? 'mcq' : 'theory'; }
       saveState();
       closeModal('settingsModal');
       renderHome();
@@ -6624,7 +6638,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const a=document.getElementById('settingsAgeInput'); if(a)a.value=appState.profileAge ?? appState.cloudProfile?.age ?? '';
       const e=document.getElementById('settingsExamTitleInput'); if(e)e.value=appState.examTitle||'';
       const d=document.getElementById('settingsExamDateInput'); if(d)d.value=appState.examDate||'';
-      const hm=document.getElementById('settingsShowHomeMCQ'); if(hm)hm.checked=appState.showHomeMCQ!==false;
+      const hm=document.getElementById('settingsShowHomeMCQ'); if(hm)hm.checked=appState.mcqEnabled!==false;
     }catch(e){}
     openModal('settingsModal');
     openSettingsTab('general');
@@ -6797,21 +6811,22 @@ document.addEventListener('DOMContentLoaded',function(){
 <script id="trackability-onboarding-script">
 (function(){
   const KEY='trackability_onboarding_v1';
-  let step=0, mode='account', pickedTheme='theme-light', pickedFont='font-space';
+  let step=0, mode='account', examMode='mcq', pickedTheme='theme-light', pickedFont='font-space';
   const $=id=>document.getElementById(id);
   function screens(){return [...document.querySelectorAll('#trackabilityOnboarding .ob-screen')];}
-  function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===6)updateSummary();}
-  window.obNext=function(){if(step===4)obSaveProfile();if(step<6){step++;update();}};
+  function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===7)updateSummary();}
+  window.obNext=function(){if(step===4)obSaveProfile();if(step<7){step++;update();}};
   window.obBack=function(){if(step>0){step--;update();}};
   window.obChooseMode=function(v){mode=v;$('obChoiceAccount').classList.toggle('selected',v==='account');$('obChoiceGuest').classList.toggle('selected',v==='guest');$('obSummaryMode').textContent=v==='account'?'Account':'Guest';};
+  window.obPickExamMode=function(v){examMode=v==='theory'?'theory':'mcq';$('obChoiceMCQ')?.classList.toggle('selected',examMode==='mcq');$('obChoiceTheory')?.classList.toggle('selected',examMode==='theory');if(typeof appState!=='undefined'){appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';try{saveState();}catch(e){}}};
   window.obSaveProfile=function(){
     if(typeof appState==='undefined')return;
-    appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=($('obCourse').value||'').trim();appState.examTitle=($('obExam').value||'').trim();appState.examDate=$('obDate').value||'';
+    appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=($('obCourse').value||'').trim();appState.examTitle=($('obExam').value||'').trim();appState.examDate=$('obDate').value||'';appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';
     try{saveState();}catch(e){}
   };
   window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setTheme==='function')setTheme(v);else document.body.className=v+' '+pickedFont+' h-screen overflow-hidden flex flex-col antialiased';};
   window.obPickFont=function(el,v){pickedFont=v;document.querySelectorAll('.ob-font').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setFontStyle==='function')setFontStyle(v);};
-  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obExam').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';}
+  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obExam').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
   window.obStart=function(){
     obSaveProfile();
     try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;saveState();}catch(e){}
@@ -7265,5 +7280,128 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
-</body>
+<script id="trackability-mcq-module-control-v21">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const isMCQEnabled=()=>typeof appState!=='undefined' && appState.mcqEnabled!==false;
+  function applyMCQModuleUI(){
+    const enabled=isMCQEnabled();
+    document.documentElement.classList.toggle('mcq-module-off',!enabled);
+    document.body.classList.toggle('mcq-module-off',!enabled);
+    document.querySelectorAll('[data-mcq-module],#qbankModal,#miniTestModal,#miscMCQModal,#addMCQChooserModal,#mcqSourcesModal,#mcqIdModal').forEach(el=>{el.style.display=enabled?'':'none';});
+    const opt=$('taskInputType')?.querySelector('option[value="mcq"]');
+    if(opt) opt.hidden=!enabled;
+    const type=$('taskInputType');
+    const wrap=$('taskMCQTypeWrap');
+    if(wrap)wrap.classList.toggle('hidden',!enabled || type?.value!=='mcq');
+    const active=(typeof activeTrackerModule!=='undefined'?activeTrackerModule:'');
+    if(!enabled && (active==='mcqid'||active==='gt')){
+      try{switchTrackerModule('mistakes');}catch(e){}
+    }
+    // Remove MCQ/GT statistics cards from the current statistics render.
+    const summary=$('statsDailySummary');
+    if(summary){
+      const grid=summary.querySelector('.grid.grid-cols-2');
+      if(grid){
+        grid.querySelectorAll(':scope > div').forEach(card=>{
+          const txt=(card.textContent||'').trim();
+          if(!enabled && (/^🧠\\s*MCQs/.test(txt)||/^📝\\s*Grand Tests/.test(txt)||/^🆔\\s*MCQ IDs/.test(txt))) card.remove();
+        });
+      }
+    }
+    const gtChart=$('statsMonthGTChart'); if(gtChart)gtChart.style.display=enabled?'':'none';
+    const search=$('globalSearchResults');
+    if(search && !enabled){search.querySelectorAll('*').forEach(el=>{const txt=(el.textContent||'').trim();if(/^(MCQ|Grand Test|MCQ ID)\b/i.test(txt))el.style.display='none';});}
+    if(window.lucide)lucide.createIcons();
+  }
+  window.trackabilityMCQEnabled=isMCQEnabled;
+  window.applyMCQModuleUI=applyMCQModuleUI;
+
+  // Make the existing Settings toggle control the entire MCQ module.
+  const baseSaveGeneral=window.saveGeneralSettings;
+  window.saveGeneralSettings=function(){
+    const hm=$('settingsShowHomeMCQ');
+    if(hm && typeof appState!=='undefined'){
+      appState.mcqEnabled=!!hm.checked;
+      appState.showHomeMCQ=!!hm.checked;
+      appState.examMode=appState.mcqEnabled?'mcq':'theory';
+    }
+    if(typeof baseSaveGeneral==='function')baseSaveGeneral();
+    applyMCQModuleUI();
+    try{refreshAllViews();}catch(e){}
+  };
+
+  const baseOpenSettings=window.openSettingsModal;
+  window.openSettingsModal=function(){
+    if(typeof baseOpenSettings==='function')baseOpenSettings();
+    const hm=$('settingsShowHomeMCQ'); if(hm)hm.checked=isMCQEnabled();
+  };
+
+  // Block direct MCQ actions when the module is disabled.
+  function guard(name){
+    const fn=window[name];
+    if(typeof fn!=='function')return;
+    window[name]=function(){
+      if(!isMCQEnabled()){showToast('MCQ Tracking is turned off in Settings');applyMCQModuleUI();return;}
+      return fn.apply(this,arguments);
+    };
+  }
+  ['openMCQHistoryModal','openAddMCQChooser','openQBankModal','openMiniTestModal','openGTModal','openMiscMCQModal','quickAddMCQ','openGTTracker','renderMcqIdTracker','openModal'].forEach(name=>{
+    if(name==='openModal')return;
+    guard(name);
+  });
+
+  // Ensure MCQ task creation cannot happen while the module is disabled.
+  const baseOpenTask=window.openAddTaskModal;
+  window.openAddTaskModal=function(){
+    if(typeof baseOpenTask==='function')baseOpenTask.apply(this,arguments);
+    applyMCQModuleUI();
+  };
+  const baseEditTask=window.openEditTaskModal;
+  window.openEditTaskModal=function(id){
+    const t=(typeof appState!=='undefined'?(appState.tasks||[]).find(x=>x.id===id):null);
+    if(!isMCQEnabled() && t?.trackerType==='mcq'){showToast('Enable MCQ Tracking in Settings to edit this MCQ task');return;}
+    if(typeof baseEditTask==='function')baseEditTask.apply(this,arguments);
+    applyMCQModuleUI();
+  };
+
+  const baseToggleTask=window.toggleTaskDone;
+  window.toggleTaskDone=function(id){
+    const t=(typeof appState!=='undefined'?(appState.tasks||[]).find(x=>x.id===id):null);
+    if(!isMCQEnabled() && t?.trackerType==='mcq'){showToast('Enable MCQ Tracking in Settings to complete this MCQ task');return;}
+    if(typeof baseToggleTask==='function')return baseToggleTask.apply(this,arguments);
+  };
+  const baseSaveTask=window.saveTask;
+  window.saveTask=function(){
+    const type=$('taskInputType');
+    if(typeof baseSaveTask==='function')return baseSaveTask.apply(this,arguments);
+  };
+
+  const baseSearch=window.runGlobalSearch;
+  if(typeof baseSearch==='function')window.runGlobalSearch=function(q){
+    const out=baseSearch.apply(this,arguments);
+    setTimeout(applyMCQModuleUI,0);
+    return out;
+  };
+
+  // Statistics: remove MCQ/GT cards every time the existing renderer runs.
+  const baseStats=window.renderStatistics;
+  if(typeof baseStats==='function') window.renderStatistics=function(){
+    const out=baseStats.apply(this,arguments);
+    setTimeout(applyMCQModuleUI,0);
+    return out;
+  };
+
+  // Re-apply after normal view refreshes and on first load.
+  const baseRefresh=window.refreshAllViews;
+  if(typeof baseRefresh==='function') window.refreshAllViews=function(){
+    const out=baseRefresh.apply(this,arguments);
+    setTimeout(applyMCQModuleUI,0);
+    return out;
+  };
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(applyMCQModuleUI,250);});
+  setTimeout(applyMCQModuleUI,300);
+})();
+</script>\n</body>
 </html>
