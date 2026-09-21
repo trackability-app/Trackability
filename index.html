@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>TRACKEBILITY_update5 — Your Study. Your Progress. Your Exam.</title>
+  <title>TRACKABILITY_update5 — Your Study. Your Progress. Your Exam.</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -182,7 +182,7 @@
   .ob-actions{display:flex;gap:10px;margin-top:26px}.ob-btn{border:0;border-radius:15px;padding:13px 17px;font:inherit;font-size:12px;font-weight:900;cursor:pointer;transition:.2s ease}.ob-btn.primary{background:var(--accent-color);color:#fff;flex:1;box-shadow:0 12px 32px var(--accent-glow)}.ob-btn.secondary{background:var(--card-soft-color);color:var(--text-color);border:1px solid var(--border-color)}.ob-btn:hover{transform:translateY(-2px)}.ob-btn:active{transform:scale(.97)}
   .ob-next{margin-top:28px;display:flex;align-items:center;gap:8px;color:var(--accent-color);font-size:12px;font-weight:900;cursor:pointer;width:max-content}.ob-next .arrow{transition:.2s}.ob-next:hover .arrow{transform:translateX(5px)}
   .ob-note{font-size:10px;color:var(--muted-color);margin-top:12px;line-height:1.5}.ob-note a{color:var(--accent-color);font-weight:800;text-decoration:none}.ob-note a:hover{text-decoration:underline}
-  .ob-ready{text-align:center}.ob-ready .ob-title{font-size:clamp(40px,10vw,66px)}.ob-ready-ring{width:116px;height:116px;border-radius:50%;margin:0 auto 28px;border:1px solid var(--border-color);display:grid;place-items:center;background:radial-gradient(circle,var(--accent-glow),transparent 68%);animation:obReady 1.5s ease-in-out infinite}.ob-ready-ring span{font-size:42px}.ob-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px}.ob-summary div{padding:11px;border:1px solid var(--border-color);border-radius:14px;background:var(--card-soft-color);text-align:left}.ob-summary small{display:block;font-size:8px;text-transform:uppercase;color:var(--muted-color);font-weight:900}.ob-summary b{display:block;font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@keyframes obReady{0%,100%{transform:scale(1)}50%{transform:scale(1.07);box-shadow:0 0 50px var(--accent-glow)}}
+  .ob-nav-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px}.ob-nav-row .ob-next{margin-top:0;flex:1;text-align:right}.ob-nav-row .ob-btn{flex:0 0 auto}.ob-ready{text-align:center}.ob-ready .ob-title{font-size:clamp(40px,10vw,66px)}.ob-ready-ring{width:116px;height:116px;border-radius:50%;margin:0 auto 28px;border:1px solid var(--border-color);display:grid;place-items:center;background:radial-gradient(circle,var(--accent-glow),transparent 68%);animation:obReady 1.5s ease-in-out infinite}.ob-ready-ring span{font-size:42px}.ob-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px}.ob-summary div{padding:11px;border:1px solid var(--border-color);border-radius:14px;background:var(--card-soft-color);text-align:left}.ob-summary small{display:block;font-size:8px;text-transform:uppercase;color:var(--muted-color);font-weight:900}.ob-summary b{display:block;font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@keyframes obReady{0%,100%{transform:scale(1)}50%{transform:scale(1.07);box-shadow:0 0 50px var(--accent-glow)}}
   @media(max-width:420px){.ob-shell{padding:20px 15px 25px}.ob-card{min-height:590px}.ob-grid{gap:8px}.ob-feature{padding:11px}.ob-theme-grid,.ob-font-grid{gap:7px}.ob-theme,.ob-font{padding:10px}}
 </style>
 </head>
@@ -193,27 +193,27 @@
     <div class="ob-shell">
       <div class="ob-orb one"></div><div class="ob-orb two"></div>
       <div class="ob-card">
-        <div class="ob-top"><div class="ob-brand"><span class="ob-dot"></span> TRACKEBILITY</div><div id="obProgress" class="ob-progress">01 / 07</div></div>
+        <div class="ob-top"><div class="ob-brand"><span class="ob-dot"></span> TRACKABILITY</div><div id="obProgress" class="ob-progress">01 / 07</div></div>
         <div class="ob-stage">
           <section class="ob-screen active" data-ob-screen="0">
             <div class="ob-hero-logo"><span>TR</span></div>
             <div class="ob-kicker">Welcome</div>
-            <h1 class="ob-title">Welcome to<br>TRACKEBILITY</h1>
+            <h1 class="ob-title">Welcome to<br>TRACKABILITY</h1>
             <div class="ob-tagline">Track your effort. Master your goal.</div>
             <p class="ob-subtitle">A personal command center for your study, focus, tasks, tests, revision and progress.</p>
-            <div class="ob-actions"><a class="ob-btn secondary" href="https://www.trackability.in" target="_blank" rel="noopener">Learn More ↗</a><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
-            <p class="ob-note">Explore the website for the full TRACKEBILITY story, then come back here to build your workspace.</p>
+            <div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()" aria-disabled="true" style="opacity:.45;cursor:not-allowed">← BACK</button><a class="ob-btn secondary" href="https://www.trackability.in" target="_blank" rel="noopener">Learn More ↗</a><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
+            <p class="ob-note">Explore the website for the full TRACKABILITY story, then come back here to build your workspace.</p>
           </section>
 
           <section class="ob-screen" data-ob-screen="1">
             <div class="ob-kicker">Why Trackability?</div><h2 class="ob-title">Your goals deserve more than a to-do list.</h2>
-            <p class="ob-subtitle">TRACKEBILITY turns daily effort into something you can see, understand and improve.</p>
+            <p class="ob-subtitle">TRACKABILITY turns daily effort into something you can see, understand and improve.</p>
             <div class="ob-grid">
               <div class="ob-feature"><div class="ob-icon">📚</div><b>Know what you've studied</b><span>Organize subjects, chapters and revision.</span></div>
               <div class="ob-feature"><div class="ob-icon">⏱️</div><b>Know where your time goes</b><span>Use Focus and Pomodoro sessions to stay intentional.</span></div>
               <div class="ob-feature"><div class="ob-icon">📊</div><b>See your progress</b><span>Turn your activity into meaningful statistics.</span></div>
               <div class="ob-feature"><div class="ob-icon">🎯</div><b>Know what to improve</b><span>Track tests, MCQs, mistakes and goals.</span></div>
-            </div><div class="ob-next" onclick="obNext()">NEXT <span class="arrow">→</span></div>
+            </div><div class="ob-nav-row"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><div class="ob-next" onclick="obNext()">NEXT <span class="arrow">→</span></div></div>
           </section>
 
           <section class="ob-screen" data-ob-screen="2">
@@ -226,16 +226,16 @@
               <div class="ob-feature"><div class="ob-icon">🔄</div><b>Revision & Mistakes</b><span>Close your weak areas.</span></div>
               <div class="ob-feature"><div class="ob-icon">📅</div><b>Tasks & Schedule</b><span>Plan your day.</span></div>
               <div class="ob-feature"><div class="ob-icon">🏋️</div><b>Life Trackers</b><span>Gym, sleep & nutrition.</span></div>
-            </div><div class="ob-next" onclick="obNext()">NEXT <span class="arrow">→</span></div>
+            </div><div class="ob-nav-row"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><div class="ob-next" onclick="obNext()">NEXT <span class="arrow">→</span></div></div>
           </section>
 
           <section class="ob-screen" data-ob-screen="3">
             <div class="ob-kicker">Get started</div><h2 class="ob-title">How do you want to begin?</h2>
             <p class="ob-subtitle">Create an account to keep your data synced, or start locally as a guest. You can connect an account later.</p>
             <div class="ob-choices">
-              <div id="obChoiceAccount" class="ob-choice selected" onclick="obChooseMode('account')"><div class="ob-choice-icon">☁️</div><div><b>Create Account</b><span>Keep your TRACKEBILITY data synced across devices.</span></div></div>
+              <div id="obChoiceAccount" class="ob-choice selected" onclick="obChooseMode('account')"><div class="ob-choice-icon">☁️</div><div><b>Create Account</b><span>Keep your TRACKABILITY data synced across devices.</span></div></div>
               <div id="obChoiceGuest" class="ob-choice" onclick="obChooseMode('guest')"><div class="ob-choice-icon">👤</div><div><b>Continue as Guest</b><span>Start immediately and connect an account later.</span></div></div>
-            </div><div class="ob-actions"><button class="ob-btn primary" onclick="obNext()">CONTINUE →</button></div>
+            </div><div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obNext()">CONTINUE →</button></div>
           </section>
 
           <section class="ob-screen" data-ob-screen="4">
@@ -246,7 +246,7 @@
               <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal</label><input id="obCourse" type="text" placeholder="NEET PG, JEE, etc."></div></div>
               <div class="ob-field"><label>Exam / Goal Name</label><input id="obExam" type="text" placeholder="e.g. NEET PG 2027"></div>
               <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Target Date</label><input id="obDate" type="date"></div><div class="ob-field"><label>Target Time (optional)</label><input id="obTime" type="time"></div></div>
-            </div><div class="ob-actions"><button class="ob-btn primary" onclick="obSaveProfile();obNext()">NEXT →</button></div>
+            </div><div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obSaveProfile();obNext()">NEXT →</button></div>
           </section>
 
           <section class="ob-screen" data-ob-screen="5">
@@ -264,13 +264,13 @@
               <div class="ob-font" data-font="font-poppins" onclick="obPickFont(this,'font-poppins')" style="font-family:'Poppins'"><b>Poppins</b><small>Rounded & modern</small></div>
               <div class="ob-font" data-font="font-josefin" onclick="obPickFont(this,'font-josefin')" style="font-family:'Josefin Sans'"><b>Josefin Sans</b><small>Distinctive & elegant</small></div>
             </div>
-            <div class="ob-actions"><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
+            <div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obNext()">NEXT →</button></div>
           </section>
 
           <section class="ob-screen" data-ob-screen="6">
             <div class="ob-ready"><div class="ob-ready-ring"><span>🚀</span></div><div class="ob-kicker">All set</div><h2 class="ob-title">Your journey<br>starts now.</h2><p class="ob-subtitle" style="margin:auto">Plan it. Focus on it. Track it. Improve it.</p>
               <div class="ob-summary"><div><small>Name</small><b id="obSummaryName">Guest</b></div><div><small>Goal</small><b id="obSummaryGoal">Not set</b></div><div><small>Date</small><b id="obSummaryDate">Not set</b></div><div><small>Mode</small><b id="obSummaryMode">Account</b></div></div>
-              <div class="ob-actions"><button class="ob-btn primary" onclick="obStart()">START TRACKEBILITY 🚀</button></div>
+              <div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obStart()">START TRACKABILITY 🚀</button></div>
             </div>
           </section>
         </div>
@@ -285,12 +285,12 @@
   <!-- TOP APP BAR -->
   <header class="flex items-center justify-between px-4 pt-3.5 pb-2.5 shrink-0 border-b border-themeBorder bg-themeCard/90 backdrop-blur-md z-30">
     <div class="flex items-center gap-3">
-      <div class="logo-symbol" title="TRACKEBILITY" aria-label="TRACKEBILITY logo">
-        <img id="appLogoImage" src="" alt="TRACKEBILITY logo" class="w-full h-full object-cover" />
+      <div class="logo-symbol" title="TRACKABILITY" aria-label="TRACKABILITY logo">
+        <img id="appLogoImage" src="" alt="TRACKABILITY logo" class="w-full h-full object-cover" />
       </div>
       <div>
         <div class="flex items-center gap-1.5">
-          <span class="text-[11px] font-black tracking-widest text-themeAccent uppercase">TRACKEBILITY</span>
+          <span class="text-[11px] font-black tracking-widest text-themeAccent uppercase">TRACKABILITY</span>
           <span class="text-[10px] text-themeMuted">•</span>
           <span id="currentDateHeader" class="text-[11px] font-medium text-themeMuted">Today</span>
         </div>
@@ -856,7 +856,7 @@
     <div class="flex justify-between items-center">
       <div class="flex items-center gap-2">
         <i data-lucide="compass" class="w-5 h-5 text-themeAccent"></i>
-        <span class="text-xs font-black tracking-widest text-themeAccent uppercase">TRACKEBILITY</span>
+        <span class="text-xs font-black tracking-widest text-themeAccent uppercase">TRACKABILITY</span>
       </div>
       <button onclick="closeFullscreenTimer()" class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-themeMuted hover:text-themeText">
         <i data-lucide="minimize-2" class="w-5 h-5"></i>
@@ -1365,7 +1365,7 @@
     <div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="text-sm font-black">TRACKEBILITY Account</h3>
+          <h3 class="text-sm font-black">TRACKABILITY Account</h3>
           <p id="accountStatusText" class="text-[10px] text-themeMuted mt-0.5">Guest mode • data stays on this device</p>
         </div>
         <button onclick="closeModal('accountModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -1407,7 +1407,7 @@
           <p class="text-[9px] leading-relaxed text-themeMuted">Use these only when you intentionally want one copy to completely replace the other.</p>
         </div>
         <button onclick="sendPasswordReset()" class="w-full py-2 text-[10px] font-bold text-themeAccent">Change password by email</button>
-        <button onclick="signOutTrackebility()" class="w-full py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-black">Sign Out</button>
+        <button onclick="signOutTRACKABILITY()" class="w-full py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-black">Sign Out</button>
       </div>
     </div>
   </div>
@@ -1418,7 +1418,7 @@
       <div class="flex items-start justify-between gap-3">
         <div>
           <h3 class="text-sm font-black text-themeText">🔐 Set New Password</h3>
-          <p class="text-[10px] text-themeMuted mt-1">Choose a new password for your TRACKEBILITY account.</p>
+          <p class="text-[10px] text-themeMuted mt-1">Choose a new password for your TRACKABILITY account.</p>
         </div>
         <button onclick="closePasswordResetModal()" class="p-1.5 rounded-xl bg-themeCardSoft text-themeMuted"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
@@ -1466,7 +1466,7 @@
       <div class="p-5 pb-3 flex justify-between items-center shrink-0">
         <div>
           <h3 class="text-sm font-black">Settings</h3>
-          <p class="text-[10px] text-themeMuted mt-0.5">Personalize and manage TRACKEBILITY</p>
+          <p class="text-[10px] text-themeMuted mt-0.5">Personalize and manage TRACKABILITY</p>
         </div>
         <button onclick="closeModal('settingsModal')" class="text-themeMuted p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -1599,7 +1599,7 @@
         <!-- SUPPORT & INFO -->
         <div id="settingsPanelSupport" class="hidden space-y-2">
           <button onclick="shareTrackability()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
-            <i data-lucide="share-2" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Share with friends</b><small class="text-[9px] text-themeMuted">Share the TRACKEBILITY website/app link</small></span>
+            <i data-lucide="share-2" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Share with friends</b><small class="text-[9px] text-themeMuted">Share the TRACKABILITY website/app link</small></span>
           </button>
           <button onclick="goToTrackabilityWebsite()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
             <i data-lucide="globe-2" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Go to website</b><small class="text-[9px] text-themeMuted">Open www.trackability.in</small></span>
@@ -1611,7 +1611,7 @@
             <i data-lucide="mail" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Feedback / Contact Support</b><small class="text-[9px] text-themeMuted">Send an email to trackability.app@gmail.com</small></span>
           </button>
           <button onclick="openLegalModal('privacy')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Privacy Policy</b><small class="text-[9px] text-themeMuted">Privacy information</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
-          <button onclick="openLegalModal('terms')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Terms & Conditions</b><small class="text-[9px] text-themeMuted">Terms for using TRACKEBILITY</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
+          <button onclick="openLegalModal('terms')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Terms & Conditions</b><small class="text-[9px] text-themeMuted">Terms for using TRACKABILITY</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
         </div>
       </div>
     </div>
@@ -1657,8 +1657,8 @@
   <script>
     // Offline/CDN safety: the app remains functional even if the icon CDN is temporarily unavailable.
     window.lucide = window.lucide || { createIcons: function() {} };
-    const STORAGE_KEY = 'TRACKEBILITY_V5';
-    const OLD_STORAGE_KEY = 'TRACKEBILITY_NEET_PG_2027_V4';
+    const STORAGE_KEY = 'TRACKABILITY_V5';
+    const OLD_STORAGE_KEY = 'TRACKABILITY_NEET_PG_2027_V4';
 
     function getLocalYMD(dateObj = new Date()) {
       const year = dateObj.getFullYear();
@@ -1694,14 +1694,46 @@
     const defaultCanonical19 = [];
 
     const DAILY_MOTIVATIONAL_IMAGES = [
-      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=80&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800&q=80&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&q=80&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1483721310020-03333e577078?w=1000&q=85&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=1000&q=85&auto=format&fit=crop"
     ];
+
+    const DAILY_MOTIVATIONAL_QUOTES = [
+      'Start before you feel ready.',
+      'Small progress is still progress.',
+      'Discipline makes ordinary days count.',
+      'Focus on the next step, not the whole staircase.',
+      'Your future is built by what you do today.',
+      'Consistency turns effort into results.',
+      'Do the work. Let progress make the noise.',
+      'One focused hour can change the direction of a day.',
+      'You do not need motivation every day; you need a reason to keep going.',
+      'Progress begins when excuses end.',
+      'Keep showing up. The compound effect is real.',
+      'Make today useful.',
+      'A little better today is enough.',
+      'Protect your focus and trust the process.',
+      'The goal is progress, not perfection.',
+      'Hard days count too.',
+      'Keep moving forward, one decision at a time.',
+      'Your effort today is an investment in tomorrow.',
+      'Stay patient. Stay consistent. Keep building.',
+      'Finish the day knowing you moved closer.'
+    ];
+
+    function getDailyMotivationalQuote(dateString = getLocalYMD()) {
+      let hash = 0;
+      for (let i = 0; i < dateString.length; i++) hash = (hash * 31 + dateString.charCodeAt(i)) >>> 0;
+      return DAILY_MOTIVATIONAL_QUOTES[hash % DAILY_MOTIVATIONAL_QUOTES.length];
+    }
 
     let appState = {
       profileName: '',
@@ -1964,7 +1996,7 @@
       }
 
       updateDailyMotivationFullImage();
-      const quoteEl = document.getElementById('homeDailyQuote'); if (quoteEl) quoteEl.textContent = appState.quote || 'Consistency beats intensity every single time.';
+      const quoteEl = document.getElementById('homeDailyQuote'); if (quoteEl) quoteEl.textContent = getDailyMotivationalQuote(getLocalYMD());
 
       const todayYMD = getLocalYMD();
       const todaySessions = (appState.focusSessions || []).filter(s => s.date === todayYMD);
@@ -2503,7 +2535,7 @@
     let pomoRemainingSec = 25 * 60;
     let activeSessionConfig = null;
     let focusTimerCompleted = false;
-    let fullscreenAnimation = localStorage.getItem('TRACKEBILITY_FS_ANIM') || 'water';
+    let fullscreenAnimation = localStorage.getItem('TRACKABILITY_FS_ANIM') || 'water';
 
     function setFocusType(t) {
       if (timerRunning) { showToast('Locked! Finish or reset timer first', 'lock'); return; }
@@ -2714,7 +2746,7 @@
       document.getElementById('fullscreenPlayText').textContent = 'Start';
       document.getElementById('fullscreenPlayIcon').setAttribute('data-lucide', 'play');
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        try { new Notification('TRACKEBILITY • Focus Complete', { body: `Your ${Math.round(dur/60)} minute focus session is complete.`, icon: document.querySelector('link[rel="icon"]')?.href }); } catch(e) {}
+        try { new Notification('TRACKABILITY • Focus Complete', { body: `Your ${Math.round(dur/60)} minute focus session is complete.`, icon: document.querySelector('link[rel="icon"]')?.href }); } catch(e) {}
       }
       lucide.createIcons();
       closeFullscreenTimer();
@@ -2765,7 +2797,7 @@
       toggleFocusTimer();
     }
 
-    function setFullscreenAnimation(type,persist=true){fullscreenAnimation=type;if(persist){try{localStorage.setItem('TRACKEBILITY_FS_ANIM',type);}catch(e){}}['water','circle','dots'].forEach(k=>{const b=document.getElementById(`fsAnim-${k}`);if(b)b.className=k===type?'px-2 py-1 rounded-lg text-[9px] font-bold bg-themeAccent text-white':'px-2 py-1 rounded-lg text-[9px] font-bold text-themeMuted';});const w=document.getElementById('fsWaterFill'),c=document.getElementById('fsCircleVisual'),d=document.getElementById('fsDotsVisual');if(w)w.style.display=type==='water'?'block':'none';if(c)c.style.display=type==='circle'?'block':'none';if(d)d.style.display=type==='dots'?'flex':'none';}
+    function setFullscreenAnimation(type,persist=true){fullscreenAnimation=type;if(persist){try{localStorage.setItem('TRACKABILITY_FS_ANIM',type);}catch(e){}}['water','circle','dots'].forEach(k=>{const b=document.getElementById(`fsAnim-${k}`);if(b)b.className=k===type?'px-2 py-1 rounded-lg text-[9px] font-bold bg-themeAccent text-white':'px-2 py-1 rounded-lg text-[9px] font-bold text-themeMuted';});const w=document.getElementById('fsWaterFill'),c=document.getElementById('fsCircleVisual'),d=document.getElementById('fsDotsVisual');if(w)w.style.display=type==='water'?'block':'none';if(c)c.style.display=type==='circle'?'block':'none';if(d)d.style.display=type==='dots'?'flex':'none';}
     function updateFullscreenAnimation(){const target=Math.max(1,isPomoMode?pomoWorkMins*60:timerSelectedTargetMins*60),remaining=Math.max(0,isPomoMode?pomoRemainingSec:target-timerElapsedSeconds),pct=Math.max(0,Math.min(100,remaining/target*100)),fill=document.getElementById('fsWaterFill');if(fill)fill.style.height=`${pct}%`;setFullscreenAnimation(fullscreenAnimation,false);}
 
     function openFullscreenTimer() {
@@ -3529,7 +3561,7 @@
     function renderAppLogoPicker(){
       const c=document.getElementById('appLogoPicker'); if(!c)return;
       const selected=appState.appLogo||'original';
-      const items=[['original','Current','TRACKEBILITY'],...TRACKABILITY_LOGO_META];
+      const items=[['original','Current','TRACKABILITY'],...TRACKABILITY_LOGO_META];
       c.innerHTML=items.map(([key,label,sub])=>{
         const src=key==='original' ? '' : TRACKABILITY_LOGO_ASSETS[key];
         return `<button type="button" onclick="setAppLogo('${key}')" class="relative p-1.5 rounded-2xl border ${selected===key?'border-themeAccent ring-2 ring-themeAccent/30':'border-themeBorder'} bg-themeCardSoft text-center active:scale-95 transition">
@@ -3577,7 +3609,7 @@
       const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const a = document.createElement('a');
       a.setAttribute("href", str);
-      a.setAttribute("download", `TRACKEBILITY_BACKUP_${getLocalYMD()}.json`);
+      a.setAttribute("download", `TRACKABILITY_BACKUP_${getLocalYMD()}.json`);
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -3644,7 +3676,7 @@
 
     function restoreCalendarPanelState(bodyId, toggleId) {
       try {
-        if (localStorage.getItem(`TRACKEBILITY_CAL_${bodyId}`) === '1') {
+        if (localStorage.getItem(`TRACKABILITY_CAL_${bodyId}`) === '1') {
           document.getElementById(bodyId)?.classList.add('is-collapsed');
         }
       } catch(e) {}
@@ -3652,7 +3684,7 @@
   </script>
 <script>
 /* ============================================================
-   TRACKEBILITY UPDATE 5 PATCH
+   TRACKABILITY UPDATE 5 PATCH
    Data-first tracker fixes + MCQ/GT/revision integration
    ============================================================ */
 (function(){
@@ -3884,7 +3916,7 @@
 </script>
 <script>
 /* ============================================================
-   TRACKEBILITY UPDATE 5 — HOME / MCQ / CALENDAR / REVISION REPAIR
+   TRACKABILITY UPDATE 5 — HOME / MCQ / CALENDAR / REVISION REPAIR
    ============================================================ */
 (function(){
   const esc = window.escapeHtml || (v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])));
@@ -4468,7 +4500,7 @@
       removeDuplicateTrackerCalendar();
       saveState();
       if(window.lucide)lucide.createIcons();
-    }catch(e){console.error('TRACKEBILITY final repair',e);}
+    }catch(e){console.error('TRACKABILITY final repair',e);}
   }
 
   document.addEventListener('DOMContentLoaded',finalInit);
@@ -4989,7 +5021,7 @@
       renderHomeTasksFinal();
       if(document.getElementById('globalSearchInput'))document.getElementById('globalSearchInput').value='';
       if(window.lucide)lucide.createIcons();
-    }catch(e){console.error('TRACKEBILITY user fixes',e);}
+    }catch(e){console.error('TRACKABILITY user fixes',e);}
   }
   document.addEventListener('DOMContentLoaded',finalUserFixInit);
   setInterval(()=>{
@@ -5318,7 +5350,7 @@
 
 
 <!-- ============================================================
-     TRACKEBILITY FINAL TRACKER / STATS POLISH
+     TRACKABILITY FINAL TRACKER / STATS POLISH
      ============================================================ -->
 <style id="trackability-final-tracker-polish">
   .tb-week-calendar{background:var(--card-color);border:1px solid var(--border-color);border-radius:22px;padding:12px;}
@@ -5960,7 +5992,7 @@ document.addEventListener('DOMContentLoaded',function(){
   'use strict';
 
   /* ============================================================
-     TRACKEBILITY SUPABASE ACCOUNT + CLOUD SYNC
+     TRACKABILITY SUPABASE ACCOUNT + CLOUD SYNC
      Uses the existing public.profiles + public.app_data schema.
      Guest mode remains local-only. Signed-in users sync automatically.
      ============================================================ */
@@ -5968,8 +6000,8 @@ document.addEventListener('DOMContentLoaded',function(){
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ZapsiXuoqHFbxvY4ASwteA_i-uPc7wY';
   const CLOUD_STATE_TABLE = 'app_data';
   const PROFILE_TABLE = 'profiles';
-  const PENDING_MIGRATION_KEY = 'TRACKEBILITY_PENDING_CLOUD_MIGRATION';
-  const SYNC_META_PREFIX = 'TRACKEBILITY_SYNC_META_';
+  const PENDING_MIGRATION_KEY = 'TRACKABILITY_PENDING_CLOUD_MIGRATION';
+  const SYNC_META_PREFIX = 'TRACKABILITY_SYNC_META_';
 
   let sb = null;
   let currentUser = null;
@@ -6471,7 +6503,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   window.resolveSyncConflict=resolveSyncConflict;
 
-  async function signOutTrackebility(){
+  async function signOutTRACKABILITY(){
     try{
       await uploadCloudState(false);
       if(sb) await sb.auth.signOut();
@@ -6481,7 +6513,7 @@ document.addEventListener('DOMContentLoaded',function(){
       accountToast('Signed out. Guest mode restored');
     }catch(err){accountToast(err.message||'Sign out failed','alert-circle');}
   }
-  window.signOutTrackebility=signOutTrackebility;
+  window.signOutTRACKABILITY=signOutTRACKABILITY;
 
   function openAccountModal(){
     openModal('settingsModal');
@@ -6600,7 +6632,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   window.shareTrackability=async function(){
     const url='https://trackability-app.github.io/Trackability';
-    const data={title:'TRACKEBILITY',text:'Try TRACKEBILITY — track study, tasks, tests, MCQs and progress.',url};
+    const data={title:'TRACKABILITY',text:'Try TRACKABILITY — track study, tasks, tests, MCQs and progress.',url};
     try{
       if(navigator.share){await navigator.share(data);return;}
       await navigator.clipboard.writeText(url);
@@ -6608,11 +6640,11 @@ document.addEventListener('DOMContentLoaded',function(){
     }catch(err){
       if(err?.name==='AbortError')return;
       try{await navigator.clipboard.writeText(url);showToast('Website link copied');}
-      catch(e){window.prompt('Copy the TRACKEBILITY link:',url);}
+      catch(e){window.prompt('Copy the TRACKABILITY link:',url);}
     }
   };
   window.goToTrackabilityWebsite=function(){window.open('https://www.trackability.in','_blank','noopener,noreferrer');};
-  window.contactTrackabilitySupport=function(){window.location.href='mailto:trackability.app@gmail.com?subject=TRACKEBILITY%20Feedback%20%2F%20Support';};
+  window.contactTrackabilitySupport=function(){window.location.href='mailto:trackability.app@gmail.com?subject=TRACKABILITY%20Feedback%20%2F%20Support';};
   window.openFAQModal=function(){openModal('faqModal');if(window.lucide)lucide.createIcons();};
   window.openLegalModal=function(kind){
     const title=document.getElementById('legalModalTitle'),content=document.getElementById('legalModalContent');
@@ -6770,6 +6802,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function screens(){return [...document.querySelectorAll('#trackabilityOnboarding .ob-screen')];}
   function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===6)updateSummary();}
   window.obNext=function(){if(step===4)obSaveProfile();if(step<6){step++;update();}};
+  window.obBack=function(){if(step>0){step--;update();}};
   window.obChooseMode=function(v){mode=v;$('obChoiceAccount').classList.toggle('selected',v==='account');$('obChoiceGuest').classList.toggle('selected',v==='guest');$('obSummaryMode').textContent=v==='account'?'Account':'Guest';};
   window.obSaveProfile=function(){
     if(typeof appState==='undefined')return;
