@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>TRACKABILITY_update5 — Your Study. Your Progress. Your Exam.</title>
+  <title>TRACKABILITY Update 23 — Your Study. Your Progress. Your Exam.</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -100,20 +100,20 @@
     .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* Trackability notification system */
-    #trackabilityNotificationStack{position:fixed;top:72px;left:50%;transform:translateX(-50%);width:min(420px,calc(100% - 28px));z-index:180;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
-    .track-notification{pointer-events:auto;position:relative;overflow:hidden;background:color-mix(in srgb,var(--card-color) 96%,transparent);color:var(--text-color);border:1px solid var(--border-color);border-left:4px solid var(--accent-color);border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.25),0 0 28px var(--accent-glow);backdrop-filter:blur(18px);padding:13px 14px 15px;animation:trackNotifIn .32s cubic-bezier(.16,1,.3,1) forwards;}
+    #trackabilityNotificationStack{position:fixed;top:calc(72px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(420px,calc(100vw - 28px));max-width:calc(100vw - 28px);z-index:180;display:flex;flex-direction:column;gap:10px;pointer-events:none;box-sizing:border-box;}
+    .track-notification{pointer-events:auto;position:relative;overflow:hidden;box-sizing:border-box;width:100%;max-width:100%;min-width:0;background:color-mix(in srgb,var(--card-color) 96%,transparent);color:var(--text-color);border:1px solid var(--border-color);border-left:4px solid var(--accent-color);border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.25),0 0 28px var(--accent-glow);backdrop-filter:blur(18px);padding:13px 14px 15px;animation:trackNotifIn .32s cubic-bezier(.16,1,.3,1) forwards;}
     .track-notification.leaving{animation:trackNotifOut .25s ease forwards;}
-    .track-notification-head{display:flex;align-items:center;gap:10px;}
+    .track-notification-head{display:flex;align-items:center;gap:10px;min-width:0;}
     .track-notification-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--accent-glow);color:var(--accent-color);flex:0 0 auto;}
-    .track-notification-title{font-size:12px;font-weight:900;letter-spacing:.04em;line-height:1.2;}
-    .track-notification-close{margin-left:auto;width:28px;height:28px;border:0;border-radius:9px;background:var(--card-soft-color);color:var(--muted-color);cursor:pointer;font-size:16px;line-height:1;}
-    .track-notification-body{padding-left:44px;margin-top:7px;font-size:11px;line-height:1.45;color:var(--muted-color);font-weight:600;}
-    .track-notification-action{margin:10px 0 0 44px;border:1px solid var(--border-color);background:var(--card-soft-color);color:var(--accent-color);border-radius:10px;padding:6px 10px;font-size:10px;font-weight:900;cursor:pointer;}
-    .track-notification-progress{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--accent-color);transform-origin:left center;animation:trackNotifProgress 8s linear forwards;}
+    .track-notification-title{font-size:12px;font-weight:900;letter-spacing:.04em;line-height:1.25;min-width:0;flex:1;overflow-wrap:anywhere;word-break:break-word;}
+    .track-notification-close{margin-left:auto;width:28px;height:28px;min-width:28px;border:0;border-radius:9px;background:var(--card-soft-color);color:var(--muted-color);cursor:pointer;font-size:16px;line-height:1;flex:0 0 auto;}
+    .track-notification-body{padding-left:44px;margin-top:7px;font-size:11px;line-height:1.5;color:var(--muted-color);font-weight:600;overflow-wrap:anywhere;word-break:break-word;max-width:100%;box-sizing:border-box;}
+    .track-notification-action{display:inline-flex;max-width:calc(100% - 44px);margin:10px 0 0 44px;border:1px solid var(--border-color);background:var(--card-soft-color);color:var(--accent-color);border-radius:10px;padding:7px 10px;font-size:10px;font-weight:900;cursor:pointer;white-space:normal;text-align:center;overflow-wrap:anywhere;}
+    .track-notification-progress{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--accent-color);transform-origin:left center;animation:trackNotifProgress var(--track-notif-duration,8s) linear forwards;}
     @keyframes trackNotifIn{from{opacity:0;transform:translateY(-18px) scale(.97)}to{opacity:1;transform:none}}
     @keyframes trackNotifOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-12px) scale(.98)}}
     @keyframes trackNotifProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-    @media(max-width:420px){#trackabilityNotificationStack{top:68px;width:calc(100% - 22px)}.track-notification{padding:12px}.track-notification-body{padding-left:44px}}
+    @media(max-width:420px){#trackabilityNotificationStack{top:calc(68px + env(safe-area-inset-top));width:calc(100vw - 20px);max-width:calc(100vw - 20px)}.track-notification{padding:12px}.track-notification-body{padding-left:44px}.track-notification-action{margin-left:44px;max-width:calc(100% - 44px)}}
 
     .toast-animate-in { animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     .toast-animate-out { animation: toastOut 0.2s ease-in forwards; }
@@ -309,7 +309,7 @@
   <div id="trackabilityNotificationStack" aria-live="polite" aria-atomic="false"></div>
 
   <!-- TOAST CONTAINER -->
-  <div id="toastContainer" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center pointer-events-none w-full max-w-xs px-4"></div><div id="achievementOverlay" class="achievement-overlay hidden"></div>
+  <div id="toastContainer" class="fixed bottom-[76px] left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 items-center pointer-events-none w-[calc(100vw-28px)] max-w-[420px] px-0 box-border"></div><div id="achievementOverlay" class="achievement-overlay hidden"></div>
 
   <!-- TOP APP BAR -->
   <header class="flex items-center justify-between px-4 pt-3.5 pb-2.5 shrink-0 border-b border-themeBorder bg-themeCard/90 backdrop-blur-md z-30">
@@ -1512,9 +1512,10 @@
         </div>
       </div>
 
-      <div class="px-5 pb-3 shrink-0 grid grid-cols-4 gap-1.5">
+      <div class="px-5 pb-3 shrink-0 grid grid-cols-5 gap-1.5">
         <button id="settingsTabGeneral" onclick="openSettingsTab('general')" class="py-2 rounded-xl bg-themeAccent text-white text-[10px] font-black">General</button>
         <button id="settingsTabAppearance" onclick="openSettingsTab('appearance')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Appearance</button>
+        <button id="settingsTabNotifications" onclick="openSettingsTab('notifications')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Notify</button>
         <button id="settingsTabAccount" onclick="openSettingsTab('account')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Account</button>
         <button id="settingsTabSupport" onclick="openSettingsTab('support')" class="py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black">Support</button>
       </div>
@@ -1562,6 +1563,55 @@
           </div>
 
           <button onclick="saveGeneralSettings()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-bold shadow active:scale-95 transition">Apply & Save Settings</button>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div id="settingsPanelNotifications" class="hidden space-y-4">
+          <div>
+            <h4 class="text-xs font-black">Notifications</h4>
+            <p class="text-[9px] text-themeMuted mt-0.5">Control Trackability alerts, sound and vibration.</p>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder space-y-2.5">
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0"><div class="text-xs font-black">In-app notifications</div><p class="text-[9px] text-themeMuted mt-0.5">Show the large Trackability notification card.</p></div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input id="settingsNotificationsEnabled" type="checkbox" class="sr-only peer" onchange="updateNotificationSetting('enabled',this.checked)" />
+                <div class="w-10 h-5 bg-themeCard border border-themeBorder rounded-full peer-checked:bg-themeAccent transition"></div>
+                <div class="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between gap-3 pt-2 border-t border-themeBorder">
+              <div class="min-w-0"><div class="text-xs font-black">Sound</div><p class="text-[9px] text-themeMuted mt-0.5">Play the short notification chime.</p></div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input id="settingsNotificationsSound" type="checkbox" class="sr-only peer" onchange="updateNotificationSetting('sound',this.checked)" />
+                <div class="w-10 h-5 bg-themeCard border border-themeBorder rounded-full peer-checked:bg-themeAccent transition"></div>
+                <div class="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between gap-3 pt-2 border-t border-themeBorder">
+              <div class="min-w-0"><div class="text-xs font-black">Vibration</div><p class="text-[9px] text-themeMuted mt-0.5">Vibrate when supported by your device/browser.</p></div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input id="settingsNotificationsVibrate" type="checkbox" class="sr-only peer" onchange="updateNotificationSetting('vibrate',this.checked)" />
+                <div class="w-10 h-5 bg-themeCard border border-themeBorder rounded-full peer-checked:bg-themeAccent transition"></div>
+                <div class="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder space-y-2">
+            <label class="text-xs font-black" for="settingsNotificationsDuration">In-app display duration</label>
+            <select id="settingsNotificationsDuration" onchange="updateNotificationSetting('duration',Number(this.value))" class="w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText">
+              <option value="5000">5 seconds</option>
+              <option value="8000">8 seconds</option>
+              <option value="10000">10 seconds</option>
+              <option value="15000">15 seconds</option>
+            </select>
+            <p class="text-[9px] text-themeMuted">System notification timing is controlled by Android/Chrome.</p>
+          </div>
+
+          <button onclick="requestTrackabilityNotificationPermission()" class="w-full py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-black text-themeAccent">Allow / Re-check System Notifications</button>
+          <button onclick="testTrackabilityNotification()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-bold shadow active:scale-95 transition">🔔 Send Test Notification</button>
         </div>
 
         <!-- APPEARANCE -->
@@ -1738,6 +1788,7 @@
         const el=document.createElement('div');el.className='track-notification';
         const icon=opts.icon||'bell';const action=opts.actionLabel||'';
         el.innerHTML=`<div class="track-notification-head"><div class="track-notification-icon"><i data-lucide="${icon}" class="w-4 h-4"></i></div><div class="track-notification-title">${escapeHtml(title)}</div><button class="track-notification-close" aria-label="Dismiss">×</button></div><div class="track-notification-body">${escapeHtml(body)}</div>${action?`<button class="track-notification-action">${escapeHtml(action)}</button>`:''}<div class="track-notification-progress"></div>`;
+        el.style.setProperty('--track-notif-duration', `${Math.max(3000,Number(settings.duration)||8000)}ms`);
         stack.appendChild(el);if(window.lucide)lucide.createIcons();
         const close=()=>{if(!el.isConnected)return;el.classList.add('leaving');setTimeout(()=>el.remove(),260)};
         el.querySelector('.track-notification-close').onclick=close;
@@ -1750,16 +1801,36 @@
       }
       function notify(title,body,opts={}){show(title,body,opts);system('TRACKABILITY • '+title,body)}
       function test(){notify('Test notification','Notifications, sound and vibration are working.',{icon:'bell',actionLabel:'OPEN TRACKABILITY',onAction:()=>{}})}
-      return {show,system,notify,test,ensurePermission,getSettings:()=>({...settings}),setSettings(next){settings={...settings,...next};save()}};
+      return {show,system,notify,test,ensurePermission,getSettings:()=>({...settings}),setSettings(next){settings={...settings,...next};save();return {...settings}}};
     })();
 
     function showTrackabilityNotification(title,body,opts={}){return TrackabilityNotifications.notify(title,body,opts)}
+    function updateNotificationSettingsUI(){
+      const st=TrackabilityNotifications.getSettings();
+      const e=document.getElementById('settingsNotificationsEnabled'); if(e)e.checked=!!st.enabled;
+      const s=document.getElementById('settingsNotificationsSound'); if(s)s.checked=!!st.sound;
+      const v=document.getElementById('settingsNotificationsVibrate'); if(v)v.checked=!!st.vibrate;
+      const d=document.getElementById('settingsNotificationsDuration'); if(d)d.value=String(st.duration||8000);
+    }
+    function updateNotificationSetting(key,value){
+      TrackabilityNotifications.setSettings({[key]:value});
+      if(key==='enabled' && value===false) return;
+      if(key==='sound' || key==='vibrate') showToast((key==='sound'?'Sound ':'Vibration ')+(value?'enabled':'disabled'));
+    }
+    function requestTrackabilityNotificationPermission(){
+      TrackabilityNotifications.ensurePermission().then(ok=>showToast(ok?'System notifications allowed':'System notification permission not granted',ok?'check-circle':'alert-circle'));
+    }
+    function testTrackabilityNotification(){TrackabilityNotifications.test()}
+    window.updateNotificationSetting=updateNotificationSetting;
+    window.requestTrackabilityNotificationPermission=requestTrackabilityNotificationPermission;
+    window.testTrackabilityNotification=testTrackabilityNotification;
 
     function showToast(message, icon = 'check') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      toast.className = 'toast-animate-in bg-themeCardSoft/95 border border-themeBorder text-themeText px-4 py-2.5 rounded-2xl shadow-xl backdrop-blur-md flex items-center gap-2 text-xs font-bold pointer-events-auto';
-      toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 text-themeAccent"></i> <span>${escapeHtml(message)}</span>`;
+      toast.className = 'toast-animate-in bg-themeCardSoft/95 border border-themeBorder text-themeText px-4 py-2.5 rounded-2xl shadow-xl backdrop-blur-md flex items-start gap-2 text-xs font-bold pointer-events-auto w-full max-w-[420px] box-border';
+      toast.style.wordBreak='break-word'; toast.style.overflowWrap='anywhere';
+      toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 text-themeAccent shrink-0 mt-0.5"></i><span class="min-w-0 leading-snug">${escapeHtml(message)}</span>`;
       container.appendChild(toast);
       lucide.createIcons();
 
@@ -2431,7 +2502,7 @@
     function completeTaskWithTracker(t) {
       const date = t.date || getLocalYMD();
       if (t.trackerLogged) {
-        t.completed = true; saveState(); refreshAllViews(); checkHomeAchievements(date); showToast('✓ Task completed'); return;
+        t.completed = true; saveState(); refreshAllViews(); checkHomeAchievements(date); showTrackabilityNotification('Task completed',t.name||'Your task is complete.',{icon:'check-circle-2'}); return;
       }
       if (t.trackerType === 'gym') {
         pendingGymTaskId = t.id;
@@ -2452,14 +2523,14 @@
         if (!appState.sleepLogs) appState.sleepLogs = [];
         appState.sleepLogs.unshift({ id:'slp_'+Date.now(), taskId:t.id, date, hours, taskName:t.name });
         t.completed = true; t.trackerLogged = true;
-        saveState(); refreshAllViews(); renderSleepTracker(); checkHomeAchievements(date); showToast('😴 Sleep logged & task completed');
+        saveState(); refreshAllViews(); renderSleepTracker(); checkHomeAchievements(date); showTrackabilityNotification('Sleep logged',`Sleep task completed: ${t.name||'Sleep'}.`,{icon:'moon'});
         return;
       }
       if (t.trackerType === 'mistake_review') {
         if (!appState.mistakeReviewLogs) appState.mistakeReviewLogs = [];
         appState.mistakeReviewLogs.unshift({ id:'mrv_'+Date.now(), taskId:t.id, date, title:t.name });
         t.completed = true; t.trackerLogged = true;
-        saveState(); refreshAllViews(); renderMistakeReviewTracker(); checkHomeAchievements(date); showToast('⚠️ Mistake Book review logged');
+        saveState(); refreshAllViews(); renderMistakeReviewTracker(); checkHomeAchievements(date); showTrackabilityNotification('Review logged',`Mistake Book review completed: ${t.name||'Review'}.`,{icon:'book-check'});
         return;
       }
       if (t.trackerType === 'mcq') {
@@ -2470,7 +2541,7 @@
       }
       t.completed = true;
       saveState(); refreshAllViews(); checkHomeAchievements(date);
-      showToast('✓ Task completed', 'check-circle');
+      showTrackabilityNotification('Task completed',t.name||'Your task is complete.',{icon:'check-circle-2'});
     }
 
     function openTaskActions(id) {
@@ -2828,7 +2899,6 @@
       showTrackabilityNotification('Focus session complete',`Your ${Math.round(dur/60)} minute focus session is complete.`,{icon:'check-circle-2',actionLabel:'OPEN FOCUS',onAction:()=>switchTab('focus')});
       lucide.createIcons();
       closeFullscreenTimer();
-      showToast('✓ Focus session complete!');
     }
 
     function recordFocusSession(durationSec) {
@@ -3419,7 +3489,7 @@
       }
       pendingGymTaskId = null;
       saveState(); closeModal('gymModal'); refreshAllViews(); renderGymTracker();
-      showToast('🏋️ Workout recorded & task completed');
+      showTrackabilityNotification('Workout recorded',`${split || 'Workout'} task completed.`,{icon:'dumbbell'});
     }
 
     function renderSleepTracker() {
@@ -4846,7 +4916,7 @@
     if(t?.trackerType==='mistake_review'){
       if(t.completed){const l=(appState.mistakeReviewLogs||[]).find(x=>x.taskId===t.id);if(l){appState.mistakeReviewLogs=appState.mistakeReviewLogs.filter(x=>x.id!==l.id);}t.completed=false;t.trackerLogged=false;t.reviewLogId=null;saveState();refreshAllViews();renderMistakeReviewTracker();showToast('↩ Review task undone');}
       else{
-        appState.mistakeReviewLogs=appState.mistakeReviewLogs||[];const l={id:'mrv_'+Date.now(),taskId:t.id,date:t.date||today(),title:t.name};appState.mistakeReviewLogs.unshift(l);t.completed=true;t.trackerLogged=true;t.reviewLogId=l.id;saveState();refreshAllViews();renderMistakeReviewTracker();showToast('⚠️ Review logged & task completed');
+        appState.mistakeReviewLogs=appState.mistakeReviewLogs||[];const l={id:'mrv_'+Date.now(),taskId:t.id,date:t.date||today(),title:t.name};appState.mistakeReviewLogs.unshift(l);t.completed=true;t.trackerLogged=true;t.reviewLogId=l.id;saveState();refreshAllViews();renderMistakeReviewTracker();showTrackabilityNotification('Review logged',`Mistake Book review completed: ${t.name||'Review'}.`,{icon:'book-check'});
       }
       return;
     }
@@ -5334,7 +5404,7 @@
     else {var interval=c.interval||1,days=(c.days||[dayIndex(start)]).slice();var anchor=new Date(start);var anchorMonday=new Date(anchor);var ad=anchorMonday.getDay();anchorMonday.setDate(anchorMonday.getDate()-(ad===0?6:ad-1));for(var i=1;i<=3700;i++){var x=new Date(start);x.setDate(start.getDate()+i);var monday=new Date(x),xd=monday.getDay();monday.setDate(monday.getDate()-(xd===0?6:xd-1));var weeks=Math.round((monday-anchorMonday)/604800000);if(weeks%interval===0&&days.includes(x.getDay())){candidate=x;break;}}}
     if(!candidate)return null;var out=ymd(candidate);if(c.endType==='date'&&c.endDate&&out>c.endDate)return null;return out;}
   function copyNextOccurrence(task){if(!task||!task.repeat||task.repeat.mode==='none')return null;var nd=nextDate(task);if(!nd)return null;var group=task.repeatGroupId||('rep_'+Date.now()+'_'+Math.random().toString(36).slice(2,8));task.repeatGroupId=group;var nextIndex=Number(task.repeatIndex||0)+1;var exists=(appState.tasks||[]).find(function(x){return x.repeatGroupId===group&&Number(x.repeatIndex)===nextIndex;});if(exists)return exists;var copy=Object.assign({},task,{id:'tsk_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),date:nd,completed:false,trackerLogged:false,mcqTaskCount:0,repeat:clone(task.repeat),repeatGroupId:group,repeatIndex:nextIndex});appState.tasks.push(copy);return copy;}
-  function afterCompletion(task){if(!task||!task.completed)return;var next=copyNextOccurrence(task);if(next){saveState();refreshAllViews();showToast('✓ Task completed • next repeat scheduled for '+next.date);}else saveState();}
+  function afterCompletion(task){if(!task||!task.completed)return;var next=copyNextOccurrence(task);if(next){saveState();refreshAllViews();showTrackabilityNotification('Task completed',`Next repeat scheduled for ${next.date}.`,{icon:'check-circle-2'});}else saveState();}
 
   window.saveTask=function(){var editId=document.getElementById('taskEditId')?.value||'';var before=editId?(appState.tasks||[]).find(function(x){return x.id===editId;}):null;if(typeof baseSave==='function')baseSave();var t=editId?(appState.tasks||[]).find(function(x){return x.id===editId;}):(appState.tasks||[]).slice(-1)[0];if(!t)return;var cfg=norm(repeatDraft,t.date);t.repeat=cfg;if(cfg.mode!=='none'){if(!t.repeatGroupId)t.repeatGroupId='rep_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);if(t.repeatIndex==null)t.repeatIndex=0;}else if(t.repeatGroupId&&editId){(appState.tasks||[]).filter(function(x){return x.repeatGroupId===t.repeatGroupId&&x.id!==t.id&&!x.completed;}).forEach(function(x){x.repeat={mode:'none',interval:1,unit:'day',days:[],endType:'never',endDate:'',count:10};});t.repeatGroupId=null;t.repeatIndex=0;}saveState();repeatDraft=fresh(t.date);if(window.lucide)lucide.createIcons();};
 
@@ -6669,15 +6739,16 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function settingsTabButton(active){
-    ['general','appearance','account','support'].forEach(t=>{
+    ['general','appearance','notifications','account','support'].forEach(t=>{
       const b=document.getElementById('settingsTab'+t.charAt(0).toUpperCase()+t.slice(1));
       if(!b)return;
       b.className=t===active?'py-2 rounded-xl bg-themeAccent text-white text-[10px] font-black':'py-2 rounded-xl bg-themeCardSoft border border-themeBorder text-themeMuted text-[10px] font-black';
     });
   }
   window.openSettingsTab=function(tab){
-    tab=['general','appearance','account','support'].includes(tab)?tab:'general';
-    ['general','appearance','account','support'].forEach(t=>document.getElementById('settingsPanel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden',t!==tab));
+    tab=['general','appearance','notifications','account','support'].includes(tab)?tab:'general';
+    ['general','appearance','notifications','account','support'].forEach(t=>document.getElementById('settingsPanel'+t.charAt(0).toUpperCase()+t.slice(1))?.classList.toggle('hidden',t!==tab));
+    if(tab==='notifications') updateNotificationSettingsUI();
     settingsTabButton(tab);
     updateSettingsAccountCard();
     updateRecycleCount();
