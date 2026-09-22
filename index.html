@@ -7064,11 +7064,48 @@ document.addEventListener('DOMContentLoaded',function(){
   const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 
   /* 2) Home/Task MCQ chooser: add Misc / Other. */
-  function normalizeMiscMCQRecords(){
-    if(!Array.isArray(appState.mcqActivities)) return;
-    appState.mcqActivities.forEach(x=>{if(x && x.type==='misc' && x.name) x.platform=x.name;});
+  function miscMCQFingerprint(x){
+    if(!x || x.type!=='misc') return '';
+    return [
+      String(x.date||''),
+      String(x.name||'').trim().toLowerCase(),
+      String(Number(x.questions)||0),
+      String(x.subjectId||''),
+      String(x.notes||'').trim(),
+      String(x.platform||x.name||'').trim().toLowerCase()
+    ].join('\u001f');
   }
-  normalizeMiscMCQRecords();
+
+  function normalizeMiscMCQRecords(){
+    if(!Array.isArray(appState.mcqActivities)) return false;
+    let changed=false;
+    const seen=new Map();
+    const cleaned=[];
+    appState.mcqActivities.forEach(x=>{
+      if(x && x.type==='misc' && x.name){
+        const oldPlatform=x.platform;
+        x.platform=x.name;
+        if(oldPlatform!==x.platform) changed=true;
+        const key=miscMCQFingerprint(x);
+        const existingIndex=seen.get(key);
+        if(existingIndex!==undefined){
+          const existing=cleaned[existingIndex];
+          // Keep the record linked to a task when one copy has task linkage.
+          if(!existing.taskId && x.taskId) cleaned[existingIndex]=x;
+          changed=true;
+          return;
+        }
+        seen.set(key,cleaned.length);
+      }
+      cleaned.push(x);
+    });
+    if(cleaned.length!==appState.mcqActivities.length){
+      appState.mcqActivities=cleaned;
+      changed=true;
+    }
+    return changed;
+  }
+  if(normalizeMiscMCQRecords()) saveState();
 
   function ensureMiscChooser(){
     const m=document.getElementById('addMCQChooserModal');
@@ -7109,7 +7146,18 @@ document.addEventListener('DOMContentLoaded',function(){
   window.saveMiscMCQ=function(){
     appState.mcqActivities=appState.mcqActivities||[];const id=document.getElementById('miscMCQEditId').value;const name=document.getElementById('miscMCQName').value.trim()||'Misc / Other';const questions=Math.max(1,parseInt(document.getElementById('miscMCQQuestions').value,10)||0);if(!questions){showToast('Enter number of questions','alert-circle');return;}
     const rec={name,subjectId:document.getElementById('miscMCQSubject').value||'',platform:name,questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
-    let saved;if(id){const i=appState.mcqActivities.findIndex(x=>x.id===id);if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}}if(!saved){saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);appState.mcqActivities.unshift(saved);}
+    let saved;if(id){const i=appState.mcqActivities.findIndex(x=>x.id===id);if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}}
+    if(!saved){
+      // A single Misc / Other action must never create a second identical ledger row.
+      const duplicate=appState.mcqActivities.find(x=>miscMCQFingerprint(x)===miscMCQFingerprint(rec));
+      if(duplicate){
+        saved=duplicate;
+        Object.assign(saved,rec);
+      }else{
+        saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);
+        appState.mcqActivities.unshift(saved);
+      }
+    }
     if(window.pendingMCQTaskId){const t=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(t){t.completed=true;t.trackerLogged=true;t.mcqTaskCount=questions;t.mcqActivityId=saved.id;saved.taskId=t.id;}window.pendingMCQTaskId='';}
     saveState();closeModal('miscMCQModal');renderHome();if(typeof renderStatistics==='function')renderStatistics();openMCQHistoryModal();showToast(id?'Misc MCQ updated':'Misc MCQ logged');
   };
@@ -7139,6 +7187,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   /* Update MCQ history labels and support Misc editing. */
   function patchMCQHistory(){
+    normalizeMiscMCQRecords();
     const modal=document.getElementById('mcqHistoryModal');if(!modal)return;
     const list=modal.querySelector('#mcqHistorySelectedDay');if(list){list.querySelectorAll('.text-emerald-400').forEach(()=>{});}
   }
