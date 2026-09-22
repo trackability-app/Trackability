@@ -7708,5 +7708,264 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
+
+<!-- ============================================================
+     TRACKABILITY FINAL PATCH: GT SCORING + SLEEP/CHART POLISH
+     ============================================================ -->
+<style id="trackability-gt-sleep-final-patch">
+  /* Keep tracker charts compact. Extra dates scroll horizontally, never vertically. */
+  .tb-sleep-chart-box{
+    display:flex !important;
+    gap:7px !important;
+    height:184px !important;
+    min-height:184px !important;
+    max-height:184px !important;
+    margin-top:6px !important;
+    overflow-x:hidden !important;
+    overflow-y:hidden !important;
+  }
+  .tb-sleep-chart-box .tb-sleep-yaxis{
+    height:154px !important;
+    flex:0 0 32px !important;
+    padding:2px 0 24px !important;
+  }
+  .tb-sleep-chart-box .tb-sleep-plot{
+    height:154px !important;
+    min-width:0 !important;
+    flex:1 1 auto !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    scrollbar-width:thin;
+  }
+  .tb-sleep-chart-box .tb-sleep-bars{
+    height:154px !important;
+    min-width:max-content !important;
+    gap:9px !important;
+    padding:2px 10px 27px !important;
+    box-sizing:border-box !important;
+  }
+  .tb-sleep-chart-box .tb-sleep-bar-col{
+    flex:0 0 38px !important;
+    width:38px !important;
+    height:100% !important;
+  }
+  .tb-sleep-chart-box .tb-sleep-date{white-space:nowrap !important;}
+
+  /* Tighten vertical separation around stacked chart cards. */
+  .stats-gt-chart-scroll{margin-top:4px !important;padding-bottom:2px !important;}
+  #statsMonthGTChart{margin-bottom:8px !important;}
+  #gtScoreChart{margin-bottom:0 !important;}
+
+  /* GT scoring settings */
+  #gtScoringSettingsCard .gt-preset-btn{white-space:nowrap;}
+</style>
+<script id="trackability-gt-scoring-final-patch">
+(function(){
+  'use strict';
+  const esc = v => window.escapeHtml ? window.escapeHtml(String(v ?? '')) : String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  function ensureScoringState(){
+    if(!window.appState) return;
+    const cur=appState.gtScoring||{};
+    const c=Number(cur.correct), w=Number(cur.wrong), l=Number(cur.left);
+    appState.gtScoring={
+      correct:Number.isFinite(c)?c:4,
+      wrong:Number.isFinite(w)?w:-1,
+      left:Number.isFinite(l)?l:0
+    };
+  }
+
+  function scoreGT(correct,wrong,left){
+    ensureScoringState();
+    return Number(correct||0)*Number(appState.gtScoring.correct||0)
+      + Number(wrong||0)*Number(appState.gtScoring.wrong||0)
+      + Number(left||0)*Number(appState.gtScoring.left||0);
+  }
+  window.trackabilityGTScore=scoreGT;
+
+  function formulaText(){
+    ensureScoringState();
+    const f=Number(appState.gtScoring.correct), w=Number(appState.gtScoring.wrong), l=Number(appState.gtScoring.left);
+    const part=(n,label)=>`${n<0?'− ':''}${Math.abs(n)} × ${label}`;
+    return `score = ${part(f,'correct')} ${w<0?'−':'+'} ${Math.abs(w)} × wrong ${l!==0?` ${l<0?'−':'+'} ${Math.abs(l)} × left`:''}`;
+  }
+  window.trackabilityGTFormula=formulaText;
+
+  function injectGTScoringSettings(){
+    const toggle=document.getElementById('settingsShowHomeMCQ');
+    if(!toggle) return;
+    let card=document.getElementById('gtScoringSettingsCard');
+    if(!card){
+      card=document.createElement('div');
+      card.id='gtScoringSettingsCard';
+      card.className='p-3 rounded-2xl bg-themeCardSoft border border-themeBorder space-y-3';
+      const parent=toggle.closest('.p-3.rounded-2xl') || toggle.parentElement?.parentElement;
+      if(parent && parent.parentNode){ parent.parentNode.insertBefore(card,parent.nextSibling); }
+      else return;
+      card.innerHTML=`
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="text-xs font-black">Grand Test Scoring</div>
+            <p class="text-[9px] text-themeMuted mt-0.5">Choose how each GT score is calculated. This applies to new and existing GTs.</p>
+          </div>
+        </div>
+        <div class="flex gap-1.5 overflow-x-auto custom-scroll pb-0.5">
+          <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="neet">NEET PG / UG / JEE</button>
+          <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="cet">CET</button>
+          <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="minus025">+1 / −0.25</button>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Correct</span><input id="gtScoreCorrectInput" type="number" step="0.01" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Wrong</span><input id="gtScoreWrongInput" type="number" step="0.01" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Left</span><input id="gtScoreLeftInput" type="number" step="0.01" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+        </div>
+        <div id="gtScoringFormulaPreview" class="text-[9px] font-bold text-themeAccent bg-themeCard rounded-xl border border-themeBorder px-3 py-2"></div>
+      `;
+      card.querySelectorAll('.gt-preset-btn').forEach(btn=>btn.addEventListener('click',()=>{
+        const p=btn.dataset.preset;
+        const vals=p==='cet'?[1,0,0]:p==='minus025'?[1,-0.25,0]:[4,-1,0];
+        document.getElementById('gtScoreCorrectInput').value=vals[0];
+        document.getElementById('gtScoreWrongInput').value=vals[1];
+        document.getElementById('gtScoreLeftInput').value=vals[2];
+        updateScoringPreview();
+      }));
+      ['gtScoreCorrectInput','gtScoreWrongInput','gtScoreLeftInput'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateScoringPreview));
+    }
+    ensureScoringState();
+    document.getElementById('gtScoreCorrectInput').value=appState.gtScoring.correct;
+    document.getElementById('gtScoreWrongInput').value=appState.gtScoring.wrong;
+    document.getElementById('gtScoreLeftInput').value=appState.gtScoring.left;
+    updateScoringPreview();
+    syncScoringDisabledState();
+  }
+
+  function updateScoringPreview(){
+    const c=Number(document.getElementById('gtScoreCorrectInput')?.value),w=Number(document.getElementById('gtScoreWrongInput')?.value),l=Number(document.getElementById('gtScoreLeftInput')?.value);
+    const el=document.getElementById('gtScoringFormulaPreview');
+    if(!el)return;
+    const cc=Number.isFinite(c)?c:0,ww=Number.isFinite(w)?w:0,ll=Number.isFinite(l)?l:0;
+    el.textContent=`Example: 100 correct, 20 wrong, 5 left → ${scoreWithValues(100,20,5,cc,ww,ll)} marks`;
+  }
+  function scoreWithValues(c,w,l,cm,wm,lm){return c*cm+w*wm+l*lm;}
+
+  function syncScoringDisabledState(){
+    const enabled=appState?.mcqEnabled!==false;
+    const card=document.getElementById('gtScoringSettingsCard');
+    if(!card)return;
+    card.style.opacity=enabled?'1':'0.55';
+    card.querySelectorAll('input,button').forEach(el=>el.disabled=!enabled);
+  }
+
+  function applyScoringSettingsFromInputs(){
+    ensureScoringState();
+    const c=Number(document.getElementById('gtScoreCorrectInput')?.value),w=Number(document.getElementById('gtScoreWrongInput')?.value),l=Number(document.getElementById('gtScoreLeftInput')?.value);
+    if(!Number.isFinite(c)||!Number.isFinite(w)||!Number.isFinite(l)){
+      showToast('Enter valid GT scoring values','alert-circle');
+      return false;
+    }
+    appState.gtScoring={correct:c,wrong:w,left:l};
+    /* Recalculate stored GTs so the entire ledger uses the selected exam marking scheme. */
+    (appState.grandTests||[]).forEach(g=>{
+      const total=Math.max(0,Number(g.total)||0), correct=Math.max(0,Number(g.correct)||0), wrong=Math.max(0,Number(g.wrong)||0), left=Math.max(0,total-correct-wrong);
+      g.attempted=correct+wrong;
+      g.score=scoreWithValues(correct,wrong,left,c,w,l);
+      g.scoreCorrectMark=c;g.scoreWrongMark=w;g.scoreLeftMark=l;
+    });
+    saveState();
+    return true;
+  }
+
+  function refreshGTFormulaLabels(){
+    const f=formulaText();
+    document.querySelectorAll('#gtModal p, #trackerMod-gt p, #statsMonthGTChart p').forEach(el=>{
+      const t=el.textContent||'';
+      if(/Score is calculated automatically|Y-axis = total score|score = .*correct/i.test(t)){
+        if(el.closest('#gtModal')) el.innerHTML=`Score is calculated automatically: <b>${esc(appState.gtScoring.correct)}</b> per correct, <b>${esc(appState.gtScoring.wrong)}</b> per wrong, <b>${esc(appState.gtScoring.left)}</b> per left.`;
+        else el.textContent=f;
+      }
+    });
+  }
+
+  /* Replace the final GT save function so both new GTs and edits use the selected marking scheme. */
+  window.saveGT=function(){
+    ensureScoringState();
+    const name=document.getElementById('gtName')?.value.trim();
+    if(!name){showToast('Enter a GT name','alert-circle');return;}
+    const date=document.getElementById('gtDate')?.value||new Date().toISOString().slice(0,10);
+    const total=Math.max(1,parseInt(document.getElementById('gtTotal')?.value,10)||200);
+    const correct=Math.max(0,parseInt(document.getElementById('gtCorrect')?.value,10)||0);
+    const wrong=Math.max(0,parseInt(document.getElementById('gtWrong')?.value,10)||0);
+    if(correct+wrong>total){showToast('Correct + wrong cannot exceed total questions','alert-circle');return;}
+    const left=Math.max(0,total-correct-wrong);
+    const score=scoreGT(correct,wrong,left);
+    const editId=document.getElementById('gtEditId')?.value||'';
+    appState.grandTests=appState.grandTests||[];
+    if(editId){
+      const g=appState.grandTests.find(x=>x.id===editId);
+      if(!g){showToast('GT not found','alert-circle');return;}
+      Object.assign(g,{name,platform:document.getElementById('gtPlatform')?.value.trim()||'',score,total,correct,wrong,attempted:correct+wrong,date,scoreCorrectMark:appState.gtScoring.correct,scoreWrongMark:appState.gtScoring.wrong,scoreLeftMark:appState.gtScoring.left});
+      const task=(appState.tasks||[]).find(t=>t.mcqActivityId===editId||t.id===g.taskId);
+      if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=total;task.mcqActivityId=g.id;}
+      const h=document.getElementById('gtEditId');if(h)h.value='';
+      saveState();closeModal('gtModal');
+      if(typeof renderGTTracker==='function')renderGTTracker();
+      if(typeof renderHome==='function')renderHome();
+      if(typeof renderTrackerMiniCalendar==='function')renderTrackerMiniCalendar();
+      if(typeof renderStatistics==='function')renderStatistics();
+      refreshGTFormulaLabels();
+      showToast(`GT updated • ${score} marks`);
+      return;
+    }
+    const gt={id:'gt_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,platform:document.getElementById('gtPlatform')?.value.trim()||'',score,total,correct,wrong,attempted:correct+wrong,date,taskId:window.pendingMCQTaskId||null,scoreCorrectMark:appState.gtScoring.correct,scoreWrongMark:appState.gtScoring.wrong,scoreLeftMark:appState.gtScoring.left};
+    appState.grandTests.unshift(gt);
+    if(window.pendingMCQTaskId){
+      const task=(appState.tasks||[]).find(t=>t.id===window.pendingMCQTaskId);
+      if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=total;task.mcqActivityId=gt.id;}
+      window.pendingMCQTaskId='';
+    }
+    saveState();closeModal('gtModal');
+    if(typeof renderGTTracker==='function')renderGTTracker();
+    if(typeof renderHome==='function')renderHome();
+    if(typeof renderTrackerMiniCalendar==='function')renderTrackerMiniCalendar();
+    if(typeof renderStatistics==='function')renderStatistics();
+    refreshGTFormulaLabels();
+    document.getElementById('gtName').value='';document.getElementById('gtPlatform').value='';document.getElementById('gtCorrect').value='';document.getElementById('gtWrong').value='';
+    showToast(`GT logged • ${score} marks • ${correct} correct`);
+  };
+
+  /* Settings save wrapper: save the selected GT marking scheme together with General settings. */
+  const originalSaveGeneral=window.saveGeneralSettings;
+  window.saveGeneralSettings=function(){
+    if(typeof originalSaveGeneral==='function')originalSaveGeneral();
+    ensureScoringState();
+    if(appState.mcqEnabled!==false && document.getElementById('gtScoreCorrectInput')){
+      if(!applyScoringSettingsFromInputs()) return;
+    }
+    syncScoringDisabledState();
+    refreshGTFormulaLabels();
+    if(typeof renderGTTracker==='function')renderGTTracker();
+    if(typeof renderStatistics==='function')renderStatistics();
+    saveState();
+  };
+
+  const originalOpenSettingsTab=window.openSettingsTab;
+  window.openSettingsTab=function(tab){
+    if(typeof originalOpenSettingsTab==='function')originalOpenSettingsTab(tab);
+    ensureScoringState();
+    injectGTScoringSettings();
+    syncScoringDisabledState();
+  };
+
+  function init(){
+    ensureScoringState();
+    injectGTScoringSettings();
+    refreshGTFormulaLabels();
+    syncScoringDisabledState();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,60));else setTimeout(init,60);
+  window.addEventListener('load',init);
+})();
+</script>
+
 </body>
 </html>
