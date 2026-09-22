@@ -97,6 +97,8 @@
     }
 
     .custom-scroll::-webkit-scrollbar { display: none; }
+    .syllabus-wrap-text{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;min-width:0;}
+    #syllabusChaptersList h5,#syllabusChaptersList p{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;}
     .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* Trackability notification system */
@@ -730,7 +732,7 @@
           <span class="text-xs font-black uppercase tracking-wider text-themeMuted">Subjects & Chapters</span>
           <div class="flex items-center gap-2">
             <button onclick="openEditSubjectModal()" class="text-xs font-bold text-themeMuted hover:text-themeText flex items-center gap-1">Edit Subject</button>
-            <button onclick="openModal('addChapterModal')" class="text-xs font-bold text-themeAccent flex items-center gap-1">
+            <button onclick="openAddChapterModal()" class="text-xs font-bold text-themeAccent flex items-center gap-1">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Chapter
             </button>
           </div>
@@ -3218,7 +3220,7 @@
       (appState.subjects || []).forEach(s => {
         const done = s.chapters.filter(c => c.status === 'DONE').length;
         const pct = s.chapters.length === 0 ? 0 : Math.round((done / s.chapters.length) * 100);
-        if (miniBars) miniBars.innerHTML += `<div class="flex justify-between items-center"><span class="truncate pr-1">${escapeHtml(s.name)}</span><span class="font-bold">${pct}%</span></div>`;
+        if (miniBars) miniBars.innerHTML += `<div class="flex justify-between items-start gap-2"><span class="min-w-0 flex-1 break-words whitespace-normal leading-tight pr-1">${escapeHtml(s.name)}</span><span class="font-bold shrink-0">${pct}%</span></div>`;
       });
 
       const subList = document.getElementById('syllabusSubjectsSidebar');
@@ -3230,7 +3232,7 @@
         const card = document.createElement('div');
         card.onclick = () => { selectedSubjectId = s.id; renderSyllabus(); };
         card.className = `p-3 rounded-2xl border cursor-pointer transition ${isSel ? 'bg-themeAccent/20 border-themeAccent' : 'bg-themeCard border-themeBorder'}`;
-        card.innerHTML = `<div class="flex items-center justify-between"><span class="text-xs font-black px-1.5 py-0.5 rounded bg-themeCardSoft" style="color:${s.color}">${escapeHtml(s.symbol)}</span><span class="text-[10px] font-bold text-themeMuted">${pct}%</span></div><h5 class="text-xs font-bold text-themeText mt-1.5 truncate">${escapeHtml(s.name)}</h5><p class="text-[9px] text-themeMuted">${done}/${s.chapters.length} chapters</p>`;
+        card.innerHTML = `<div class="flex items-center justify-between"><span class="text-xs font-black px-1.5 py-0.5 rounded bg-themeCardSoft" style="color:${s.color}">${escapeHtml(s.symbol)}</span><span class="text-[10px] font-bold text-themeMuted">${pct}%</span></div><h5 class="text-xs font-bold text-themeText mt-1.5 whitespace-normal break-words leading-snug">${escapeHtml(s.name)}</h5><p class="text-[9px] text-themeMuted">${done}/${s.chapters.length} chapters</p>`;
         subList.appendChild(card);
       });
 
@@ -3238,14 +3240,14 @@
       const chList = document.getElementById('syllabusChaptersList');
       chList.innerHTML = '';
       if (!activeSub || !activeSub.chapters || activeSub.chapters.length === 0) {
-        chList.innerHTML = `<div class="p-8 text-center text-themeMuted space-y-2"><p class="text-xs">No chapters found for this subject.</p><button onclick="openModal('addChapterModal')" class="text-xs font-bold text-themeAccent underline">+ Add Chapter</button></div>`;
+        chList.innerHTML = `<div class="p-8 text-center text-themeMuted space-y-2"><p class="text-xs">No chapters found for this subject.</p><button onclick="openAddChapterModal()" class="text-xs font-bold text-themeAccent underline">+ Add Chapter</button></div>`;
         return;
       }
 
       activeSub.chapters.forEach(ch => {
         const div = document.createElement('div');
         div.className = 'p-3 rounded-2xl bg-themeCard border border-themeBorder space-y-2';
-        div.innerHTML = `<div class="flex justify-between items-start"><div class="truncate flex-1"><h5 class="text-xs font-bold text-themeText truncate">${escapeHtml(ch.name)}</h5>${ch.notes ? `<p class="text-[10px] text-themeMuted truncate">${escapeHtml(ch.notes)}</p>` : ''}</div><button onclick="deleteChapter('${activeSub.id}', '${ch.id}')" class="text-themeMuted hover:text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div class="flex gap-1 pt-1"><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'BLANK')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'BLANK' ? 'bg-themeCardSoft text-themeText border-themeText' : 'border-themeBorder text-themeMuted'}">Left</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'R')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'R' ? 'bg-amber-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">R</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'MCQ')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'MCQ' ? 'bg-indigo-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">MCQ</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'DONE')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'DONE' ? 'bg-emerald-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">Done ✓</button></div>`;
+        div.innerHTML = `<div class="flex justify-between items-start"><div class="min-w-0 flex-1"><h5 class="text-xs font-bold text-themeText whitespace-normal break-words leading-snug">${escapeHtml(ch.name)}</h5>${ch.notes ? `<p class="text-[10px] text-themeMuted whitespace-normal break-words leading-snug mt-0.5">${escapeHtml(ch.notes)}</p>` : ''}</div><button onclick="deleteChapter('${activeSub.id}', '${ch.id}')" class="text-themeMuted hover:text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div class="flex gap-1 pt-1"><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'BLANK')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'BLANK' ? 'bg-themeCardSoft text-themeText border-themeText' : 'border-themeBorder text-themeMuted'}">Left</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'R')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'R' ? 'bg-amber-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">R</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'MCQ')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'MCQ' ? 'bg-indigo-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">MCQ</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'DONE')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'DONE' ? 'bg-emerald-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">Done ✓</button></div>`;
         chList.appendChild(div);
       });
       lucide.createIcons();
@@ -3685,10 +3687,26 @@
     }
 
     function openAddSubjectModal() {
-      document.getElementById('newSubjectName').value='';
-      document.getElementById('newSubjectSymbol').value='';
-      document.getElementById('newSubjectColor').value='#6366f1';
+      const nameEl=document.getElementById('newSubjectName');
+      const symbolEl=document.getElementById('newSubjectSymbol');
+      const colorEl=document.getElementById('newSubjectColor');
+      if(nameEl)nameEl.value='';
+      if(symbolEl)symbolEl.value='';
+      if(colorEl)colorEl.value='#6366f1';
       openModal('addSubjectModal');
+      setTimeout(()=>nameEl?.focus(),50);
+    }
+
+    function openAddChapterModal() {
+      const subjectEl=document.getElementById('addChapterSubjectSelect');
+      const nameEl=document.getElementById('newChapterName');
+      const notesEl=document.getElementById('newChapterNotes');
+      if(nameEl)nameEl.value='';
+      if(notesEl)notesEl.value='';
+      populateSubjectDropdowns();
+      if(subjectEl) subjectEl.value=selectedSubjectId || appState.subjects?.[0]?.id || '';
+      openModal('addChapterModal');
+      setTimeout(()=>nameEl?.focus(),50);
     }
 
     function saveNewSubject() {
@@ -3698,7 +3716,11 @@
       const symbol=(document.getElementById('newSubjectSymbol').value.trim() || name.substring(0,2)).toUpperCase();
       const subject={ id:'sub_'+Date.now(), name, symbol, color:document.getElementById('newSubjectColor').value, chapters:[] };
       appState.subjects.push(subject); selectedSubjectId=subject.id;
-      saveState(); closeModal('addSubjectModal'); populateSubjectDropdowns(); renderSyllabus(); renderHome(); showToast('Subject created');
+      saveState();
+      document.getElementById('newSubjectName').value='';
+      document.getElementById('newSubjectSymbol').value='';
+      document.getElementById('newSubjectColor').value='#6366f1';
+      closeModal('addSubjectModal'); populateSubjectDropdowns(); renderSyllabus(); renderHome(); showToast('Subject created');
     }
 
     function openEditSubjectModal() {
@@ -3744,6 +3766,8 @@
       if (!sub || !name) return;
       sub.chapters.push({ id: 'ch_' + Date.now(), name, status: 'BLANK' });
       saveState();
+      document.getElementById('newChapterName').value='';
+      document.getElementById('newChapterNotes').value='';
       closeModal('addChapterModal');
       renderSyllabus();
       showToast('Chapter added');
