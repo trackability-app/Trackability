@@ -327,8 +327,7 @@
             <p class="ob-subtitle">These details personalize your dashboard. You can change them later in Settings.</p>
             <div class="ob-form">
               <div class="ob-field"><label>Name</label><input id="obName" type="text" placeholder="What should we call you?"></div>
-              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal</label><input id="obCourse" type="text" placeholder="NEET PG, JEE, etc."></div></div>
-              <div class="ob-field"><label>Exam / Goal Name</label><input id="obExam" type="text" placeholder="e.g. NEET PG 2027"></div>
+              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal / Exam Name</label><input id="obGoal" type="text" placeholder="e.g. NEET PG 2027, JEE, UPSC, USMLE"></div></div>
               <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Target Date</label><input id="obDate" type="date"></div><div class="ob-field"><label>Target Time (optional)</label><input id="obTime" type="time"></div></div>
             </div><div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obSaveProfile();obNext()">NEXT →</button></div>
           </section>
@@ -3813,6 +3812,7 @@
       const ageVal=(document.getElementById('settingsAgeInput')?.value||'').trim();
       appState.profileAge = ageVal ? Number(ageVal) : '';
       appState.examTitle = document.getElementById('settingsExamTitleInput').value.trim();
+      appState.course = appState.examTitle;
       const date = document.getElementById('settingsExamDateInput').value;
       appState.examDate = date;
       const hm=document.getElementById('settingsShowHomeMCQ');
@@ -7027,12 +7027,12 @@ document.addEventListener('DOMContentLoaded',function(){
   window.obPickExamMode=function(v){examMode=v==='theory'?'theory':'mcq';$('obChoiceMCQ')?.classList.toggle('selected',examMode==='mcq');$('obChoiceTheory')?.classList.toggle('selected',examMode==='theory');if(typeof appState!=='undefined'){appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';try{saveState();}catch(e){}}};
   window.obSaveProfile=function(){
     if(typeof appState==='undefined')return;
-    appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=($('obCourse').value||'').trim();appState.examTitle=($('obExam').value||'').trim();appState.examDate=$('obDate').value||'';appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';
+    const goal=($('obGoal').value||'').trim();appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=goal;appState.examTitle=goal;appState.examDate=$('obDate').value||'';appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';
     try{saveState();}catch(e){}
   };
   window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setTheme==='function')setTheme(v);else document.body.className=v+' '+pickedFont+' h-screen overflow-hidden flex flex-col antialiased';};
   window.obPickFont=function(el,v){pickedFont=v;document.querySelectorAll('.ob-font').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setFontStyle==='function')setFontStyle(v);};
-  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obExam').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
+  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obGoal').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
   window.obStart=function(){
     obSaveProfile();
     try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;saveState();}catch(e){}
@@ -7064,6 +7064,12 @@ document.addEventListener('DOMContentLoaded',function(){
   const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 
   /* 2) Home/Task MCQ chooser: add Misc / Other. */
+  function normalizeMiscMCQRecords(){
+    if(!Array.isArray(appState.mcqActivities)) return;
+    appState.mcqActivities.forEach(x=>{if(x && x.type==='misc' && x.name) x.platform=x.name;});
+  }
+  normalizeMiscMCQRecords();
+
   function ensureMiscChooser(){
     const m=document.getElementById('addMCQChooserModal');
     if(!m)return;
@@ -7083,7 +7089,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="flex justify-between items-center"><div><h3 class="text-sm font-black">Log Misc / Other MCQs</h3><p class="text-[10px] text-themeMuted">This entry is added to the same MCQ history and totals.</p></div><button onclick="closeModal('miscMCQModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <input type="hidden" id="miscMCQEditId" value="" />
       <input type="text" id="miscMCQName" placeholder="Source / name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
-      <div class="grid grid-cols-2 gap-2"><input type="text" id="miscMCQPlatform" placeholder="Platform / source" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" /><input type="number" id="miscMCQQuestions" min="1" step="1" placeholder="Questions" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" /></div>
+      <input type="number" id="miscMCQQuestions" min="1" step="1" placeholder="Questions" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
       <select id="miscMCQSubject" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></select>
       <textarea id="miscMCQNotes" rows="3" placeholder="Optional note" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></textarea>
       <input type="date" id="miscMCQDate" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
@@ -7094,7 +7100,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function populateMisc(rec){
     ensureMiscModal();const sub=document.getElementById('miscMCQSubject');
     sub.innerHTML='<option value="">General / Mix</option>'+(appState.subjects||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
-    document.getElementById('miscMCQName').value=rec?.name||'';document.getElementById('miscMCQPlatform').value=rec?.platform||'';document.getElementById('miscMCQQuestions').value=rec?.questions??'';document.getElementById('miscMCQNotes').value=rec?.notes||'';document.getElementById('miscMCQDate').value=rec?.date||today();document.getElementById('miscMCQEditId').value=rec?.id||'';sub.value=rec?.subjectId||'';document.getElementById('miscMCQSave').textContent=rec?'Update':'Save';
+    document.getElementById('miscMCQName').value=rec?.name||'';document.getElementById('miscMCQQuestions').value=rec?.questions??'';document.getElementById('miscMCQNotes').value=rec?.notes||'';document.getElementById('miscMCQDate').value=rec?.date||today();document.getElementById('miscMCQEditId').value=rec?.id||'';sub.value=rec?.subjectId||'';document.getElementById('miscMCQSave').textContent=rec?'Update':'Save';
   }
   window.openMiscMCQModal=function(id=''){
     const rec=id?(appState.mcqActivities||[]).find(x=>x.id===id):null;populateMisc(rec);openModal('miscMCQModal');
@@ -7102,7 +7108,7 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   window.saveMiscMCQ=function(){
     appState.mcqActivities=appState.mcqActivities||[];const id=document.getElementById('miscMCQEditId').value;const name=document.getElementById('miscMCQName').value.trim()||'Misc / Other';const questions=Math.max(1,parseInt(document.getElementById('miscMCQQuestions').value,10)||0);if(!questions){showToast('Enter number of questions','alert-circle');return;}
-    const rec={name,subjectId:document.getElementById('miscMCQSubject').value||'',platform:document.getElementById('miscMCQPlatform').value.trim(),questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
+    const rec={name,subjectId:document.getElementById('miscMCQSubject').value||'',platform:name,questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
     let saved;if(id){const i=appState.mcqActivities.findIndex(x=>x.id===id);if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}}if(!saved){saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);appState.mcqActivities.unshift(saved);}
     if(window.pendingMCQTaskId){const t=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(t){t.completed=true;t.trackerLogged=true;t.mcqTaskCount=questions;t.mcqActivityId=saved.id;saved.taskId=t.id;}window.pendingMCQTaskId='';}
     saveState();closeModal('miscMCQModal');renderHome();if(typeof renderStatistics==='function')renderStatistics();openMCQHistoryModal();showToast(id?'Misc MCQ updated':'Misc MCQ logged');
@@ -7297,32 +7303,6 @@ document.addEventListener('DOMContentLoaded',function(){
     if(typeof oldChooseSource==='function')return oldChooseSource(type);
   };
 
-  // History renderer: preserve misc as Misc / Other, with edit/delete.
-  const oldHistory=window.openMCQHistoryModal;
-  window.openMCQHistoryModal=function(){
-    if(typeof oldHistory==='function') oldHistory();
-    setTimeout(()=>{
-      const modal=document.getElementById('mcqHistoryModal');
-      if(!modal)return;
-      const selected=modal.querySelector('#mcqHistorySelectedDay');
-      if(!selected)return;
-      selected.querySelectorAll('[data-misc-history]').forEach(e=>e.remove());
-      // Re-render the selected-day detail if the underlying history code exposed a selected date.
-      const text=selected.textContent||'';
-      const m=text.match(/(\d{4}-\d{2}-\d{2})/);
-      if(!m)return;
-      const date=m[1];
-      const acts=(appState.mcqActivities||[]).filter(x=>x.date===date);
-      const misc=acts.filter(x=>x.type==='misc');
-      if(!misc.length)return;
-      const box=document.createElement('div');
-      box.setAttribute('data-misc-history','1');
-      box.className='space-y-1 mt-1';
-      box.innerHTML=misc.map(x=>`<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">Misc / Other</span><b class="block text-[10px]">${esc(x.name||'Misc / Other')}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}</div><div class="text-right"><b class="text-emerald-400">${Number(x.questions||0)}</b><div class="flex gap-1 justify-end mt-1"><button onclick="openMiscMCQModal('${esc(x.id||'')}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id||'')}')" class="text-[8px] text-rose-400">Delete</button></div></div></div>`).join('');
-      selected.appendChild(box);
-    },20);
-  };
-
   /* =========================================================
      2) STATISTICS: Today / Custom Range / Total + full calendar
      ========================================================= */
@@ -7427,7 +7407,9 @@ document.addEventListener('DOMContentLoaded',function(){
     const subtitle=statsMode==='today'?fmtDate(r.from):statsMode==='total'?'All recorded activity':`${fmtDate(r.from)} → ${fmtDate(r.to)}`;
     const buttons=`<div class="grid grid-cols-3 gap-1.5"><button onclick="setStatsMode('today')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='today'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Today</button><button onclick="setStatsMode('custom')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='custom'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Custom Range</button><button onclick="setStatsMode('total')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='total'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Total</button></div>`;
     const custom=statsMode==='custom'?`<div class="grid grid-cols-2 gap-2"><label class="text-[9px] font-black uppercase text-themeMuted">From<input type="date" value="${esc(statsFrom)}" onchange="setStatsCustomFrom(this.value)" class="mt-1 w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></label><label class="text-[9px] font-black uppercase text-themeMuted">To<input type="date" value="${esc(statsTo)}" onchange="setStatsCustomTo(this.value)" class="mt-1 w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></label></div>`:'';
-    summary.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeText">${title}</h4><p class="text-[9px] text-themeMuted mt-0.5">${subtitle}</p></div><span class="text-[9px] font-black text-themeAccent">${activeDays} active day${activeDays===1?'':'s'}</span></div>${buttons}${custom}</div><div class="grid grid-cols-2 gap-2">${statCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`)}${statCard('📚 Focus',fmtHours(d.focusH),`${d.focus.length} sessions`)}${statCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}${statCard('📝 Grand Tests',d.gts.length,`${d.gts.reduce((a,x)=>a+Number(x.total||0),0)} questions`)}${statCard('🏋️ Gym',d.gym.length,'workout logs')}${statCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,d.sleep.length?`avg ${avgSleep.toFixed(1)} h/log`:'no logs')}${statCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(avgProtein)} g / active day`)}${statCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(avgKcal).toLocaleString()} / active day`)}${statCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}${statCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}</div>`;
+    const mcqEnabled=typeof appState!=='undefined' && appState.mcqEnabled!==false;
+    const mcqCards=mcqEnabled?`${statCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`)}${statCard('📝 Grand Tests',d.gts.length,`${d.gts.reduce((a,x)=>a+Number(x.total||0),0)} questions`)}${statCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}`:'';
+    summary.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeText">${title}</h4><p class="text-[9px] text-themeMuted mt-0.5">${subtitle}</p></div><span class="text-[9px] font-black text-themeAccent">${activeDays} active day${activeDays===1?'':'s'}</span></div>${buttons}${custom}</div><div class="grid grid-cols-2 gap-2">${mcqCards}${statCard('📚 Focus',fmtHours(d.focusH),`${d.focus.length} sessions`)}${statCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}${statCard('🏋️ Gym',d.gym.length,'workout logs')}${statCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,d.sleep.length?`avg ${avgSleep.toFixed(1)} h/log`:'no logs')}${statCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(avgProtein)} g / active day`)}${statCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(avgKcal).toLocaleString()} / active day`)}${statCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}</div>`;
     const head=document.querySelector('#tab-statistics h3');if(head)head.textContent='ACTIVITY STATISTICS';
     const sub=head?.parentElement?.querySelector('p');if(sub)sub.textContent='Choose today, a custom date range, or all recorded activity.';
     renderStatsCalendar();
@@ -7483,6 +7465,14 @@ document.addEventListener('DOMContentLoaded',function(){
 (function(){
   'use strict';
   const $=id=>document.getElementById(id);
+  if(typeof appState!=='undefined'){
+    const canonicalGoal=String(appState.examTitle||appState.course||'').trim();
+    if(appState.examTitle!==canonicalGoal || appState.course!==canonicalGoal){
+      appState.examTitle=canonicalGoal;
+      appState.course=canonicalGoal;
+      try{saveState();}catch(e){}
+    }
+  }
   const isMCQEnabled=()=>typeof appState!=='undefined' && appState.mcqEnabled!==false;
   function applyMCQModuleUI(){
     const enabled=isMCQEnabled();
@@ -7500,14 +7490,11 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     // Remove MCQ/GT statistics cards from the current statistics render.
     const summary=$('statsDailySummary');
-    if(summary){
-      const grid=summary.querySelector('.grid.grid-cols-2');
-      if(grid){
-        grid.querySelectorAll(':scope > div').forEach(card=>{
-          const txt=(card.textContent||'').trim();
-          if(!enabled && (/^🧠\\s*MCQs/.test(txt)||/^📝\\s*Grand Tests/.test(txt)||/^🆔\\s*MCQ IDs/.test(txt))) card.remove();
-        });
-      }
+    if(summary && !enabled){
+      summary.querySelectorAll('.grid.grid-cols-2 > div').forEach(card=>{
+        const txt=(card.textContent||'').trim();
+        if(/MCQs|Grand Tests|MCQ IDs/.test(txt)) card.remove();
+      });
     }
     const gtChart=$('statsMonthGTChart'); if(gtChart)gtChart.style.display=enabled?'':'none';
     const search=$('globalSearchResults');
