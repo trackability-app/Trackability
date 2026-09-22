@@ -7063,46 +7063,33 @@ document.addEventListener('DOMContentLoaded',function(){
   const today=()=>ymd(new Date());
   const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 
-  /* 2) Home/Task MCQ chooser: add Misc / Other. */
-  function miscMCQFingerprint(x){
-    if(!x || x.type!=='misc') return '';
-    return [
-      String(x.date||''),
-      String(x.name||'').trim().toLowerCase(),
-      String(Number(x.questions)||0),
-      String(x.subjectId||''),
-      String(x.notes||'').trim(),
-      String(x.platform||x.name||'').trim().toLowerCase()
-    ].join('\u001f');
-  }
+  /* 2) Home/Task MCQ chooser + Misc / Other ledger. */
+  // Misc / Other uses one built-in platform/source selector.  It is deliberately
+  // not user-editable and is never used as a de-duplication key.
+  const BUILTIN_MISC_MCQ_PLATFORMS=['Marrow','PrepLadder','BTR','Cerebellum','Bhatia','PYQ Exam','Other'];
 
   function normalizeMiscMCQRecords(){
     if(!Array.isArray(appState.mcqActivities)) return false;
     let changed=false;
-    const seen=new Map();
+    const seenTaskIds=new Set();
     const cleaned=[];
     appState.mcqActivities.forEach(x=>{
-      if(x && x.type==='misc' && x.name){
-        const oldPlatform=x.platform;
-        x.platform=x.name;
-        if(oldPlatform!==x.platform) changed=true;
-        const key=miscMCQFingerprint(x);
-        const existingIndex=seen.get(key);
-        if(existingIndex!==undefined){
-          const existing=cleaned[existingIndex];
-          // Keep the record linked to a task when one copy has task linkage.
-          if(!existing.taskId && x.taskId) cleaned[existingIndex]=x;
-          changed=true;
-          return;
+      if(x && x.type==='misc'){
+        const platform=BUILTIN_MISC_MCQ_PLATFORMS.includes(x.platform)?x.platform:(BUILTIN_MISC_MCQ_PLATFORMS.includes(x.name)?x.name:'Other');
+        if(x.platform!==platform){x.platform=platform;changed=true;}
+        // The ONLY safe automatic duplicate rule is the task link itself.
+        // Two manual logs with identical details must remain separate records.
+        if(x.taskId){
+          if(seenTaskIds.has(String(x.taskId))){changed=true;return;}
+          seenTaskIds.add(String(x.taskId));
         }
-        seen.set(key,cleaned.length);
+        // Legacy Misc records used the typed source/name as the display name.
+        // Keep that value aligned with the built-in platform.
+        if(x.name!==platform){x.name=platform;changed=true;}
       }
       cleaned.push(x);
     });
-    if(cleaned.length!==appState.mcqActivities.length){
-      appState.mcqActivities=cleaned;
-      changed=true;
-    }
+    if(cleaned.length!==appState.mcqActivities.length){appState.mcqActivities=cleaned;changed=true;}
     return changed;
   }
   if(normalizeMiscMCQRecords()) saveState();
@@ -7113,7 +7100,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const grid=m.querySelector('.grid');
     if(grid && !grid.querySelector('[data-mcq-source="misc"]')){
       const b=document.createElement('button');b.setAttribute('data-mcq-source','misc');b.className='p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-left';
-      b.innerHTML='<b class="text-xs">📌 Misc / Other</b><span class="block text-[9px] text-themeMuted mt-1">Log MCQs from any other source.</span>';
+      b.innerHTML='<b class="text-xs">📌 Misc / Other</b><span class="block text-[9px] text-themeMuted mt-1">Log MCQs from a built-in platform/source.</span>';
       b.onclick=()=>window.chooseMCQSource('misc');grid.appendChild(b);
     }
   }
@@ -7123,9 +7110,9 @@ document.addEventListener('DOMContentLoaded',function(){
     let m=document.getElementById('miscMCQModal');if(m)return m;
     m=document.createElement('div');m.id='miscMCQModal';m.className='hidden fixed inset-0 z-[59] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4';
     m.innerHTML=`<div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-3 max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center"><div><h3 class="text-sm font-black">Log Misc / Other MCQs</h3><p class="text-[10px] text-themeMuted">This entry is added to the same MCQ history and totals.</p></div><button onclick="closeModal('miscMCQModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="flex justify-between items-center"><div><h3 class="text-sm font-black">Log Misc / Other MCQs</h3><p class="text-[10px] text-themeMuted">Select the platform/source and log the questions.</p></div><button onclick="closeModal('miscMCQModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <input type="hidden" id="miscMCQEditId" value="" />
-      <input type="text" id="miscMCQName" placeholder="Source / name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+      <select id="miscMCQPlatform" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></select>
       <input type="number" id="miscMCQQuestions" min="1" step="1" placeholder="Questions" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
       <select id="miscMCQSubject" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></select>
       <textarea id="miscMCQNotes" rows="3" placeholder="Optional note" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></textarea>
@@ -7135,30 +7122,49 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.appendChild(m);if(window.lucide)lucide.createIcons();return m;
   }
   function populateMisc(rec){
-    ensureMiscModal();const sub=document.getElementById('miscMCQSubject');
+    ensureMiscModal();
+    const plat=document.getElementById('miscMCQPlatform'),sub=document.getElementById('miscMCQSubject');
+    plat.innerHTML=BUILTIN_MISC_MCQ_PLATFORMS.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
     sub.innerHTML='<option value="">General / Mix</option>'+(appState.subjects||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
-    document.getElementById('miscMCQName').value=rec?.name||'';document.getElementById('miscMCQQuestions').value=rec?.questions??'';document.getElementById('miscMCQNotes').value=rec?.notes||'';document.getElementById('miscMCQDate').value=rec?.date||today();document.getElementById('miscMCQEditId').value=rec?.id||'';sub.value=rec?.subjectId||'';document.getElementById('miscMCQSave').textContent=rec?'Update':'Save';
+    plat.value=BUILTIN_MISC_MCQ_PLATFORMS.includes(rec?.platform)?rec.platform:(BUILTIN_MISC_MCQ_PLATFORMS.includes(rec?.name)?rec.name:'Marrow');
+    document.getElementById('miscMCQQuestions').value=rec?.questions??'';
+    document.getElementById('miscMCQNotes').value=rec?.notes||'';
+    document.getElementById('miscMCQDate').value=rec?.date||today();
+    document.getElementById('miscMCQEditId').value=rec?.id||'';
+    sub.value=rec?.subjectId||'';
+    document.getElementById('miscMCQSave').textContent=rec?'Update':'Save';
   }
   window.openMiscMCQModal=function(id=''){
     const rec=id?(appState.mcqActivities||[]).find(x=>x.id===id):null;populateMisc(rec);openModal('miscMCQModal');
     const task=window.pendingMCQTaskId?(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId):null;if(task)document.getElementById('miscMCQDate').value=task.date||today();
   };
   window.saveMiscMCQ=function(){
-    appState.mcqActivities=appState.mcqActivities||[];const id=document.getElementById('miscMCQEditId').value;const name=document.getElementById('miscMCQName').value.trim()||'Misc / Other';const questions=Math.max(1,parseInt(document.getElementById('miscMCQQuestions').value,10)||0);if(!questions){showToast('Enter number of questions','alert-circle');return;}
-    const rec={name,subjectId:document.getElementById('miscMCQSubject').value||'',platform:name,questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
-    let saved;if(id){const i=appState.mcqActivities.findIndex(x=>x.id===id);if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}}
-    if(!saved){
-      // A single Misc / Other action must never create a second identical ledger row.
-      const duplicate=appState.mcqActivities.find(x=>miscMCQFingerprint(x)===miscMCQFingerprint(rec));
-      if(duplicate){
-        saved=duplicate;
-        Object.assign(saved,rec);
-      }else{
-        saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);
-        appState.mcqActivities.unshift(saved);
-      }
+    appState.mcqActivities=appState.mcqActivities||[];
+    const id=document.getElementById('miscMCQEditId').value;
+    const platform=document.getElementById('miscMCQPlatform').value||'Other';
+    const questions=Math.max(1,parseInt(document.getElementById('miscMCQQuestions').value,10)||0);
+    if(!questions){showToast('Enter number of questions','alert-circle');return;}
+    const taskId=window.pendingMCQTaskId||null;
+    // If this came from a Task, update that Task's linked record instead of creating another.
+    const linkedId=taskId?((appState.tasks||[]).find(x=>x.id===taskId)?.mcqActivityId||''):'';
+    const editId=id||linkedId;
+    const rec={name:platform,subjectId:document.getElementById('miscMCQSubject').value||'',platform,questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
+    let saved=null;
+    if(editId){
+      const i=appState.mcqActivities.findIndex(x=>x.id===editId);
+      if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}
     }
-    if(window.pendingMCQTaskId){const t=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(t){t.completed=true;t.trackerLogged=true;t.mcqTaskCount=questions;t.mcqActivityId=saved.id;saved.taskId=t.id;}window.pendingMCQTaskId='';}
+    // A manual Misc log always creates a NEW unique record. Identical details are allowed.
+    if(!saved){
+      saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);
+      if(taskId)saved.taskId=taskId;
+      appState.mcqActivities.unshift(saved);
+    }
+    if(taskId){
+      const t=(appState.tasks||[]).find(x=>x.id===taskId);
+      if(t){t.completed=true;t.trackerLogged=true;t.mcqTaskCount=questions;t.mcqActivityId=saved.id;saved.taskId=t.id;}
+      window.pendingMCQTaskId='';
+    }
     saveState();closeModal('miscMCQModal');renderHome();if(typeof renderStatistics==='function')renderStatistics();openMCQHistoryModal();showToast(id?'Misc MCQ updated':'Misc MCQ logged');
   };
 
