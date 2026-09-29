@@ -6256,6 +6256,15 @@ document.addEventListener('DOMContentLoaded',function(){
   let bootstrapPromise = null;
   let conflictContext = null;
 
+  /*
+   * SYNC SAFETY:
+   * A signed-in device starts with its own guest/local appState. Do NOT allow
+   * that local state to be uploaded until the account's cloud state has been
+   * checked and hydrated. This prevents a second device from overwriting an
+   * existing account with its empty/guest state during login.
+   */
+  let cloudHydrated = false;
+
   function syncMetaKey(){ return SYNC_META_PREFIX + (currentUser?.id || 'guest'); }
 
   function stableSyncString(value){
@@ -6338,7 +6347,12 @@ document.addEventListener('DOMContentLoaded',function(){
       /* Register before getSession so recovery links cannot miss the
          PASSWORD_RECOVERY event while Supabase processes the URL. */
       sb.auth.onAuthStateChange(function(event,session){
-        currentUser=session?.user || null;
+        const nextUser=session?.user || null;
+        if((currentUser?.id||'') !== (nextUser?.id||'')){
+          clearTimeout(cloudSaveTimer);
+          cloudHydrated=false;
+        }
+        currentUser=nextUser;
         window.__trackabilityCurrentUserEmail=currentUser?.email||'';
         try{ updateSettingsAccountCard(); }catch(e){}
         if(event==='PASSWORD_RECOVERY'){
@@ -6368,14 +6382,16 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   async function finishSignedInBootstrap(){
-    /* One bootstrap at a time. There is deliberately NO cloud/device
-       confirmation dialog. Existing cloud data is the source of truth for an
-       already-existing account; a brand-new account with no cloud data gets
-       the current guest/device data uploaded once. */
+    /* One bootstrap at a time. Existing cloud data is the source of truth for
+       an already-existing account. Guest/device data is uploaded automatically
+       ONLY during creation of a brand-new account with no cloud row. */
     if(bootstrapPromise) return bootstrapPromise;
     bootstrapPromise=(async function(){
       populateAccountUI();
       if(!currentUser || !sb) return;
+      const bootUserId=currentUser.id;
+      clearTimeout(cloudSaveTimer);
+      cloudHydrated=false;
       try{
         const {data:profile,error:profileError}=await sb.from(PROFILE_TABLE).select('id,name,age,course,exam_date,exam_year').eq('id',currentUser.id).maybeSingle();
         if(profileError) throw profileError;
@@ -6396,17 +6412,38 @@ document.addEventListener('DOMContentLoaded',function(){
           await saveProfileRow({name,age,course,exam_date});
         }
 
-        const {data:cloudRow,error:stateError}=await sb.from(CLOUD_STATE_TABLE).select('data,updated_at').eq('user_id',currentUser.id).maybeSingle();
+        const {data:cloudRow,error:stateError}=await sb.from(CLOUD_STATE_TABLE).select('data,updated_at').eq('user_id',bootUserId).maybeSingle();
         if(stateError) throw stateError;
 
         if(cloudRow){
-          /* Existing account: silently load its cloud copy. */
+          /*
+           * EXISTING ACCOUNT:
+           * Cloud is authoritative on a fresh device. Replace the guest/local
+           * state with the account's stored state BEFORE enabling cloud writes.
+           */
           await applyCloudRow(cloudRow,false);
+          cloudHydrated=true;
+          localStorage.removeItem(PENDING_MIGRATION_KEY);
+        }else if(localStorage.getItem(PENDING_MIGRATION_KEY)==='1'){
+          /*
+           * BRAND-NEW ACCOUNT:
+           * There is no cloud row, so the device's guest state is the intended
+           * first cloud copy.
+           */
+          const uploaded=await uploadCloudState(true,true);
+          if(!uploaded) throw new Error('Could not create the initial cloud copy');
+          cloudHydrated=true;
           localStorage.removeItem(PENDING_MIGRATION_KEY);
         }else{
-          /* New account or account with no app data yet: upload current local data. */
-          await uploadCloudState(true);
-          localStorage.removeItem(PENDING_MIGRATION_KEY);
+          /*
+           * EXISTING SIGN-IN WITH NO CLOUD ROW:
+           * Never silently upload this device's guest data.
+           */
+          cloudHydrated=false;
+          setSyncStatus('No cloud data found');
+          accountToast('No cloud data was found for this account. Your device data was not uploaded.','alert-circle');
+          populateAccountUI();
+          return;
         }
         setSyncStatus('Synced');
         populateAccountUI();
@@ -6443,8 +6480,9 @@ document.addEventListener('DOMContentLoaded',function(){
     finally{ suppressCloudSave=false; }
   }
 
-  async function uploadCloudState(showMessage){
+  async function uploadCloudState(showMessage,allowBeforeHydration=false){
     if(!sb || !currentUser || suppressCloudSave) return false;
+    if(!cloudHydrated && !allowBeforeHydration) return false;
     if(cloudSaveBusy) return false;
     cloudSaveBusy=true;
     setSyncStatus('Syncing…');
@@ -6465,7 +6503,11 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function scheduleCloudSave(){
-    if(!currentUser || suppressCloudSave) return;
+    /*
+     * Never write local guest state to an account while login/bootstrap is
+     * still deciding whether that account already has cloud data.
+     */
+    if(!currentUser || suppressCloudSave || !cloudHydrated) return;
     clearTimeout(cloudSaveTimer);
     setSyncStatus('Changes pending…');
     cloudSaveTimer=setTimeout(function(){ uploadCloudState(false); },900);
@@ -6750,6 +6792,8 @@ document.addEventListener('DOMContentLoaded',function(){
     try{
       await uploadCloudState(false);
       if(sb) await sb.auth.signOut();
+      clearTimeout(cloudSaveTimer);
+      cloudHydrated=false;
       currentUser=null;
       populateAccountUI();
       closeModal('accountModal');
@@ -7815,9 +7859,9 @@ document.addEventListener('DOMContentLoaded',function(){
           <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="minus025">+1 / −0.25</button>
         </div>
         <div class="grid grid-cols-3 gap-2">
-          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Correct</span><input id="gtScoreCorrectInput" type="number" step="0.01" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
-          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Wrong</span><input id="gtScoreWrongInput" type="number" step="0.01" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
-          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Left</span><input id="gtScoreLeftInput" type="number" step="0.01" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Correct</span><input id="gtScoreCorrectInput" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Wrong</span><input id="gtScoreWrongInput" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Left</span><input id="gtScoreLeftInput" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
         </div>
         <div id="gtScoringFormulaPreview" class="text-[9px] font-bold text-themeAccent bg-themeCard rounded-xl border border-themeBorder px-3 py-2"></div>
       `;
@@ -7839,8 +7883,13 @@ document.addEventListener('DOMContentLoaded',function(){
     syncScoringDisabledState();
   }
 
+  function parseScoringValue(value){
+    const normalized=String(value ?? '').trim().replace(/[−–—]/g,'-').replace(/,/g,'.');
+    return normalized==='' ? NaN : Number(normalized);
+  }
+
   function updateScoringPreview(){
-    const c=Number(document.getElementById('gtScoreCorrectInput')?.value),w=Number(document.getElementById('gtScoreWrongInput')?.value),l=Number(document.getElementById('gtScoreLeftInput')?.value);
+    const c=parseScoringValue(document.getElementById('gtScoreCorrectInput')?.value),w=parseScoringValue(document.getElementById('gtScoreWrongInput')?.value),l=parseScoringValue(document.getElementById('gtScoreLeftInput')?.value);
     const el=document.getElementById('gtScoringFormulaPreview');
     if(!el)return;
     const cc=Number.isFinite(c)?c:0,ww=Number.isFinite(w)?w:0,ll=Number.isFinite(l)?l:0;
@@ -7858,7 +7907,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   function applyScoringSettingsFromInputs(){
     ensureScoringState();
-    const c=Number(document.getElementById('gtScoreCorrectInput')?.value),w=Number(document.getElementById('gtScoreWrongInput')?.value),l=Number(document.getElementById('gtScoreLeftInput')?.value);
+    const c=parseScoringValue(document.getElementById('gtScoreCorrectInput')?.value),w=parseScoringValue(document.getElementById('gtScoreWrongInput')?.value),l=parseScoringValue(document.getElementById('gtScoreLeftInput')?.value);
     if(!Number.isFinite(c)||!Number.isFinite(w)||!Number.isFinite(l)){
       showToast('Enter valid GT scoring values','alert-circle');
       return false;
