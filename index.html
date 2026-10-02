@@ -225,7 +225,7 @@
   .ob-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px;text-align:left;}
   .ob-plan{position:relative;padding:11px;border:1px solid var(--border-color);border-radius:16px;background:var(--card-soft-color);cursor:pointer;transition:.18s ease;}
   .ob-plan:hover{transform:translateY(-2px);border-color:var(--accent-color);}
-  .ob-plan.featured{border-color:var(--accent-color);box-shadow:0 8px 28px var(--accent-glow);}
+  .ob-plan.selected{border-color:var(--accent-color);background:var(--accent-glow);box-shadow:0 8px 28px var(--accent-glow);}
   .ob-plan-badge{position:absolute;right:7px;top:7px;font-size:7px;font-weight:950;text-transform:uppercase;color:var(--accent-color);}
   .ob-plan-name{font-size:9px;font-weight:950;text-transform:uppercase;color:var(--muted-color);}
   .ob-plan-price{font-size:18px;font-weight:950;margin-top:4px;}
@@ -408,8 +408,8 @@
               <div class="ob-plan-grid">
                 <button class="ob-plan" type="button" onclick="obChoosePaidPlan('monthly')"><div class="ob-plan-name">1 Month</div><div class="ob-plan-price">₹129</div><div class="ob-plan-small">Simple monthly access</div></button>
                 <button class="ob-plan" type="button" onclick="obChoosePaidPlan('quarterly')"><div class="ob-plan-name">3 Months</div><div class="ob-plan-price">₹359</div><div class="ob-plan-save">Save ₹28</div><div class="ob-plan-small">vs ₹129/month</div></button>
-                <button class="ob-plan featured" type="button" onclick="obChoosePaidPlan('halfyearly')"><div class="ob-plan-badge">Popular</div><div class="ob-plan-name">6 Months</div><div class="ob-plan-price">₹699</div><div class="ob-plan-old">₹759</div><div class="ob-plan-save">Save ₹60</div></button>
-                <button class="ob-plan featured" type="button" onclick="obChoosePaidPlan('yearly')"><div class="ob-plan-badge">Best value</div><div class="ob-plan-name">12 Months</div><div class="ob-plan-price">₹1,199</div><div class="ob-plan-old">₹1,499</div><div class="ob-plan-save">Save ₹300</div></button>
+                <button class="ob-plan" type="button" onclick="obChoosePaidPlan('halfyearly')"><div class="ob-plan-badge">Popular</div><div class="ob-plan-name">6 Months</div><div class="ob-plan-price">₹699</div><div class="ob-plan-old">₹759</div><div class="ob-plan-save">Save ₹60</div></button>
+                <button class="ob-plan" type="button" onclick="obChoosePaidPlan('yearly')"><div class="ob-plan-badge">Best value</div><div class="ob-plan-name">12 Months</div><div class="ob-plan-price">₹1,199</div><div class="ob-plan-old">₹1,499</div><div class="ob-plan-save">Save ₹300</div></button>
               </div>
               <div class="ob-sub-hero" style="margin-top:14px">
                 <button class="ob-trial-btn" type="button" onclick="obStartTrial()">START 14-DAY FREE TRIAL →</button>
@@ -6506,7 +6506,12 @@ document.addEventListener('DOMContentLoaded',function(){
           accountToast('No cloud data was found for this account. Your device data was not uploaded.','alert-circle');
           return;
         }
-        await syncSubscriptionFromCloud();
+        /* Subscription access is initialized separately. During anonymous
+           sign-in, Auth/bootstrap can race the trial trigger by a few ms; do
+           not surface that transient subscription-read error as a duplicate
+           user-facing toast. The trial flow performs the authoritative read. */
+        try{ await syncSubscriptionFromCloud(); }
+        catch(subscriptionErr){ console.warn('Subscription bootstrap read deferred:',subscriptionErr); }
         setSyncStatus('Synced');
         populateAccountUI();
       }catch(err){
@@ -7165,7 +7170,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <script id="trackability-onboarding-script">
 (function(){
   const KEY='trackability_onboarding_v1';
-  let step=0, mode='account', examMode='mcq', pickedTheme='theme-light', pickedFont='font-space';
+  let step=0, mode='account', examMode='mcq', pickedTheme='theme-light', pickedFont='font-space', selectedPaidPlan='';
   const $=id=>document.getElementById(id);
   function screens(){return [...document.querySelectorAll('#trackabilityOnboarding .ob-screen')];}
   function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===7)updateSummary();}
@@ -7215,6 +7220,10 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   };
   window.obChoosePaidPlan=function(planId){
+    selectedPaidPlan=planId;
+    document.querySelectorAll('#trackabilityOnboarding .ob-plan').forEach(function(el){el.classList.remove('selected');});
+    const selected=document.querySelector('#trackabilityOnboarding .ob-plan[onclick*="' + planId + '"]');
+    if(selected) selected.classList.add('selected');
     obSaveProfile();
     if(typeof window.trackabilityActivatePlan==='function'){
       window.trackabilityActivatePlan(planId,true);
