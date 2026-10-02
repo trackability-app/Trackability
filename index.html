@@ -97,8 +97,6 @@
     }
 
     .custom-scroll::-webkit-scrollbar { display: none; }
-    .syllabus-wrap-text{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;min-width:0;}
-    #syllabusChaptersList h5,#syllabusChaptersList p{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;}
     .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* Trackability notification system */
@@ -263,6 +261,18 @@
   }
 </style>
 
+
+<style id="trackability-subscription-styles">
+  #trackabilitySubscriptionGate{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:18px}
+  #trackabilitySubscriptionGate.is-open{display:flex}
+  .tb-sub-card{width:min(560px,100%);max-height:min(92vh,760px);overflow:auto;border:1px solid rgba(127,127,127,.22);border-radius:28px;background:var(--theme-card,#fff);box-shadow:0 30px 90px rgba(0,0,0,.35)}
+  .tb-sub-plan{border:1px solid rgba(127,127,127,.18);border-radius:20px;padding:15px;background:rgba(127,127,127,.045);transition:.18s ease}
+  .tb-sub-plan:hover{transform:translateY(-1px);border-color:rgba(127,127,127,.32)}
+  .tb-sub-plan.popular{outline:2px solid rgba(59,130,246,.24)}
+  .tb-sub-test{border:1px dashed rgba(127,127,127,.35);border-radius:16px;padding:10px;background:rgba(127,127,127,.035)}
+  .tb-sub-count{font-variant-numeric:tabular-nums}
+</style>
+
 </head>
 <body class="theme-light h-screen overflow-hidden flex flex-col antialiased">
 
@@ -329,7 +339,8 @@
             <p class="ob-subtitle">These details personalize your dashboard. You can change them later in Settings.</p>
             <div class="ob-form">
               <div class="ob-field"><label>Name</label><input id="obName" type="text" placeholder="What should we call you?"></div>
-              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal / Exam Name</label><input id="obGoal" type="text" placeholder="e.g. NEET PG 2027, JEE, UPSC, USMLE"></div></div>
+              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal</label><input id="obCourse" type="text" placeholder="NEET PG, JEE, etc."></div></div>
+              <div class="ob-field"><label>Exam / Goal Name</label><input id="obExam" type="text" placeholder="e.g. NEET PG 2027"></div>
               <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Target Date</label><input id="obDate" type="date"></div><div class="ob-field"><label>Target Time (optional)</label><input id="obTime" type="time"></div></div>
             </div><div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obSaveProfile();obNext()">NEXT →</button></div>
           </section>
@@ -732,7 +743,7 @@
           <span class="text-xs font-black uppercase tracking-wider text-themeMuted">Subjects & Chapters</span>
           <div class="flex items-center gap-2">
             <button onclick="openEditSubjectModal()" class="text-xs font-bold text-themeMuted hover:text-themeText flex items-center gap-1">Edit Subject</button>
-            <button onclick="openAddChapterModal()" class="text-xs font-bold text-themeAccent flex items-center gap-1">
+            <button onclick="openModal('addChapterModal')" class="text-xs font-bold text-themeAccent flex items-center gap-1">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Chapter
             </button>
           </div>
@@ -3220,7 +3231,7 @@
       (appState.subjects || []).forEach(s => {
         const done = s.chapters.filter(c => c.status === 'DONE').length;
         const pct = s.chapters.length === 0 ? 0 : Math.round((done / s.chapters.length) * 100);
-        if (miniBars) miniBars.innerHTML += `<div class="flex justify-between items-start gap-2"><span class="min-w-0 flex-1 break-words whitespace-normal leading-tight pr-1">${escapeHtml(s.name)}</span><span class="font-bold shrink-0">${pct}%</span></div>`;
+        if (miniBars) miniBars.innerHTML += `<div class="flex justify-between items-center"><span class="truncate pr-1">${escapeHtml(s.name)}</span><span class="font-bold">${pct}%</span></div>`;
       });
 
       const subList = document.getElementById('syllabusSubjectsSidebar');
@@ -3232,7 +3243,7 @@
         const card = document.createElement('div');
         card.onclick = () => { selectedSubjectId = s.id; renderSyllabus(); };
         card.className = `p-3 rounded-2xl border cursor-pointer transition ${isSel ? 'bg-themeAccent/20 border-themeAccent' : 'bg-themeCard border-themeBorder'}`;
-        card.innerHTML = `<div class="flex items-center justify-between"><span class="text-xs font-black px-1.5 py-0.5 rounded bg-themeCardSoft" style="color:${s.color}">${escapeHtml(s.symbol)}</span><span class="text-[10px] font-bold text-themeMuted">${pct}%</span></div><h5 class="text-xs font-bold text-themeText mt-1.5 whitespace-normal break-words leading-snug">${escapeHtml(s.name)}</h5><p class="text-[9px] text-themeMuted">${done}/${s.chapters.length} chapters</p>`;
+        card.innerHTML = `<div class="flex items-center justify-between"><span class="text-xs font-black px-1.5 py-0.5 rounded bg-themeCardSoft" style="color:${s.color}">${escapeHtml(s.symbol)}</span><span class="text-[10px] font-bold text-themeMuted">${pct}%</span></div><h5 class="text-xs font-bold text-themeText mt-1.5 truncate">${escapeHtml(s.name)}</h5><p class="text-[9px] text-themeMuted">${done}/${s.chapters.length} chapters</p>`;
         subList.appendChild(card);
       });
 
@@ -3240,14 +3251,14 @@
       const chList = document.getElementById('syllabusChaptersList');
       chList.innerHTML = '';
       if (!activeSub || !activeSub.chapters || activeSub.chapters.length === 0) {
-        chList.innerHTML = `<div class="p-8 text-center text-themeMuted space-y-2"><p class="text-xs">No chapters found for this subject.</p><button onclick="openAddChapterModal()" class="text-xs font-bold text-themeAccent underline">+ Add Chapter</button></div>`;
+        chList.innerHTML = `<div class="p-8 text-center text-themeMuted space-y-2"><p class="text-xs">No chapters found for this subject.</p><button onclick="openModal('addChapterModal')" class="text-xs font-bold text-themeAccent underline">+ Add Chapter</button></div>`;
         return;
       }
 
       activeSub.chapters.forEach(ch => {
         const div = document.createElement('div');
         div.className = 'p-3 rounded-2xl bg-themeCard border border-themeBorder space-y-2';
-        div.innerHTML = `<div class="flex justify-between items-start"><div class="min-w-0 flex-1"><h5 class="text-xs font-bold text-themeText whitespace-normal break-words leading-snug">${escapeHtml(ch.name)}</h5>${ch.notes ? `<p class="text-[10px] text-themeMuted whitespace-normal break-words leading-snug mt-0.5">${escapeHtml(ch.notes)}</p>` : ''}</div><button onclick="deleteChapter('${activeSub.id}', '${ch.id}')" class="text-themeMuted hover:text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div class="flex gap-1 pt-1"><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'BLANK')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'BLANK' ? 'bg-themeCardSoft text-themeText border-themeText' : 'border-themeBorder text-themeMuted'}">Left</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'R')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'R' ? 'bg-amber-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">R</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'MCQ')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'MCQ' ? 'bg-indigo-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">MCQ</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'DONE')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'DONE' ? 'bg-emerald-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">Done ✓</button></div>`;
+        div.innerHTML = `<div class="flex justify-between items-start"><div class="truncate flex-1"><h5 class="text-xs font-bold text-themeText truncate">${escapeHtml(ch.name)}</h5>${ch.notes ? `<p class="text-[10px] text-themeMuted truncate">${escapeHtml(ch.notes)}</p>` : ''}</div><button onclick="deleteChapter('${activeSub.id}', '${ch.id}')" class="text-themeMuted hover:text-rose-400 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div class="flex gap-1 pt-1"><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'BLANK')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'BLANK' ? 'bg-themeCardSoft text-themeText border-themeText' : 'border-themeBorder text-themeMuted'}">Left</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'R')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'R' ? 'bg-amber-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">R</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'MCQ')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'MCQ' ? 'bg-indigo-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">MCQ</button><button onclick="setChapterStatus('${activeSub.id}', '${ch.id}', 'DONE')" class="flex-1 py-1 rounded-lg text-[10px] font-bold border ${ch.status === 'DONE' ? 'bg-emerald-500 text-white border-transparent' : 'border-themeBorder text-themeMuted'}">Done ✓</button></div>`;
         chList.appendChild(div);
       });
       lucide.createIcons();
@@ -3687,26 +3698,10 @@
     }
 
     function openAddSubjectModal() {
-      const nameEl=document.getElementById('newSubjectName');
-      const symbolEl=document.getElementById('newSubjectSymbol');
-      const colorEl=document.getElementById('newSubjectColor');
-      if(nameEl)nameEl.value='';
-      if(symbolEl)symbolEl.value='';
-      if(colorEl)colorEl.value='#6366f1';
+      document.getElementById('newSubjectName').value='';
+      document.getElementById('newSubjectSymbol').value='';
+      document.getElementById('newSubjectColor').value='#6366f1';
       openModal('addSubjectModal');
-      setTimeout(()=>nameEl?.focus(),50);
-    }
-
-    function openAddChapterModal() {
-      const subjectEl=document.getElementById('addChapterSubjectSelect');
-      const nameEl=document.getElementById('newChapterName');
-      const notesEl=document.getElementById('newChapterNotes');
-      if(nameEl)nameEl.value='';
-      if(notesEl)notesEl.value='';
-      populateSubjectDropdowns();
-      if(subjectEl) subjectEl.value=selectedSubjectId || appState.subjects?.[0]?.id || '';
-      openModal('addChapterModal');
-      setTimeout(()=>nameEl?.focus(),50);
     }
 
     function saveNewSubject() {
@@ -3716,11 +3711,7 @@
       const symbol=(document.getElementById('newSubjectSymbol').value.trim() || name.substring(0,2)).toUpperCase();
       const subject={ id:'sub_'+Date.now(), name, symbol, color:document.getElementById('newSubjectColor').value, chapters:[] };
       appState.subjects.push(subject); selectedSubjectId=subject.id;
-      saveState();
-      document.getElementById('newSubjectName').value='';
-      document.getElementById('newSubjectSymbol').value='';
-      document.getElementById('newSubjectColor').value='#6366f1';
-      closeModal('addSubjectModal'); populateSubjectDropdowns(); renderSyllabus(); renderHome(); showToast('Subject created');
+      saveState(); closeModal('addSubjectModal'); populateSubjectDropdowns(); renderSyllabus(); renderHome(); showToast('Subject created');
     }
 
     function openEditSubjectModal() {
@@ -3766,8 +3757,6 @@
       if (!sub || !name) return;
       sub.chapters.push({ id: 'ch_' + Date.now(), name, status: 'BLANK' });
       saveState();
-      document.getElementById('newChapterName').value='';
-      document.getElementById('newChapterNotes').value='';
       closeModal('addChapterModal');
       renderSyllabus();
       showToast('Chapter added');
@@ -3836,7 +3825,6 @@
       const ageVal=(document.getElementById('settingsAgeInput')?.value||'').trim();
       appState.profileAge = ageVal ? Number(ageVal) : '';
       appState.examTitle = document.getElementById('settingsExamTitleInput').value.trim();
-      appState.course = appState.examTitle;
       const date = document.getElementById('settingsExamDateInput').value;
       appState.examDate = date;
       const hm=document.getElementById('settingsShowHomeMCQ');
@@ -6256,15 +6244,6 @@ document.addEventListener('DOMContentLoaded',function(){
   let bootstrapPromise = null;
   let conflictContext = null;
 
-  /*
-   * SYNC SAFETY:
-   * A signed-in device starts with its own guest/local appState. Do NOT allow
-   * that local state to be uploaded until the account's cloud state has been
-   * checked and hydrated. This prevents a second device from overwriting an
-   * existing account with its empty/guest state during login.
-   */
-  let cloudHydrated = false;
-
   function syncMetaKey(){ return SYNC_META_PREFIX + (currentUser?.id || 'guest'); }
 
   function stableSyncString(value){
@@ -6347,12 +6326,7 @@ document.addEventListener('DOMContentLoaded',function(){
       /* Register before getSession so recovery links cannot miss the
          PASSWORD_RECOVERY event while Supabase processes the URL. */
       sb.auth.onAuthStateChange(function(event,session){
-        const nextUser=session?.user || null;
-        if((currentUser?.id||'') !== (nextUser?.id||'')){
-          clearTimeout(cloudSaveTimer);
-          cloudHydrated=false;
-        }
-        currentUser=nextUser;
+        currentUser=session?.user || null;
         window.__trackabilityCurrentUserEmail=currentUser?.email||'';
         try{ updateSettingsAccountCard(); }catch(e){}
         if(event==='PASSWORD_RECOVERY'){
@@ -6382,16 +6356,14 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   async function finishSignedInBootstrap(){
-    /* One bootstrap at a time. Existing cloud data is the source of truth for
-       an already-existing account. Guest/device data is uploaded automatically
-       ONLY during creation of a brand-new account with no cloud row. */
+    /* One bootstrap at a time. There is deliberately NO cloud/device
+       confirmation dialog. Existing cloud data is the source of truth for an
+       already-existing account; a brand-new account with no cloud data gets
+       the current guest/device data uploaded once. */
     if(bootstrapPromise) return bootstrapPromise;
     bootstrapPromise=(async function(){
       populateAccountUI();
       if(!currentUser || !sb) return;
-      const bootUserId=currentUser.id;
-      clearTimeout(cloudSaveTimer);
-      cloudHydrated=false;
       try{
         const {data:profile,error:profileError}=await sb.from(PROFILE_TABLE).select('id,name,age,course,exam_date,exam_year').eq('id',currentUser.id).maybeSingle();
         if(profileError) throw profileError;
@@ -6412,38 +6384,17 @@ document.addEventListener('DOMContentLoaded',function(){
           await saveProfileRow({name,age,course,exam_date});
         }
 
-        const {data:cloudRow,error:stateError}=await sb.from(CLOUD_STATE_TABLE).select('data,updated_at').eq('user_id',bootUserId).maybeSingle();
+        const {data:cloudRow,error:stateError}=await sb.from(CLOUD_STATE_TABLE).select('data,updated_at').eq('user_id',currentUser.id).maybeSingle();
         if(stateError) throw stateError;
 
         if(cloudRow){
-          /*
-           * EXISTING ACCOUNT:
-           * Cloud is authoritative on a fresh device. Replace the guest/local
-           * state with the account's stored state BEFORE enabling cloud writes.
-           */
+          /* Existing account: silently load its cloud copy. */
           await applyCloudRow(cloudRow,false);
-          cloudHydrated=true;
-          localStorage.removeItem(PENDING_MIGRATION_KEY);
-        }else if(localStorage.getItem(PENDING_MIGRATION_KEY)==='1'){
-          /*
-           * BRAND-NEW ACCOUNT:
-           * There is no cloud row, so the device's guest state is the intended
-           * first cloud copy.
-           */
-          const uploaded=await uploadCloudState(true,true);
-          if(!uploaded) throw new Error('Could not create the initial cloud copy');
-          cloudHydrated=true;
           localStorage.removeItem(PENDING_MIGRATION_KEY);
         }else{
-          /*
-           * EXISTING SIGN-IN WITH NO CLOUD ROW:
-           * Never silently upload this device's guest data.
-           */
-          cloudHydrated=false;
-          setSyncStatus('No cloud data found');
-          accountToast('No cloud data was found for this account. Your device data was not uploaded.','alert-circle');
-          populateAccountUI();
-          return;
+          /* New account or account with no app data yet: upload current local data. */
+          await uploadCloudState(true);
+          localStorage.removeItem(PENDING_MIGRATION_KEY);
         }
         setSyncStatus('Synced');
         populateAccountUI();
@@ -6480,9 +6431,8 @@ document.addEventListener('DOMContentLoaded',function(){
     finally{ suppressCloudSave=false; }
   }
 
-  async function uploadCloudState(showMessage,allowBeforeHydration=false){
+  async function uploadCloudState(showMessage){
     if(!sb || !currentUser || suppressCloudSave) return false;
-    if(!cloudHydrated && !allowBeforeHydration) return false;
     if(cloudSaveBusy) return false;
     cloudSaveBusy=true;
     setSyncStatus('Syncing…');
@@ -6503,11 +6453,7 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function scheduleCloudSave(){
-    /*
-     * Never write local guest state to an account while login/bootstrap is
-     * still deciding whether that account already has cloud data.
-     */
-    if(!currentUser || suppressCloudSave || !cloudHydrated) return;
+    if(!currentUser || suppressCloudSave) return;
     clearTimeout(cloudSaveTimer);
     setSyncStatus('Changes pending…');
     cloudSaveTimer=setTimeout(function(){ uploadCloudState(false); },900);
@@ -6792,8 +6738,6 @@ document.addEventListener('DOMContentLoaded',function(){
     try{
       await uploadCloudState(false);
       if(sb) await sb.auth.signOut();
-      clearTimeout(cloudSaveTimer);
-      cloudHydrated=false;
       currentUser=null;
       populateAccountUI();
       closeModal('accountModal');
@@ -7095,12 +7039,12 @@ document.addEventListener('DOMContentLoaded',function(){
   window.obPickExamMode=function(v){examMode=v==='theory'?'theory':'mcq';$('obChoiceMCQ')?.classList.toggle('selected',examMode==='mcq');$('obChoiceTheory')?.classList.toggle('selected',examMode==='theory');if(typeof appState!=='undefined'){appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';try{saveState();}catch(e){}}};
   window.obSaveProfile=function(){
     if(typeof appState==='undefined')return;
-    const goal=($('obGoal').value||'').trim();appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=goal;appState.examTitle=goal;appState.examDate=$('obDate').value||'';appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';
+    appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=($('obCourse').value||'').trim();appState.examTitle=($('obExam').value||'').trim();appState.examDate=$('obDate').value||'';appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';
     try{saveState();}catch(e){}
   };
   window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setTheme==='function')setTheme(v);else document.body.className=v+' '+pickedFont+' h-screen overflow-hidden flex flex-col antialiased';};
   window.obPickFont=function(el,v){pickedFont=v;document.querySelectorAll('.ob-font').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setFontStyle==='function')setFontStyle(v);};
-  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obGoal').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
+  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obExam').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
   window.obStart=function(){
     obSaveProfile();
     try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;saveState();}catch(e){}
@@ -7131,44 +7075,14 @@ document.addEventListener('DOMContentLoaded',function(){
   const today=()=>ymd(new Date());
   const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 
-  /* 2) Home/Task MCQ chooser + Misc / Other ledger. */
-  // Misc / Other uses one built-in platform/source selector.  It is deliberately
-  // not user-editable and is never used as a de-duplication key.
-  const BUILTIN_MISC_MCQ_PLATFORMS=['Marrow','PrepLadder','BTR','Cerebellum','Bhatia','PYQ Exam','Other'];
-
-  function normalizeMiscMCQRecords(){
-    if(!Array.isArray(appState.mcqActivities)) return false;
-    let changed=false;
-    const seenTaskIds=new Set();
-    const cleaned=[];
-    appState.mcqActivities.forEach(x=>{
-      if(x && x.type==='misc'){
-        const platform=BUILTIN_MISC_MCQ_PLATFORMS.includes(x.platform)?x.platform:(BUILTIN_MISC_MCQ_PLATFORMS.includes(x.name)?x.name:'Other');
-        if(x.platform!==platform){x.platform=platform;changed=true;}
-        // The ONLY safe automatic duplicate rule is the task link itself.
-        // Two manual logs with identical details must remain separate records.
-        if(x.taskId){
-          if(seenTaskIds.has(String(x.taskId))){changed=true;return;}
-          seenTaskIds.add(String(x.taskId));
-        }
-        // Legacy Misc records used the typed source/name as the display name.
-        // Keep that value aligned with the built-in platform.
-        if(x.name!==platform){x.name=platform;changed=true;}
-      }
-      cleaned.push(x);
-    });
-    if(cleaned.length!==appState.mcqActivities.length){appState.mcqActivities=cleaned;changed=true;}
-    return changed;
-  }
-  if(normalizeMiscMCQRecords()) saveState();
-
+  /* 2) Home/Task MCQ chooser: add Misc / Other. */
   function ensureMiscChooser(){
     const m=document.getElementById('addMCQChooserModal');
     if(!m)return;
     const grid=m.querySelector('.grid');
     if(grid && !grid.querySelector('[data-mcq-source="misc"]')){
       const b=document.createElement('button');b.setAttribute('data-mcq-source','misc');b.className='p-3 rounded-2xl bg-themeCardSoft border border-themeBorder text-left';
-      b.innerHTML='<b class="text-xs">📌 Misc / Other</b><span class="block text-[9px] text-themeMuted mt-1">Log MCQs from a built-in platform/source.</span>';
+      b.innerHTML='<b class="text-xs">📌 Misc / Other</b><span class="block text-[9px] text-themeMuted mt-1">Log MCQs from any other source.</span>';
       b.onclick=()=>window.chooseMCQSource('misc');grid.appendChild(b);
     }
   }
@@ -7178,10 +7092,10 @@ document.addEventListener('DOMContentLoaded',function(){
     let m=document.getElementById('miscMCQModal');if(m)return m;
     m=document.createElement('div');m.id='miscMCQModal';m.className='hidden fixed inset-0 z-[59] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4';
     m.innerHTML=`<div class="bg-themeCard w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 border border-themeBorder space-y-3 max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center"><div><h3 class="text-sm font-black">Log Misc / Other MCQs</h3><p class="text-[10px] text-themeMuted">Select the platform/source and log the questions.</p></div><button onclick="closeModal('miscMCQModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="flex justify-between items-center"><div><h3 class="text-sm font-black">Log Misc / Other MCQs</h3><p class="text-[10px] text-themeMuted">This entry is added to the same MCQ history and totals.</p></div><button onclick="closeModal('miscMCQModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <input type="hidden" id="miscMCQEditId" value="" />
-      <select id="miscMCQPlatform" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></select>
-      <input type="number" id="miscMCQQuestions" min="1" step="1" placeholder="Questions" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+      <input type="text" id="miscMCQName" placeholder="Source / name" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
+      <div class="grid grid-cols-2 gap-2"><input type="text" id="miscMCQPlatform" placeholder="Platform / source" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" /><input type="number" id="miscMCQQuestions" min="1" step="1" placeholder="Questions" class="p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" /></div>
       <select id="miscMCQSubject" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></select>
       <textarea id="miscMCQNotes" rows="3" placeholder="Optional note" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></textarea>
       <input type="date" id="miscMCQDate" class="w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText" />
@@ -7190,49 +7104,19 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.appendChild(m);if(window.lucide)lucide.createIcons();return m;
   }
   function populateMisc(rec){
-    ensureMiscModal();
-    const plat=document.getElementById('miscMCQPlatform'),sub=document.getElementById('miscMCQSubject');
-    plat.innerHTML=BUILTIN_MISC_MCQ_PLATFORMS.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    ensureMiscModal();const sub=document.getElementById('miscMCQSubject');
     sub.innerHTML='<option value="">General / Mix</option>'+(appState.subjects||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
-    plat.value=BUILTIN_MISC_MCQ_PLATFORMS.includes(rec?.platform)?rec.platform:(BUILTIN_MISC_MCQ_PLATFORMS.includes(rec?.name)?rec.name:'Marrow');
-    document.getElementById('miscMCQQuestions').value=rec?.questions??'';
-    document.getElementById('miscMCQNotes').value=rec?.notes||'';
-    document.getElementById('miscMCQDate').value=rec?.date||today();
-    document.getElementById('miscMCQEditId').value=rec?.id||'';
-    sub.value=rec?.subjectId||'';
-    document.getElementById('miscMCQSave').textContent=rec?'Update':'Save';
+    document.getElementById('miscMCQName').value=rec?.name||'';document.getElementById('miscMCQPlatform').value=rec?.platform||'';document.getElementById('miscMCQQuestions').value=rec?.questions??'';document.getElementById('miscMCQNotes').value=rec?.notes||'';document.getElementById('miscMCQDate').value=rec?.date||today();document.getElementById('miscMCQEditId').value=rec?.id||'';sub.value=rec?.subjectId||'';document.getElementById('miscMCQSave').textContent=rec?'Update':'Save';
   }
   window.openMiscMCQModal=function(id=''){
     const rec=id?(appState.mcqActivities||[]).find(x=>x.id===id):null;populateMisc(rec);openModal('miscMCQModal');
     const task=window.pendingMCQTaskId?(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId):null;if(task)document.getElementById('miscMCQDate').value=task.date||today();
   };
   window.saveMiscMCQ=function(){
-    appState.mcqActivities=appState.mcqActivities||[];
-    const id=document.getElementById('miscMCQEditId').value;
-    const platform=document.getElementById('miscMCQPlatform').value||'Other';
-    const questions=Math.max(1,parseInt(document.getElementById('miscMCQQuestions').value,10)||0);
-    if(!questions){showToast('Enter number of questions','alert-circle');return;}
-    const taskId=window.pendingMCQTaskId||null;
-    // If this came from a Task, update that Task's linked record instead of creating another.
-    const linkedId=taskId?((appState.tasks||[]).find(x=>x.id===taskId)?.mcqActivityId||''):'';
-    const editId=id||linkedId;
-    const rec={name:platform,subjectId:document.getElementById('miscMCQSubject').value||'',platform,questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
-    let saved=null;
-    if(editId){
-      const i=appState.mcqActivities.findIndex(x=>x.id===editId);
-      if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}
-    }
-    // A manual Misc log always creates a NEW unique record. Identical details are allowed.
-    if(!saved){
-      saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);
-      if(taskId)saved.taskId=taskId;
-      appState.mcqActivities.unshift(saved);
-    }
-    if(taskId){
-      const t=(appState.tasks||[]).find(x=>x.id===taskId);
-      if(t){t.completed=true;t.trackerLogged=true;t.mcqTaskCount=questions;t.mcqActivityId=saved.id;saved.taskId=t.id;}
-      window.pendingMCQTaskId='';
-    }
+    appState.mcqActivities=appState.mcqActivities||[];const id=document.getElementById('miscMCQEditId').value;const name=document.getElementById('miscMCQName').value.trim()||'Misc / Other';const questions=Math.max(1,parseInt(document.getElementById('miscMCQQuestions').value,10)||0);if(!questions){showToast('Enter number of questions','alert-circle');return;}
+    const rec={name,subjectId:document.getElementById('miscMCQSubject').value||'',platform:document.getElementById('miscMCQPlatform').value.trim(),questions,notes:document.getElementById('miscMCQNotes').value.trim(),date:document.getElementById('miscMCQDate').value||today(),type:'misc',updatedAt:Date.now()};
+    let saved;if(id){const i=appState.mcqActivities.findIndex(x=>x.id===id);if(i>=0){Object.assign(appState.mcqActivities[i],rec);saved=appState.mcqActivities[i];}}if(!saved){saved=Object.assign({id:'mca_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)},rec);appState.mcqActivities.unshift(saved);}
+    if(window.pendingMCQTaskId){const t=(appState.tasks||[]).find(x=>x.id===window.pendingMCQTaskId);if(t){t.completed=true;t.trackerLogged=true;t.mcqTaskCount=questions;t.mcqActivityId=saved.id;saved.taskId=t.id;}window.pendingMCQTaskId='';}
     saveState();closeModal('miscMCQModal');renderHome();if(typeof renderStatistics==='function')renderStatistics();openMCQHistoryModal();showToast(id?'Misc MCQ updated':'Misc MCQ logged');
   };
 
@@ -7261,7 +7145,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
   /* Update MCQ history labels and support Misc editing. */
   function patchMCQHistory(){
-    normalizeMiscMCQRecords();
     const modal=document.getElementById('mcqHistoryModal');if(!modal)return;
     const list=modal.querySelector('#mcqHistorySelectedDay');if(list){list.querySelectorAll('.text-emerald-400').forEach(()=>{});}
   }
@@ -7426,6 +7309,32 @@ document.addEventListener('DOMContentLoaded',function(){
     if(typeof oldChooseSource==='function')return oldChooseSource(type);
   };
 
+  // History renderer: preserve misc as Misc / Other, with edit/delete.
+  const oldHistory=window.openMCQHistoryModal;
+  window.openMCQHistoryModal=function(){
+    if(typeof oldHistory==='function') oldHistory();
+    setTimeout(()=>{
+      const modal=document.getElementById('mcqHistoryModal');
+      if(!modal)return;
+      const selected=modal.querySelector('#mcqHistorySelectedDay');
+      if(!selected)return;
+      selected.querySelectorAll('[data-misc-history]').forEach(e=>e.remove());
+      // Re-render the selected-day detail if the underlying history code exposed a selected date.
+      const text=selected.textContent||'';
+      const m=text.match(/(\d{4}-\d{2}-\d{2})/);
+      if(!m)return;
+      const date=m[1];
+      const acts=(appState.mcqActivities||[]).filter(x=>x.date===date);
+      const misc=acts.filter(x=>x.type==='misc');
+      if(!misc.length)return;
+      const box=document.createElement('div');
+      box.setAttribute('data-misc-history','1');
+      box.className='space-y-1 mt-1';
+      box.innerHTML=misc.map(x=>`<div class="p-2 rounded-xl bg-themeCardSoft flex justify-between items-center gap-2"><div><span class="text-[8px] font-black uppercase text-themeMuted">Misc / Other</span><b class="block text-[10px]">${esc(x.name||'Misc / Other')}</b>${x.platform?`<span class="text-[8px] text-themeMuted">${esc(x.platform)}</span>`:''}</div><div class="text-right"><b class="text-emerald-400">${Number(x.questions||0)}</b><div class="flex gap-1 justify-end mt-1"><button onclick="openMiscMCQModal('${esc(x.id||'')}')" class="text-[8px] text-themeAccent">Edit</button><button onclick="deleteMCQActivity('${esc(x.id||'')}')" class="text-[8px] text-rose-400">Delete</button></div></div></div>`).join('');
+      selected.appendChild(box);
+    },20);
+  };
+
   /* =========================================================
      2) STATISTICS: Today / Custom Range / Total + full calendar
      ========================================================= */
@@ -7530,9 +7439,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const subtitle=statsMode==='today'?fmtDate(r.from):statsMode==='total'?'All recorded activity':`${fmtDate(r.from)} → ${fmtDate(r.to)}`;
     const buttons=`<div class="grid grid-cols-3 gap-1.5"><button onclick="setStatsMode('today')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='today'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Today</button><button onclick="setStatsMode('custom')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='custom'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Custom Range</button><button onclick="setStatsMode('total')" class="py-2.5 rounded-xl text-[10px] font-black ${statsMode==='total'?'bg-themeAccent text-white':'bg-themeCardSoft text-themeMuted border border-themeBorder'}">Total</button></div>`;
     const custom=statsMode==='custom'?`<div class="grid grid-cols-2 gap-2"><label class="text-[9px] font-black uppercase text-themeMuted">From<input type="date" value="${esc(statsFrom)}" onchange="setStatsCustomFrom(this.value)" class="mt-1 w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></label><label class="text-[9px] font-black uppercase text-themeMuted">To<input type="date" value="${esc(statsTo)}" onchange="setStatsCustomTo(this.value)" class="mt-1 w-full p-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs text-themeText"></label></div>`:'';
-    const mcqEnabled=typeof appState!=='undefined' && appState.mcqEnabled!==false;
-    const mcqCards=mcqEnabled?`${statCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`)}${statCard('📝 Grand Tests',d.gts.length,`${d.gts.reduce((a,x)=>a+Number(x.total||0),0)} questions`)}${statCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}`:'';
-    summary.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeText">${title}</h4><p class="text-[9px] text-themeMuted mt-0.5">${subtitle}</p></div><span class="text-[9px] font-black text-themeAccent">${activeDays} active day${activeDays===1?'':'s'}</span></div>${buttons}${custom}</div><div class="grid grid-cols-2 gap-2">${mcqCards}${statCard('📚 Focus',fmtHours(d.focusH),`${d.focus.length} sessions`)}${statCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}${statCard('🏋️ Gym',d.gym.length,'workout logs')}${statCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,d.sleep.length?`avg ${avgSleep.toFixed(1)} h/log`:'no logs')}${statCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(avgProtein)} g / active day`)}${statCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(avgKcal).toLocaleString()} / active day`)}${statCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}</div>`;
+    summary.innerHTML=`<div class="rounded-3xl p-3.5 bg-themeCard border border-themeBorder space-y-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-black uppercase text-themeText">${title}</h4><p class="text-[9px] text-themeMuted mt-0.5">${subtitle}</p></div><span class="text-[9px] font-black text-themeAccent">${activeDays} active day${activeDays===1?'':'s'}</span></div>${buttons}${custom}</div><div class="grid grid-cols-2 gap-2">${statCard('🧠 MCQs',d.mcq.total.toLocaleString(),`Q-Bank ${d.mcq.qbank} • Mini ${d.mcq.mini} • GT ${d.mcq.gt} • Misc ${d.mcq.misc}`)}${statCard('📚 Focus',fmtHours(d.focusH),`${d.focus.length} sessions`)}${statCard('✅ Tasks',`${done} / ${d.tasks.length}`,`${d.tasks.length?Math.round(done/d.tasks.length*100):0}% completed`)}${statCard('📝 Grand Tests',d.gts.length,`${d.gts.reduce((a,x)=>a+Number(x.total||0),0)} questions`)}${statCard('🏋️ Gym',d.gym.length,'workout logs')}${statCard('😴 Sleep',`${d.sleepH.toFixed(1)} h`,d.sleep.length?`avg ${avgSleep.toFixed(1)} h/log`:'no logs')}${statCard('🥛 Protein',`${Math.round(d.protein)} g`,`avg ${Math.round(avgProtein)} g / active day`)}${statCard('🔥 Calories',`${Math.round(d.kcal).toLocaleString()} kcal`,`avg ${Math.round(avgKcal).toLocaleString()} / active day`)}${statCard('⚠️ Mistakes',d.mistakes.length,`${d.reviews.length} review logs`)}${statCard('🆔 MCQ IDs',d.ids.length,'ID tracker entries')}</div>`;
     const head=document.querySelector('#tab-statistics h3');if(head)head.textContent='ACTIVITY STATISTICS';
     const sub=head?.parentElement?.querySelector('p');if(sub)sub.textContent='Choose today, a custom date range, or all recorded activity.';
     renderStatsCalendar();
@@ -7588,14 +7495,6 @@ document.addEventListener('DOMContentLoaded',function(){
 (function(){
   'use strict';
   const $=id=>document.getElementById(id);
-  if(typeof appState!=='undefined'){
-    const canonicalGoal=String(appState.examTitle||appState.course||'').trim();
-    if(appState.examTitle!==canonicalGoal || appState.course!==canonicalGoal){
-      appState.examTitle=canonicalGoal;
-      appState.course=canonicalGoal;
-      try{saveState();}catch(e){}
-    }
-  }
   const isMCQEnabled=()=>typeof appState!=='undefined' && appState.mcqEnabled!==false;
   function applyMCQModuleUI(){
     const enabled=isMCQEnabled();
@@ -7613,11 +7512,14 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     // Remove MCQ/GT statistics cards from the current statistics render.
     const summary=$('statsDailySummary');
-    if(summary && !enabled){
-      summary.querySelectorAll('.grid.grid-cols-2 > div').forEach(card=>{
-        const txt=(card.textContent||'').trim();
-        if(/MCQs|Grand Tests|MCQ IDs/.test(txt)) card.remove();
-      });
+    if(summary){
+      const grid=summary.querySelector('.grid.grid-cols-2');
+      if(grid){
+        grid.querySelectorAll(':scope > div').forEach(card=>{
+          const txt=(card.textContent||'').trim();
+          if(!enabled && (/^🧠\\s*MCQs/.test(txt)||/^📝\\s*Grand Tests/.test(txt)||/^🆔\\s*MCQ IDs/.test(txt))) card.remove();
+        });
+      }
     }
     const gtChart=$('statsMonthGTChart'); if(gtChart)gtChart.style.display=enabled?'':'none';
     const search=$('globalSearchResults');
@@ -7753,266 +7655,279 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 
 
-<!-- ============================================================
-     TRACKABILITY FINAL PATCH: GT SCORING + SLEEP/CHART POLISH
-     ============================================================ -->
-<style id="trackability-gt-sleep-final-patch">
-  /* Keep tracker charts compact. Extra dates scroll horizontally, never vertically. */
-  .tb-sleep-chart-box{
-    display:flex !important;
-    gap:7px !important;
-    height:184px !important;
-    min-height:184px !important;
-    max-height:184px !important;
-    margin-top:6px !important;
-    overflow-x:hidden !important;
-    overflow-y:hidden !important;
-  }
-  .tb-sleep-chart-box .tb-sleep-yaxis{
-    height:154px !important;
-    flex:0 0 32px !important;
-    padding:2px 0 24px !important;
-  }
-  .tb-sleep-chart-box .tb-sleep-plot{
-    height:154px !important;
-    min-width:0 !important;
-    flex:1 1 auto !important;
-    overflow-x:auto !important;
-    overflow-y:hidden !important;
-    scrollbar-width:thin;
-  }
-  .tb-sleep-chart-box .tb-sleep-bars{
-    height:154px !important;
-    min-width:max-content !important;
-    gap:9px !important;
-    padding:2px 10px 27px !important;
-    box-sizing:border-box !important;
-  }
-  .tb-sleep-chart-box .tb-sleep-bar-col{
-    flex:0 0 38px !important;
-    width:38px !important;
-    height:100% !important;
-  }
-  .tb-sleep-chart-box .tb-sleep-date{white-space:nowrap !important;}
-
-  /* Tighten vertical separation around stacked chart cards. */
-  .stats-gt-chart-scroll{margin-top:4px !important;padding-bottom:2px !important;}
-  #statsMonthGTChart{margin-bottom:8px !important;}
-  #gtScoreChart{margin-bottom:0 !important;}
-
-  /* GT scoring settings */
-  #gtScoringSettingsCard .gt-preset-btn{white-space:nowrap;}
-</style>
-<script id="trackability-gt-scoring-final-patch">
+<script id="trackability-subscription-layer">
 (function(){
   'use strict';
-  const esc = v => window.escapeHtml ? window.escapeHtml(String(v ?? '')) : String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-  function ensureScoringState(){
-    if(!window.appState) return;
-    const cur=appState.gtScoring||{};
-    const c=Number(cur.correct), w=Number(cur.wrong), l=Number(cur.left);
-    appState.gtScoring={
-      correct:Number.isFinite(c)?c:4,
-      wrong:Number.isFinite(w)?w:-1,
-      left:Number.isFinite(l)?l:0
-    };
+  /* ============================================================
+     TRACKABILITY SUBSCRIPTION / 14-DAY TRIAL LAYER
+     ------------------------------------------------------------
+     TEST BUILD:
+     - 14-day free trial is created locally on first launch.
+     - Three plans are shown: ₹159 monthly, ₹400 / 3 months,
+       ₹1,200 yearly.
+     - "Test purchase" activates a plan locally without charging.
+     - No individual feature is locked during this test build.
+     - Production payment verification should be moved to a
+       Supabase Edge Function + Razorpay before launch.
+     ============================================================ */
+  const BILLING_KEY='TRACKABILITY_BILLING_V1';
+  const TRIAL_DAYS=14;
+  const TEST_MODE=true;
+  const PLANS={
+    monthly:{id:'monthly',name:'Monthly',price:159,days:30,subtitle:'Flexible monthly access'},
+    quarterly:{id:'quarterly',name:'3 Months',price:400,days:90,subtitle:'Save ₹77 vs monthly'},
+    yearly:{id:'yearly',name:'12 Months',price:1200,days:365,subtitle:'Best value • ₹100/month'}
+  };
+
+  let billingState=null;
+  let countdownTimer=null;
+  let uiReady=false;
+
+  const money=n=>'₹'+Number(n).toLocaleString('en-IN');
+  const esc=v=>window.escapeHtml?window.escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const now=()=>Date.now();
+  const iso=t=>new Date(t).toISOString();
+
+  function loadBilling(){
+    try{ billingState=JSON.parse(localStorage.getItem(BILLING_KEY)||'null'); }catch(e){ billingState=null; }
+    if(!billingState || !billingState.trialStartedAt){
+      const start=now();
+      billingState={version:1,status:'trial',trialStartedAt:start,trialEndsAt:start+TRIAL_DAYS*86400000,planId:null,subscriptionStartedAt:null,subscriptionEndsAt:null,updatedAt:start};
+      saveBilling();
+    }
+    normalizeBilling();
+    return billingState;
   }
 
-  function scoreGT(correct,wrong,left){
-    ensureScoringState();
-    return Number(correct||0)*Number(appState.gtScoring.correct||0)
-      + Number(wrong||0)*Number(appState.gtScoring.wrong||0)
-      + Number(left||0)*Number(appState.gtScoring.left||0);
+  function saveBilling(){
+    try{billingState.updatedAt=now();localStorage.setItem(BILLING_KEY,JSON.stringify(billingState));}catch(e){}
   }
-  window.trackabilityGTScore=scoreGT;
 
-  function formulaText(){
-    ensureScoringState();
-    const f=Number(appState.gtScoring.correct), w=Number(appState.gtScoring.wrong), l=Number(appState.gtScoring.left);
-    const part=(n,label)=>`${n<0?'− ':''}${Math.abs(n)} × ${label}`;
-    return `score = ${part(f,'correct')} ${w<0?'−':'+'} ${Math.abs(w)} × wrong ${l!==0?` ${l<0?'−':'+'} ${Math.abs(l)} × left`:''}`;
+  function normalizeBilling(){
+    if(!billingState)return;
+    if(billingState.status==='trial' && now()>=Number(billingState.trialEndsAt||0)){
+      billingState.status='expired';
+      saveBilling();
+    }
+    if(billingState.status==='active' && billingState.subscriptionEndsAt && now()>=Number(billingState.subscriptionEndsAt)){
+      billingState.status='expired';
+      saveBilling();
+    }
   }
-  window.trackabilityGTFormula=formulaText;
 
-  function injectGTScoringSettings(){
-    const toggle=document.getElementById('settingsShowHomeMCQ');
-    if(!toggle) return;
-    let card=document.getElementById('gtScoringSettingsCard');
-    if(!card){
-      card=document.createElement('div');
-      card.id='gtScoringSettingsCard';
-      card.className='p-3 rounded-2xl bg-themeCardSoft border border-themeBorder space-y-3';
-      const parent=toggle.closest('.p-3.rounded-2xl') || toggle.parentElement?.parentElement;
-      if(parent && parent.parentNode){ parent.parentNode.insertBefore(card,parent.nextSibling); }
-      else return;
-      card.innerHTML=`
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <div class="text-xs font-black">Grand Test Scoring</div>
-            <p class="text-[9px] text-themeMuted mt-0.5">Choose how each GT score is calculated. This applies to new and existing GTs.</p>
+  function isEntitled(){
+    normalizeBilling();
+    return billingState && (
+      billingState.status==='trial' && now()<Number(billingState.trialEndsAt||0) ||
+      billingState.status==='active' && now()<Number(billingState.subscriptionEndsAt||0)
+    );
+  }
+
+  function remainingMs(){
+    if(!billingState)return 0;
+    return billingState.status==='trial' ? Math.max(0,Number(billingState.trialEndsAt||0)-now()) : Math.max(0,Number(billingState.subscriptionEndsAt||0)-now());
+  }
+
+  function remainingText(){
+    const ms=remainingMs();
+    const totalSeconds=Math.max(0,Math.floor(ms/1000));
+    const days=Math.floor(totalSeconds/86400);
+    const hours=Math.floor((totalSeconds%86400)/3600);
+    const mins=Math.floor((totalSeconds%3600)/60);
+    return days>0 ? `${days}d ${hours}h remaining` : `${hours}h ${mins}m remaining`;
+  }
+
+  function statusLabel(){
+    normalizeBilling();
+    if(billingState.status==='active') return 'TRACKABILITY PRO • '+(PLANS[billingState.planId]?.name||'Active plan');
+    if(billingState.status==='trial' && isEntitled()) return '14-DAY FREE TRIAL';
+    return 'TRIAL EXPIRED';
+  }
+
+  function ensureMarkup(){
+    if(uiReady || document.getElementById('trackabilitySubscriptionGate')){uiReady=true;return;}
+    const wrap=document.createElement('div');
+    wrap.id='trackabilitySubscriptionGate';
+    wrap.setAttribute('aria-hidden','true');
+    wrap.innerHTML=`
+      <div class="tb-sub-card text-themeText">
+        <div class="p-5 border-b border-themeBorder">
+          <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-themeAccent/15 border border-themeAccent/20 flex items-center justify-center shrink-0"><i data-lucide="crown" class="w-5 h-5 text-themeAccent"></i></div>
+            <div class="min-w-0 flex-1">
+              <div class="text-[9px] font-black uppercase tracking-[.18em] text-themeAccent">TRACKABILITY</div>
+              <h2 class="text-xl font-black mt-0.5">Keep your study system running</h2>
+              <p id="tbSubGateMessage" class="text-xs text-themeMuted mt-1.5">Your free trial has ended.</p>
+            </div>
           </div>
         </div>
-        <div class="flex gap-1.5 overflow-x-auto custom-scroll pb-0.5">
-          <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="neet">NEET PG / UG / JEE</button>
-          <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="cet">CET</button>
-          <button type="button" class="gt-preset-btn px-2.5 py-1.5 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black" data-preset="minus025">+1 / −0.25</button>
+        <div class="p-5 space-y-3">
+          <div id="tbSubPlans" class="space-y-2.5"></div>
+          <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder">
+            <div class="flex items-center justify-between gap-3">
+              <div><div class="text-[10px] font-black">What you get</div><div class="text-[9px] text-themeMuted mt-1">Full TRACKABILITY access • no feature locked in this test build</div></div>
+              <span id="tbSubStatusPill" class="px-2 py-1 rounded-lg bg-themeAccent/10 text-themeAccent text-[8px] font-black whitespace-nowrap">EXPIRED</span>
+            </div>
+          </div>
+          ${TEST_MODE?`<div class="tb-sub-test"><div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">TEST BUILD</div><div class="text-[9px] text-themeMuted mt-1">No money is charged. Use these controls only to test the trial/paywall flow.</div><div class="grid grid-cols-2 gap-2 mt-2"><button id="tbResetTrial" class="py-2 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black">Reset 14-day trial</button><button id="tbExpireTrial" class="py-2 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black">Expire trial now</button></div></div>`:''}
         </div>
-        <div class="grid grid-cols-3 gap-2">
-          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Correct</span><input id="gtScoreCorrectInput" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
-          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Wrong</span><input id="gtScoreWrongInput" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
-          <label class="block"><span class="text-[8px] font-black uppercase text-themeMuted">Left</span><input id="gtScoreLeftInput" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="mt-1 w-full p-2.5 rounded-xl bg-themeCard border border-themeBorder text-xs text-themeText" /></label>
+      </div>`;
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click',function(e){if(e.target===wrap && isEntitled()) closeGate();});
+    const reset=document.getElementById('tbResetTrial');
+    const expire=document.getElementById('tbExpireTrial');
+    if(reset)reset.onclick=function(){resetTrial();};
+    if(expire)expire.onclick=function(){expireTrial();};
+    uiReady=true;
+    if(window.lucide)lucide.createIcons();
+  }
+
+  function renderPlans(){
+    const host=document.getElementById('tbSubPlans'); if(!host)return;
+    host.innerHTML=Object.values(PLANS).map(p=>`
+      <div class="tb-sub-plan ${p.id==='yearly'?'popular':''}">
+        <div class="flex items-center gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2"><span class="text-sm font-black">${esc(p.name)}</span>${p.id==='yearly'?'<span class="px-1.5 py-0.5 rounded-md bg-themeAccent/10 text-themeAccent text-[7px] font-black">BEST VALUE</span>':''}</div>
+            <div class="text-[9px] text-themeMuted mt-1">${esc(p.subtitle)}</div>
+          </div>
+          <div class="text-right"><div class="text-lg font-black">${money(p.price)}</div><div class="text-[8px] text-themeMuted">${p.id==='monthly'?'per month':p.id==='quarterly'?'for 3 months':'for 12 months'}</div></div>
+          <button onclick="window.trackabilityTestPurchase('${p.id}')" class="px-3 py-2 rounded-xl bg-themeAccent text-white text-[9px] font-black whitespace-nowrap">Test purchase</button>
         </div>
-        <div id="gtScoringFormulaPreview" class="text-[9px] font-bold text-themeAccent bg-themeCard rounded-xl border border-themeBorder px-3 py-2"></div>
-      `;
-      card.querySelectorAll('.gt-preset-btn').forEach(btn=>btn.addEventListener('click',()=>{
-        const p=btn.dataset.preset;
-        const vals=p==='cet'?[1,0,0]:p==='minus025'?[1,-0.25,0]:[4,-1,0];
-        document.getElementById('gtScoreCorrectInput').value=vals[0];
-        document.getElementById('gtScoreWrongInput').value=vals[1];
-        document.getElementById('gtScoreLeftInput').value=vals[2];
-        updateScoringPreview();
-      }));
-      ['gtScoreCorrectInput','gtScoreWrongInput','gtScoreLeftInput'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateScoringPreview));
+      </div>`).join('');
+  }
+
+  function updateGateCopy(){
+    const msg=document.getElementById('tbSubGateMessage');
+    const pill=document.getElementById('tbSubStatusPill');
+    if(!msg||!pill)return;
+    if(billingState.status==='trial' && isEntitled()){
+      msg.textContent=`Your free trial is active — ${remainingText()}.`;
+      pill.textContent='TRIAL ACTIVE';
+    }else if(billingState.status==='active' && isEntitled()){
+      msg.textContent=`Your ${PLANS[billingState.planId]?.name||''} plan is active — ${remainingText()}.`;
+      pill.textContent='ACTIVE';
+    }else{
+      msg.textContent='Your free trial has ended. Choose a plan to continue.';
+      pill.textContent='EXPIRED';
     }
-    ensureScoringState();
-    document.getElementById('gtScoreCorrectInput').value=appState.gtScoring.correct;
-    document.getElementById('gtScoreWrongInput').value=appState.gtScoring.wrong;
-    document.getElementById('gtScoreLeftInput').value=appState.gtScoring.left;
-    updateScoringPreview();
-    syncScoringDisabledState();
   }
 
-  function parseScoringValue(value){
-    const normalized=String(value ?? '').trim().replace(/[−–—]/g,'-').replace(/,/g,'.');
-    return normalized==='' ? NaN : Number(normalized);
+  function openGate(force){
+    ensureMarkup(); normalizeBilling();
+    renderPlans(); updateGateCopy();
+    const gate=document.getElementById('trackabilitySubscriptionGate');
+    if(gate){gate.classList.add('is-open');gate.setAttribute('aria-hidden','false');}
+    if(window.lucide)lucide.createIcons();
+    if(force!==false) setTimeout(updateGateCopy,100);
   }
 
-  function updateScoringPreview(){
-    const c=parseScoringValue(document.getElementById('gtScoreCorrectInput')?.value),w=parseScoringValue(document.getElementById('gtScoreWrongInput')?.value),l=parseScoringValue(document.getElementById('gtScoreLeftInput')?.value);
-    const el=document.getElementById('gtScoringFormulaPreview');
-    if(!el)return;
-    const cc=Number.isFinite(c)?c:0,ww=Number.isFinite(w)?w:0,ll=Number.isFinite(l)?l:0;
-    el.textContent=`Example: 100 correct, 20 wrong, 5 left → ${scoreWithValues(100,20,5,cc,ww,ll)} marks`;
-  }
-  function scoreWithValues(c,w,l,cm,wm,lm){return c*cm+w*wm+l*lm;}
-
-  function syncScoringDisabledState(){
-    const enabled=appState?.mcqEnabled!==false;
-    const card=document.getElementById('gtScoringSettingsCard');
-    if(!card)return;
-    card.style.opacity=enabled?'1':'0.55';
-    card.querySelectorAll('input,button').forEach(el=>el.disabled=!enabled);
+  function closeGate(){
+    if(!isEntitled())return;
+    const gate=document.getElementById('trackabilitySubscriptionGate');
+    if(gate){gate.classList.remove('is-open');gate.setAttribute('aria-hidden','true');}
   }
 
-  function applyScoringSettingsFromInputs(){
-    ensureScoringState();
-    const c=parseScoringValue(document.getElementById('gtScoreCorrectInput')?.value),w=parseScoringValue(document.getElementById('gtScoreWrongInput')?.value),l=parseScoringValue(document.getElementById('gtScoreLeftInput')?.value);
-    if(!Number.isFinite(c)||!Number.isFinite(w)||!Number.isFinite(l)){
-      showToast('Enter valid GT scoring values','alert-circle');
-      return false;
+  function activatePlan(planId){
+    const p=PLANS[planId];if(!p)return;
+    const start=now();
+    billingState.status='active';
+    billingState.planId=planId;
+    billingState.subscriptionStartedAt=start;
+    billingState.subscriptionEndsAt=start+p.days*86400000;
+    saveBilling();
+    updateBillingUI();
+    closeGate();
+    try{showToast(`${p.name} test plan activated • ${money(p.price)} (no charge)`,'check-circle');}catch(e){}
+  }
+
+  function resetTrial(){
+    const start=now();
+    billingState={version:1,status:'trial',trialStartedAt:start,trialEndsAt:start+TRIAL_DAYS*86400000,planId:null,subscriptionStartedAt:null,subscriptionEndsAt:null,updatedAt:start};
+    saveBilling(); updateBillingUI(); closeGate();
+    try{showToast('14-day test trial reset','sparkles');}catch(e){}
+  }
+
+  function expireTrial(){
+    billingState.status='expired';
+    billingState.trialEndsAt=now()-1000;
+    billingState.subscriptionEndsAt=null;
+    billingState.planId=null;
+    saveBilling(); updateBillingUI(); openGate(true);
+  }
+
+  function updateBillingUI(){
+    normalizeBilling();
+    const text=document.getElementById('trackabilitySubscriptionStatus');
+    const sub=document.getElementById('trackabilitySubscriptionDetails');
+    if(text)text.textContent=statusLabel();
+    if(sub){
+      if(billingState.status==='trial' && isEntitled())sub.textContent=`${remainingText()} • Full access during trial`;
+      else if(billingState.status==='active' && isEntitled())sub.textContent=`${remainingText()} • ${money(PLANS[billingState.planId]?.price||0)} plan`;
+      else sub.textContent='Access paused • choose a plan to continue';
     }
-    appState.gtScoring={correct:c,wrong:w,left:l};
-    /* Recalculate stored GTs so the entire ledger uses the selected exam marking scheme. */
-    (appState.grandTests||[]).forEach(g=>{
-      const total=Math.max(0,Number(g.total)||0), correct=Math.max(0,Number(g.correct)||0), wrong=Math.max(0,Number(g.wrong)||0), left=Math.max(0,total-correct-wrong);
-      g.attempted=correct+wrong;
-      g.score=scoreWithValues(correct,wrong,left,c,w,l);
-      g.scoreCorrectMark=c;g.scoreWrongMark=w;g.scoreLeftMark=l;
-    });
-    saveState();
-    return true;
+    const buy=document.getElementById('trackabilityManageSubscription');
+    if(buy)buy.textContent=billingState.status==='active'?'View plan':'View plans';
   }
 
-  function refreshGTFormulaLabels(){
-    const f=formulaText();
-    document.querySelectorAll('#gtModal p, #trackerMod-gt p, #statsMonthGTChart p').forEach(el=>{
-      const t=el.textContent||'';
-      if(/Score is calculated automatically|Y-axis = total score|score = .*correct/i.test(t)){
-        if(el.closest('#gtModal')) el.innerHTML=`Score is calculated automatically: <b>${esc(appState.gtScoring.correct)}</b> per correct, <b>${esc(appState.gtScoring.wrong)}</b> per wrong, <b>${esc(appState.gtScoring.left)}</b> per left.`;
-        else el.textContent=f;
-      }
-    });
+  function injectAccountCard(){
+    const panel=document.getElementById('settingsPanelAccount');
+    if(!panel || document.getElementById('trackabilitySubscriptionCard'))return;
+    const card=document.createElement('div');
+    card.id='trackabilitySubscriptionCard';
+    card.className='p-3 rounded-2xl bg-themeCardSoft border border-themeBorder space-y-2';
+    card.innerHTML=`<div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-themeAccent/15 flex items-center justify-center"><i data-lucide="crown" class="w-4 h-4 text-themeAccent"></i></div><div class="min-w-0 flex-1"><div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">Subscription</div><div id="trackabilitySubscriptionStatus" class="text-xs font-black">14-DAY FREE TRIAL</div><div id="trackabilitySubscriptionDetails" class="text-[9px] text-themeMuted mt-0.5"></div></div></div><button id="trackabilityManageSubscription" onclick="window.openTrackabilityPlans()" class="w-full py-2 rounded-xl bg-themeAccent text-white text-[9px] font-black">View plans</button>`;
+    panel.insertBefore(card,panel.firstChild);
+    if(window.lucide)lucide.createIcons();
+    updateBillingUI();
   }
 
-  /* Replace the final GT save function so both new GTs and edits use the selected marking scheme. */
-  window.saveGT=function(){
-    ensureScoringState();
-    const name=document.getElementById('gtName')?.value.trim();
-    if(!name){showToast('Enter a GT name','alert-circle');return;}
-    const date=document.getElementById('gtDate')?.value||new Date().toISOString().slice(0,10);
-    const total=Math.max(1,parseInt(document.getElementById('gtTotal')?.value,10)||200);
-    const correct=Math.max(0,parseInt(document.getElementById('gtCorrect')?.value,10)||0);
-    const wrong=Math.max(0,parseInt(document.getElementById('gtWrong')?.value,10)||0);
-    if(correct+wrong>total){showToast('Correct + wrong cannot exceed total questions','alert-circle');return;}
-    const left=Math.max(0,total-correct-wrong);
-    const score=scoreGT(correct,wrong,left);
-    const editId=document.getElementById('gtEditId')?.value||'';
-    appState.grandTests=appState.grandTests||[];
-    if(editId){
-      const g=appState.grandTests.find(x=>x.id===editId);
-      if(!g){showToast('GT not found','alert-circle');return;}
-      Object.assign(g,{name,platform:document.getElementById('gtPlatform')?.value.trim()||'',score,total,correct,wrong,attempted:correct+wrong,date,scoreCorrectMark:appState.gtScoring.correct,scoreWrongMark:appState.gtScoring.wrong,scoreLeftMark:appState.gtScoring.left});
-      const task=(appState.tasks||[]).find(t=>t.mcqActivityId===editId||t.id===g.taskId);
-      if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=total;task.mcqActivityId=g.id;}
-      const h=document.getElementById('gtEditId');if(h)h.value='';
-      saveState();closeModal('gtModal');
-      if(typeof renderGTTracker==='function')renderGTTracker();
-      if(typeof renderHome==='function')renderHome();
-      if(typeof renderTrackerMiniCalendar==='function')renderTrackerMiniCalendar();
-      if(typeof renderStatistics==='function')renderStatistics();
-      refreshGTFormulaLabels();
-      showToast(`GT updated • ${score} marks`);
-      return;
-    }
-    const gt={id:'gt_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,platform:document.getElementById('gtPlatform')?.value.trim()||'',score,total,correct,wrong,attempted:correct+wrong,date,taskId:window.pendingMCQTaskId||null,scoreCorrectMark:appState.gtScoring.correct,scoreWrongMark:appState.gtScoring.wrong,scoreLeftMark:appState.gtScoring.left};
-    appState.grandTests.unshift(gt);
-    if(window.pendingMCQTaskId){
-      const task=(appState.tasks||[]).find(t=>t.id===window.pendingMCQTaskId);
-      if(task){task.completed=true;task.trackerLogged=true;task.mcqTaskCount=total;task.mcqActivityId=gt.id;}
-      window.pendingMCQTaskId='';
-    }
-    saveState();closeModal('gtModal');
-    if(typeof renderGTTracker==='function')renderGTTracker();
-    if(typeof renderHome==='function')renderHome();
-    if(typeof renderTrackerMiniCalendar==='function')renderTrackerMiniCalendar();
-    if(typeof renderStatistics==='function')renderStatistics();
-    refreshGTFormulaLabels();
-    document.getElementById('gtName').value='';document.getElementById('gtPlatform').value='';document.getElementById('gtCorrect').value='';document.getElementById('gtWrong').value='';
-    showToast(`GT logged • ${score} marks • ${correct} correct`);
-  };
-
-  /* Settings save wrapper: save the selected GT marking scheme together with General settings. */
-  const originalSaveGeneral=window.saveGeneralSettings;
-  window.saveGeneralSettings=function(){
-    if(typeof originalSaveGeneral==='function')originalSaveGeneral();
-    ensureScoringState();
-    if(appState.mcqEnabled!==false && document.getElementById('gtScoreCorrectInput')){
-      if(!applyScoringSettingsFromInputs()) return;
-    }
-    syncScoringDisabledState();
-    refreshGTFormulaLabels();
-    if(typeof renderGTTracker==='function')renderGTTracker();
-    if(typeof renderStatistics==='function')renderStatistics();
-    saveState();
-  };
-
-  const originalOpenSettingsTab=window.openSettingsTab;
-  window.openSettingsTab=function(tab){
-    if(typeof originalOpenSettingsTab==='function')originalOpenSettingsTab(tab);
-    ensureScoringState();
-    injectGTScoringSettings();
-    syncScoringDisabledState();
-  };
-
-  function init(){
-    ensureScoringState();
-    injectGTScoringSettings();
-    refreshGTFormulaLabels();
-    syncScoringDisabledState();
+  function openPlans(){
+    ensureMarkup(); renderPlans(); updateGateCopy();
+    const gate=document.getElementById('trackabilitySubscriptionGate');
+    gate.classList.add('is-open');gate.setAttribute('aria-hidden','false');
+    if(window.lucide)lucide.createIcons();
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,60));else setTimeout(init,60);
-  window.addEventListener('load',init);
+
+  function enforce(){
+    loadBilling();
+    if(!isEntitled()) openGate(true);
+    updateBillingUI();
+  }
+
+  window.trackabilityTestPurchase=activatePlan;
+  window.openTrackabilityPlans=openPlans;
+  window.trackabilitySubscriptionState=function(){return JSON.parse(JSON.stringify(billingState));};
+  window.trackabilityEnforceSubscription=enforce;
+
+  function boot(){
+    loadBilling();
+    ensureMarkup();
+    renderPlans();
+    updateBillingUI();
+    injectAccountCard();
+    if(countdownTimer)clearInterval(countdownTimer);
+    countdownTimer=setInterval(function(){
+      normalizeBilling(); updateBillingUI();
+      if(!isEntitled())openGate(true);
+      else if(document.getElementById('trackabilitySubscriptionGate')?.classList.contains('is-open'))updateGateCopy();
+    },1000);
+    /* Trial/paywall enforcement is intentionally only a whole-app gate in this test build. */
+    setTimeout(function(){
+      if(!isEntitled())openGate(true);
+    },1200);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,180));
+  else setTimeout(boot,180);
+
+  /* Re-inject the Account subscription card after the existing Settings/account
+     integration moves the account modal content into Settings. */
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(injectAccountCard,700);
+    setTimeout(injectAccountCard,1600);
+  });
 })();
 </script>
 
