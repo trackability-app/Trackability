@@ -213,6 +213,20 @@
   .ob-next{margin-top:28px;display:flex;align-items:center;gap:8px;color:var(--accent-color);font-size:12px;font-weight:900;cursor:pointer;width:max-content}.ob-next .arrow{transition:.2s}.ob-next:hover .arrow{transform:translateX(5px)}
   .ob-note{font-size:10px;color:var(--muted-color);margin-top:12px;line-height:1.5}.ob-note a{color:var(--accent-color);font-weight:800;text-decoration:none}.ob-note a:hover{text-decoration:underline}
   .ob-nav-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px}.ob-nav-row .ob-next{margin-top:0;flex:1;text-align:right}.ob-nav-row .ob-btn{flex:0 0 auto}.ob-ready{text-align:center}.ob-ready .ob-title{font-size:clamp(40px,10vw,66px)}.ob-ready-ring{width:116px;height:116px;border-radius:50%;margin:0 auto 28px;border:1px solid var(--border-color);display:grid;place-items:center;background:radial-gradient(circle,var(--accent-glow),transparent 68%);animation:obReady 1.5s ease-in-out infinite}.ob-ready-ring span{font-size:42px}.ob-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px}.ob-summary div{padding:11px;border:1px solid var(--border-color);border-radius:14px;background:var(--card-soft-color);text-align:left}.ob-summary small{display:block;font-size:8px;text-transform:uppercase;color:var(--muted-color);font-weight:900}.ob-summary b{display:block;font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@keyframes obReady{0%,100%{transform:scale(1)}50%{transform:scale(1.07);box-shadow:0 0 50px var(--accent-glow)}}
+  /* Subscription screen follows the selected onboarding theme even if another startup
+     routine temporarily changes body utility classes. */
+  body.dark-obsidian #trackabilityOnboarding, body.dark-midnight #trackabilityOnboarding,
+  body.dark-oled #trackabilityOnboarding, body.dark-burgundy #trackabilityOnboarding,
+  body.dark-emerald #trackabilityOnboarding, body.dark-forest #trackabilityOnboarding,
+  body.dark-plum #trackabilityOnboarding{background:var(--bg-color);color:var(--text-color);}
+  body.dark-obsidian #trackabilityOnboarding .ob-plan, body.dark-midnight #trackabilityOnboarding .ob-plan,
+  body.dark-oled #trackabilityOnboarding .ob-plan, body.dark-burgundy #trackabilityOnboarding .ob-plan,
+  body.dark-emerald #trackabilityOnboarding .ob-plan, body.dark-forest #trackabilityOnboarding .ob-plan,
+  body.dark-plum #trackabilityOnboarding .ob-plan{background:var(--card-soft-color);color:var(--text-color);border-color:var(--border-color);}
+  body.dark-obsidian #trackabilityOnboarding .ob-sub-benefit, body.dark-midnight #trackabilityOnboarding .ob-sub-benefit,
+  body.dark-oled #trackabilityOnboarding .ob-sub-benefit, body.dark-burgundy #trackabilityOnboarding .ob-sub-benefit,
+  body.dark-emerald #trackabilityOnboarding .ob-sub-benefit, body.dark-forest #trackabilityOnboarding .ob-sub-benefit,
+  body.dark-plum #trackabilityOnboarding .ob-sub-benefit{background:var(--card-soft-color);color:var(--text-color);}
   .ob-subscription{max-width:760px;margin:0 auto;text-align:center;}
   .ob-sub-hero{display:grid;grid-template-columns:1fr;gap:8px;margin:18px 0 14px;}
   .ob-sub-benefits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;text-align:left;}
@@ -295,6 +309,20 @@
   .tb-sub-test{border:1px dashed rgba(127,127,127,.35);border-radius:16px;padding:10px;background:rgba(127,127,127,.035)}
   .tb-sub-count{font-variant-numeric:tabular-nums}
 </style>
+
+<script id="trackability-subscription-global-safety">
+/* Safe global subscription mapper. The full Supabase sync layer may replace this
+   implementation later, but no page action can ever fail with an undefined
+   applyCloudSubscription symbol. */
+window.applyCloudSubscription = window.applyCloudSubscription || function(row){
+  if(!row) return false;
+  const planMap={'1_month':'monthly','3_months':'quarterly','6_months':'halfyearly','12_months':'yearly'};
+  const state={version:2,status:row.status||'expired',trialStartedAt:row.trial_started_at?Date.parse(row.trial_started_at):null,trialEndsAt:row.trial_ends_at?Date.parse(row.trial_ends_at):null,planId:planMap[row.plan]||null,subscriptionStartedAt:row.current_period_start?Date.parse(row.current_period_start):null,subscriptionEndsAt:row.current_period_end?Date.parse(row.current_period_end):null,updatedAt:Date.now(),provider:'razorpay',providerPaymentId:row.razorpay_payment_id||null,providerPaymentLinkId:row.razorpay_payment_link_id||null,amountPaid:row.amount_paid??null};
+  try{localStorage.setItem('TRACKABILITY_BILLING_V1',JSON.stringify(state));}catch(e){}
+  try{window.dispatchEvent(new CustomEvent('trackability:subscription-updated',{detail:state}));}catch(e){}
+  return true;
+};
+</script>
 
 </head>
 <body class="theme-light h-screen overflow-hidden flex flex-col antialiased">
@@ -409,10 +437,10 @@
               </div>
               <div class="text-[9px] font-black uppercase tracking-wider" style="color:var(--muted-color);margin-top:16px">Choose your plan</div>
               <div class="ob-plan-grid">
-                <button class="ob-plan" type="button" onclick="obChoosePaidPlan('monthly')"><div class="ob-plan-name">1 Month</div><div class="ob-plan-price">₹129</div><div class="ob-plan-small">Simple monthly access</div></button>
-                <button class="ob-plan" type="button" onclick="obChoosePaidPlan('quarterly')"><div class="ob-plan-name">3 Months</div><div class="ob-plan-price">₹359</div><div class="ob-plan-save">Save ₹28</div><div class="ob-plan-small">vs ₹129/month</div></button>
-                <button class="ob-plan" type="button" onclick="obChoosePaidPlan('halfyearly')"><div class="ob-plan-badge">Popular</div><div class="ob-plan-name">6 Months</div><div class="ob-plan-price">₹699</div><div class="ob-plan-old">₹759</div><div class="ob-plan-save">Save ₹60</div></button>
-                <button class="ob-plan" type="button" onclick="obChoosePaidPlan('yearly')"><div class="ob-plan-badge">Best value</div><div class="ob-plan-name">12 Months</div><div class="ob-plan-price">₹1,199</div><div class="ob-plan-old">₹1,499</div><div class="ob-plan-save">Save ₹300</div></button>
+                <button class="ob-plan" type="button" data-plan-id="monthly" onclick="obChoosePaidPlan('monthly')"><div class="ob-plan-name">1 Month</div><div class="ob-plan-price">₹129</div><div class="ob-plan-small">Simple monthly access</div></button>
+                <button class="ob-plan" type="button" data-plan-id="quarterly" onclick="obChoosePaidPlan('quarterly')"><div class="ob-plan-name">3 Months</div><div class="ob-plan-price">₹359</div><div class="ob-plan-save">Save ₹28</div><div class="ob-plan-small">vs ₹129/month</div></button>
+                <button class="ob-plan" type="button" data-plan-id="halfyearly" onclick="obChoosePaidPlan('halfyearly')"><div class="ob-plan-badge">Popular</div><div class="ob-plan-name">6 Months</div><div class="ob-plan-price">₹699</div><div class="ob-plan-old">₹759</div><div class="ob-plan-save">Save ₹60</div></button>
+                <button class="ob-plan" type="button" data-plan-id="yearly" onclick="obChoosePaidPlan('yearly')"><div class="ob-plan-badge">Best value</div><div class="ob-plan-name">12 Months</div><div class="ob-plan-price">₹1,199</div><div class="ob-plan-old">₹1,499</div><div class="ob-plan-save">Save ₹300</div></button>
               </div>
               <div id="obSelectedPlanNote" class="ob-trial-note" style="min-height:15px;font-weight:800"></div>
               <div class="ob-sub-hero" style="margin-top:14px">
@@ -6406,7 +6434,7 @@ document.addEventListener('DOMContentLoaded',function(){
   async function syncSubscriptionFromCloud(){
     if(!sb || !currentUser) return null;
     const row=await fetchSubscriptionRow();
-    if(row) applyCloudSubscription(row);
+    if(row && typeof window.applyCloudSubscription==='function') window.applyCloudSubscription(row);
     return row;
   }
 
@@ -7238,19 +7266,20 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   };
   window.obChoosePaidPlan=function(planId){
+    const valid=['monthly','quarterly','halfyearly','yearly'];
+    if(!valid.includes(planId)) return;
     selectedPaidPlan=planId;
-    document.querySelectorAll('#trackabilityOnboarding .ob-plan').forEach(function(el){el.classList.remove('selected');});
-    const selected=document.querySelector('#trackabilityOnboarding .ob-plan[onclick*="' + planId + '"]');
-    if(selected) selected.classList.add('selected');
+    document.querySelectorAll('#trackabilityOnboarding .ob-plan').forEach(function(el){
+      el.classList.toggle('selected', el.getAttribute('data-plan-id')===planId);
+      el.blur();
+    });
     const note=$('obSelectedPlanNote');
     if(note){
       const names={monthly:'1 Month',quarterly:'3 Months',halfyearly:'6 Months',yearly:'12 Months'};
-      note.textContent='Selected plan: '+(names[planId]||'');
+      note.textContent='Selected plan: '+names[planId];
       note.style.color='var(--accent-color)';
     }
-    /* Selecting a plan is only a UI choice during onboarding.
-       It must NOT activate a paid/test subscription or close onboarding.
-       The 14-day trial is started only by the dedicated trial button. */
+    /* Selection is UI-only. It never purchases, activates, or closes onboarding. */
   };
   function boot(){
     const el=$('trackabilityOnboarding');if(!el)return;
@@ -7903,7 +7932,8 @@ document.addEventListener('DOMContentLoaded',function(){
       if(typeof window.trackabilitySyncSubscription==='function'){
         const row=await window.trackabilitySyncSubscription();
         if(!row) throw new Error('Your trial could not be created. Please refresh and try again.');
-        applyCloudSubscription(row);
+        if(typeof window.applyCloudSubscription!=='function') throw new Error('Subscription cloud mapper is not ready. Please refresh and try again.');
+        window.applyCloudSubscription(row);
         loadBilling();
         updateBillingUI();
         if(isEntitled()) return true;
