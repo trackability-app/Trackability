@@ -223,9 +223,12 @@
   .ob-trial-btn:hover{transform:translateY(-2px);}
   .ob-trial-note{font-size:9px;color:var(--muted-color);margin-top:7px;}
   .ob-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px;text-align:left;}
-  .ob-plan{position:relative;padding:11px;border:1px solid var(--border-color);border-radius:16px;background:var(--card-soft-color);cursor:pointer;transition:.18s ease;}
+  .ob-plan{position:relative;padding:11px;border:1px solid var(--border-color);border-radius:16px;background:var(--card-soft-color);color:var(--text-color);cursor:pointer;transition:.18s ease;outline:none;-webkit-tap-highlight-color:transparent;}
   .ob-plan:hover{transform:translateY(-2px);border-color:var(--accent-color);}
-  .ob-plan.selected{border-color:var(--accent-color);background:var(--accent-glow);box-shadow:0 8px 28px var(--accent-glow);}
+  .ob-plan:focus{outline:none;}
+  .ob-plan:focus-visible{outline:2px solid var(--accent-color);outline-offset:2px;}
+  .ob-plan.selected{border-color:var(--accent-color);background:var(--accent-color);color:#fff;box-shadow:0 8px 28px var(--accent-glow);}
+  .ob-plan.selected .ob-plan-name,.ob-plan.selected .ob-plan-old,.ob-plan.selected .ob-plan-save,.ob-plan.selected .ob-plan-small,.ob-plan.selected .ob-plan-badge{color:rgba(255,255,255,.92);}
   .ob-plan-badge{position:absolute;right:7px;top:7px;font-size:7px;font-weight:950;text-transform:uppercase;color:var(--accent-color);}
   .ob-plan-name{font-size:9px;font-weight:950;text-transform:uppercase;color:var(--muted-color);}
   .ob-plan-price{font-size:18px;font-weight:950;margin-top:4px;}
@@ -359,8 +362,8 @@
             <p class="ob-subtitle">These details personalize your dashboard. You can change them later in Settings.</p>
             <div class="ob-form">
               <div class="ob-field"><label>Name</label><input id="obName" type="text" placeholder="What should we call you?"></div>
-              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Goal</label><input id="obCourse" type="text" placeholder="NEET PG, JEE, etc."></div></div>
-              <div class="ob-field"><label>Exam / Goal Name</label><input id="obExam" type="text" placeholder="e.g. NEET PG 2027"></div>
+              <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Age</label><input id="obAge" type="number" min="1" max="120" placeholder="Age"></div><div class="ob-field"><label>Course / Field</label><input id="obCourse" type="text" placeholder="Medicine, Engineering, UPSC, etc."></div></div>
+              <div class="ob-field"><label>Exam / Goal Name</label><input id="obExam" type="text" placeholder="e.g. NEET PG 2027, JEE 2027"></div>
               <div class="ob-grid" style="margin-top:0"><div class="ob-field"><label>Target Date</label><input id="obDate" type="date"></div><div class="ob-field"><label>Target Time (optional)</label><input id="obTime" type="time"></div></div>
             </div><div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obSaveProfile();obNext()">NEXT →</button></div>
           </section>
@@ -411,6 +414,7 @@
                 <button class="ob-plan" type="button" onclick="obChoosePaidPlan('halfyearly')"><div class="ob-plan-badge">Popular</div><div class="ob-plan-name">6 Months</div><div class="ob-plan-price">₹699</div><div class="ob-plan-old">₹759</div><div class="ob-plan-save">Save ₹60</div></button>
                 <button class="ob-plan" type="button" onclick="obChoosePaidPlan('yearly')"><div class="ob-plan-badge">Best value</div><div class="ob-plan-name">12 Months</div><div class="ob-plan-price">₹1,199</div><div class="ob-plan-old">₹1,499</div><div class="ob-plan-save">Save ₹300</div></button>
               </div>
+              <div id="obSelectedPlanNote" class="ob-trial-note" style="min-height:15px;font-weight:800"></div>
               <div class="ob-sub-hero" style="margin-top:14px">
                 <button class="ob-trial-btn" type="button" onclick="obStartTrial()">START 14-DAY FREE TRIAL →</button>
                 <div class="ob-trial-note">14 days of full access • No payment today • Choose a paid plan whenever you are ready</div>
@@ -6397,6 +6401,8 @@ document.addEventListener('DOMContentLoaded',function(){
     return true;
   }
 
+  window.applyCloudSubscription=applyCloudSubscription;
+
   async function syncSubscriptionFromCloud(){
     if(!sb || !currentUser) return null;
     const row=await fetchSubscriptionRow();
@@ -7173,7 +7179,19 @@ document.addEventListener('DOMContentLoaded',function(){
   let step=0, mode='account', examMode='mcq', pickedTheme='theme-light', pickedFont='font-space', selectedPaidPlan='';
   const $=id=>document.getElementById(id);
   function screens(){return [...document.querySelectorAll('#trackabilityOnboarding .ob-screen')];}
-  function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===7)updateSummary();}
+  function syncOnboardingTheme(){
+    try{
+      const theme=pickedTheme || appState?.theme || 'theme-light';
+      const font=pickedFont || appState?.fontStyle || '';
+      const structural='h-screen overflow-hidden flex flex-col antialiased';
+      document.body.className=theme+' '+font+' '+structural;
+      if(typeof appState!=='undefined'){appState.theme=theme;appState.fontStyle=font;}
+    }catch(e){}
+  }
+  function update(){
+    syncOnboardingTheme();
+    const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===7)updateSummary();
+  }
   window.obNext=function(){if(step===4)obSaveProfile();if(step<8){step++;update();}};
   window.obBack=function(){if(step>0){step--;update();}};
   window.obChooseMode=function(v){mode=v;$('obChoiceAccount').classList.toggle('selected',v==='account');$('obChoiceGuest').classList.toggle('selected',v==='guest');$('obSummaryMode').textContent=v==='account'?'Account':'Guest';};
@@ -7183,12 +7201,12 @@ document.addEventListener('DOMContentLoaded',function(){
     appState.profileName=($('obName').value||'').trim();appState.profileAge=($('obAge').value||'').trim();appState.course=($('obCourse').value||'').trim();appState.examTitle=($('obExam').value||'').trim();appState.examDate=$('obDate').value||'';appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';
     try{saveState();}catch(e){}
   };
-  window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setTheme==='function')setTheme(v);else document.body.className=v+' '+pickedFont+' h-screen overflow-hidden flex flex-col antialiased';};
+  window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');syncOnboardingTheme();try{saveState();}catch(e){}};
   window.obPickFont=function(el,v){pickedFont=v;document.querySelectorAll('.ob-font').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setFontStyle==='function')setFontStyle(v);};
   function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obExam').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
   function finishOnboarding(){
     obSaveProfile();
-    try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;saveState();}catch(e){}
+    try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;applyBodyClasses();saveState();}catch(e){}
     localStorage.setItem(KEY,'1');
     const el=$('trackabilityOnboarding');el.classList.add('ob-hide');
     setTimeout(()=>{el.style.display='none';try{if(typeof refreshAllViews==='function')refreshAllViews();if(window.lucide)lucide.createIcons();}catch(e){};
@@ -7224,14 +7242,19 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('#trackabilityOnboarding .ob-plan').forEach(function(el){el.classList.remove('selected');});
     const selected=document.querySelector('#trackabilityOnboarding .ob-plan[onclick*="' + planId + '"]');
     if(selected) selected.classList.add('selected');
-    obSaveProfile();
-    if(typeof window.trackabilityActivatePlan==='function'){
-      window.trackabilityActivatePlan(planId,true);
-      finishOnboarding();
+    const note=$('obSelectedPlanNote');
+    if(note){
+      const names={monthly:'1 Month',quarterly:'3 Months',halfyearly:'6 Months',yearly:'12 Months'};
+      note.textContent='Selected plan: '+(names[planId]||'');
+      note.style.color='var(--accent-color)';
     }
+    /* Selecting a plan is only a UI choice during onboarding.
+       It must NOT activate a paid/test subscription or close onboarding.
+       The 14-day trial is started only by the dedicated trial button. */
   };
   function boot(){
     const el=$('trackabilityOnboarding');if(!el)return;
+    try{pickedTheme=appState?.theme||pickedTheme;pickedFont=appState?.fontStyle||pickedFont;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.toggle('selected',x.dataset.theme===pickedTheme));document.querySelectorAll('.ob-font').forEach(x=>x.classList.toggle('selected',x.dataset.font===pickedFont));}catch(e){}
     const complete=localStorage.getItem(KEY)==='1';
     if(complete){el.style.display='none';return;}
     update();
@@ -7388,7 +7411,11 @@ document.addEventListener('DOMContentLoaded',function(){
     removeOldLogoUI();ensureMiscChooser();
     /* First launch is intentionally white/light until the user reaches the theme screen. */
     if(localStorage.getItem('trackability_onboarding_v1')!=='1'){
-      try{document.body.className='theme-light h-screen overflow-hidden flex flex-col antialiased';}catch(e){}
+      try{
+        const t=(typeof appState!=='undefined'&&appState.theme)||'theme-light';
+        const f=(typeof appState!=='undefined'&&appState.fontStyle)||'';
+        document.body.className=t+' '+f+' h-screen overflow-hidden flex flex-col antialiased';
+      }catch(e){}
     }
     renderNutritionTracker();renderStatistics();
     if(window.lucide)lucide.createIcons();
