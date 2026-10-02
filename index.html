@@ -6277,6 +6277,7 @@ document.addEventListener('DOMContentLoaded',function(){
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ZapsiXuoqHFbxvY4ASwteA_i-uPc7wY';
   const CLOUD_STATE_TABLE = 'app_data';
   const PROFILE_TABLE = 'profiles';
+  const SUBSCRIPTION_TABLE = 'subscriptions';
   const PENDING_MIGRATION_KEY = 'TRACKABILITY_PENDING_CLOUD_MIGRATION';
   const SYNC_META_PREFIX = 'TRACKABILITY_SYNC_META_';
 
@@ -6336,6 +6337,12 @@ document.addEventListener('DOMContentLoaded',function(){
     if(el) el.textContent=text;
   }
 
+  function isAnonymousUser(user){
+    return !!(user && user.is_anonymous === true);
+  }
+
+  window.trackabilityIsAnonymousUser=function(){return isAnonymousUser(currentUser);};
+
   function populateAccountUI(){
     const signedOut = document.getElementById('accountSignedOutPanel');
     const signedIn = document.getElementById('accountSignedInPanel');
@@ -6344,7 +6351,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const isIn=!!currentUser;
     signedOut.classList.toggle('hidden',isIn);
     signedIn.classList.toggle('hidden',!isIn);
-    if(status) status.textContent=isIn ? 'Cloud account • sync enabled' : 'Guest mode • data stays on this device';
+    if(status) status.textContent=isIn ? (isAnonymousUser(currentUser) ? 'Guest • cloud sync enabled' : 'Cloud account • sync enabled') : 'Guest mode • data stays on this device';
     if(isIn){
       const email=currentUser.email||'';
       const ed=document.getElementById('accountEmailDisplay'); if(ed) ed.textContent=email;
@@ -6360,6 +6367,57 @@ document.addEventListener('DOMContentLoaded',function(){
       const date=document.getElementById('accountExamDateInput'); if(date) date.value=appState.examDate || '';
     }
   }
+
+  async function fetchSubscriptionRow(){
+    if(!sb || !currentUser) return null;
+    const {data,error}=await sb.from(SUBSCRIPTION_TABLE).select('status,plan,trial_started_at,trial_ends_at,current_period_start,current_period_end,razorpay_payment_link_id,razorpay_payment_id,amount_paid,updated_at').eq('user_id',currentUser.id).maybeSingle();
+    if(error) throw error;
+    return data||null;
+  }
+
+  function applyCloudSubscription(row){
+    if(!row) return false;
+    const planMap={'1_month':'monthly','3_months':'quarterly','6_months':'halfyearly','12_months':'yearly'};
+    const state={
+      version:2,
+      status:row.status||'expired',
+      trialStartedAt:row.trial_started_at?Date.parse(row.trial_started_at):null,
+      trialEndsAt:row.trial_ends_at?Date.parse(row.trial_ends_at):null,
+      planId:planMap[row.plan]||null,
+      subscriptionStartedAt:row.current_period_start?Date.parse(row.current_period_start):null,
+      subscriptionEndsAt:row.current_period_end?Date.parse(row.current_period_end):null,
+      updatedAt:Date.now(),
+      provider:'razorpay',
+      providerPaymentId:row.razorpay_payment_id||null,
+      providerPaymentLinkId:row.razorpay_payment_link_id||null,
+      amountPaid:row.amount_paid??null
+    };
+    try{localStorage.setItem('TRACKABILITY_BILLING_V1',JSON.stringify(state));}catch(e){}
+    try{window.dispatchEvent(new CustomEvent('trackability:subscription-updated',{detail:state}));}catch(e){}
+    return true;
+  }
+
+  async function syncSubscriptionFromCloud(){
+    if(!sb || !currentUser) return null;
+    const row=await fetchSubscriptionRow();
+    if(row) applyCloudSubscription(row);
+    return row;
+  }
+
+  async function ensureAnonymousSession(){
+    if(!sb) throw new Error('Cloud connection is not ready. Please wait a moment and try again.');
+    if(currentUser && isAnonymousUser(currentUser)) return currentUser;
+    if(currentUser && !isAnonymousUser(currentUser)) return currentUser;
+    const {data,error}=await sb.auth.signInAnonymously();
+    if(error) throw error;
+    currentUser=data?.user||null;
+    window.__trackabilityCurrentUserEmail='';
+    try{ updateSettingsAccountCard(); }catch(e){}
+    await finishSignedInBootstrap();
+    return currentUser;
+  }
+  window.trackabilityEnsureAnonymousSession=ensureAnonymousSession;
+  window.trackabilitySyncSubscription=syncSubscriptionFromCloud;
 
   async function initSupabase(){
     if(!window.supabase || !window.supabase.createClient){
@@ -6434,14 +6492,21 @@ document.addEventListener('DOMContentLoaded',function(){
         if(stateError) throw stateError;
 
         if(cloudRow){
-          /* Existing account: silently load its cloud copy. */
+          /* Existing account/device: cloud is authoritative. */
           await applyCloudRow(cloudRow,false);
           localStorage.removeItem(PENDING_MIGRATION_KEY);
-        }else{
-          /* New account or account with no app data yet: upload current local data. */
-          await uploadCloudState(true);
+        }else if(isAnonymousUser(currentUser) || localStorage.getItem(PENDING_MIGRATION_KEY)==='1'){
+          /* Anonymous guest or brand-new account: the current device state is the first cloud copy. */
+          const uploaded=await uploadCloudState(true);
+          if(!uploaded) throw new Error('Could not create the initial cloud copy');
           localStorage.removeItem(PENDING_MIGRATION_KEY);
+        }else{
+          /* Existing signed-in account with no cloud row: do not silently upload guest/device data. */
+          setSyncStatus('No cloud data found');
+          accountToast('No cloud data was found for this account. Your device data was not uploaded.','alert-circle');
+          return;
         }
+        await syncSubscriptionFromCloud();
         setSyncStatus('Synced');
         populateAccountUI();
       }catch(err){
@@ -6542,23 +6607,48 @@ document.addEventListener('DOMContentLoaded',function(){
         const age=appState.profileAge ?? appState.cloudProfile?.age ?? '';
         const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
         const examDate=appState.examDate || null;
-        localStorage.setItem(PENDING_MIGRATION_KEY,'1');
-        const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,age:age?Number(age):null,course,exam_date:examDate},emailRedirectTo:window.location.origin+window.location.pathname}});
-        if(error) throw error;
-        appState.profileName=name;
-        appState.course=course;
-        if(examDate) appState.examDate=examDate;
-        saveLocalOnly();
-        if(data.session){
-          currentUser=data.user;
+        const metadata={name,age:age?Number(age):null,course,exam_date:examDate};
+
+        if(currentUser && isAnonymousUser(currentUser)){
+          /* The onboarding trial already belongs to this anonymous user.
+             Convert that same identity instead of creating a second user, so
+             the trial, profile and cloud study data keep the same user_id. */
+          const {data,error}=await sb.auth.updateUser({
+            email,
+            password,
+            data:metadata
+          });
+          if(error) throw error;
+          currentUser=data?.user || currentUser;
           window.__trackabilityCurrentUserEmail=currentUser?.email||'';
-          try{ updateSettingsAccountCard(); }catch(e){}
-          await finishSignedInBootstrap();
+          appState.profileName=name;
+          appState.course=course;
+          if(examDate) appState.examDate=examDate;
+          saveLocalOnly();
+          await saveProfileRow({name,age,course,exam_date:examDate||''});
+          await syncSubscriptionFromCloud();
           populateAccountUI();
-          accountToast('Account created and data synced ☁️');
-        }else{
           closeModal('accountModal');
-          alert('Account created. Please check your email to confirm the account, then sign in to complete cloud sync.');
+          alert('Your account details were saved. Please check your email to confirm your account. Your existing TRACKABILITY trial and data stay linked to this account.');
+        }else{
+          localStorage.setItem(PENDING_MIGRATION_KEY,'1');
+          const {data,error}=await sb.auth.signUp({email,password,options:{data:metadata,emailRedirectTo:window.location.origin+window.location.pathname}});
+          if(error) throw error;
+          appState.profileName=name;
+          appState.course=course;
+          if(examDate) appState.examDate=examDate;
+          saveLocalOnly();
+          if(data.session){
+            currentUser=data.user;
+            window.__trackabilityCurrentUserEmail=currentUser?.email||'';
+            try{ updateSettingsAccountCard(); }catch(e){}
+            await finishSignedInBootstrap();
+            populateAccountUI();
+            accountToast('Account created and data synced ☁️');
+          }else{
+            closeModal('accountModal');
+            alert('Account created. Please check your email to confirm the account, then sign in to complete cloud sync.');
+          }
         }
       }else{
         const {data,error}=await sb.auth.signInWithPassword({email,password});
@@ -7105,11 +7195,23 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!window.trackabilityHasEntitlement || !window.trackabilityHasEntitlement()){return;}
     finishOnboarding();
   };
-  window.obStartTrial=function(){
+  window.obStartTrial=async function(){
     obSaveProfile();
-    if(typeof window.trackabilityStartTrial==='function'){
-      window.trackabilityStartTrial();
+    const btn=document.querySelector('.ob-trial-btn');
+    if(btn){btn.disabled=true;btn.textContent='SETTING UP YOUR FREE TRIAL…';}
+    try{
+      if(typeof window.trackabilityStartTrial!=='function') throw new Error('Subscription service is not ready. Please try again in a moment.');
+      /* Both Guest and Account onboarding start from the same Supabase
+         anonymous identity. If the user later creates an email/password
+         account, that identity can be converted without losing the trial. */
+      const ok=await window.trackabilityStartTrial(true);
+      if(!ok) return;
       finishOnboarding();
+    }catch(err){
+      console.error('Trial start error:',err);
+      try{showToast(err.message||'Could not start your free trial','alert-circle');}catch(e){alert(err.message||'Could not start your free trial');}
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='START 14-DAY FREE TRIAL →';}
     }
   };
   window.obChoosePaidPlan=function(planId){
@@ -7727,14 +7829,12 @@ document.addEventListener('DOMContentLoaded',function(){
   /* ============================================================
      TRACKABILITY SUBSCRIPTION / 14-DAY TRIAL LAYER
      ------------------------------------------------------------
-     TEST BUILD:
-     - 14-day free trial is selected during first-launch onboarding.
+     PRODUCTION TRIAL + TEST PAYMENT BUILD:
+     - 14-day free trial is backed by the Supabase subscriptions row.
+     - Guest users are Supabase anonymous users, not local-only guests.
      - Plans: ₹129 monthly, ₹359 / 3 months, ₹699 / 6 months,
        ₹1,199 / 12 months.
-     - Test purchase activates a plan locally without charging.
-     - No individual feature is locked during this test build.
-     - Production payment verification should be moved to a
-       Supabase Edge Function + Razorpay before launch.
+     - Payment buttons remain TEST MODE until Razorpay verification is wired.
      ============================================================ */
   const BILLING_KEY='TRACKABILITY_BILLING_V1';
   const TRIAL_DAYS=14;
@@ -7761,11 +7861,22 @@ document.addEventListener('DOMContentLoaded',function(){
     return billingState;
   }
 
-  function startTrial(){
-    const start=now();
-    billingState={version:1,status:'trial',trialStartedAt:start,trialEndsAt:start+TRIAL_DAYS*86400000,planId:null,subscriptionStartedAt:null,subscriptionEndsAt:null,updatedAt:start};
-    saveBilling();
-    updateBillingUI();
+  async function startTrial(forGuest){
+    try{
+      if(forGuest && typeof window.trackabilityEnsureAnonymousSession==='function') await window.trackabilityEnsureAnonymousSession();
+      if(typeof window.trackabilitySyncSubscription==='function'){
+        const row=await window.trackabilitySyncSubscription();
+        if(!row) throw new Error('Your trial could not be created. Please refresh and try again.');
+        applyCloudSubscription(row);
+        loadBilling();
+        updateBillingUI();
+        if(isEntitled()) return true;
+      }
+      throw new Error('Your trial could not be verified. Please try again.');
+    }catch(err){
+      console.error('Production trial start failed:',err);
+      throw err;
+    }
   }
 
   function saveBilling(){
@@ -7838,15 +7949,11 @@ document.addEventListener('DOMContentLoaded',function(){
               <span id="tbSubStatusPill" class="px-2 py-1 rounded-lg bg-themeAccent/10 text-themeAccent text-[8px] font-black whitespace-nowrap">EXPIRED</span>
             </div>
           </div>
-          ${TEST_MODE?`<div class="tb-sub-test"><div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">TEST BUILD</div><div class="text-[9px] text-themeMuted mt-1">No money is charged. Use these controls only to test the trial/paywall flow.</div><div class="grid grid-cols-2 gap-2 mt-2"><button id="tbResetTrial" class="py-2 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black">Reset 14-day trial</button><button id="tbExpireTrial" class="py-2 rounded-xl bg-themeCard border border-themeBorder text-[9px] font-black">Expire trial now</button></div></div>`:''}
+          ${TEST_MODE?`<div class="tb-sub-test"><div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">PAYMENT TEST BUILD</div><div class="text-[9px] text-themeMuted mt-1">Payment activation is still test-only. The 14-day trial itself is verified from Supabase.</div></div>`:''}
         </div>
       </div>`;
     document.body.appendChild(wrap);
     wrap.addEventListener('click',function(e){if(e.target===wrap && isEntitled()) closeGate();});
-    const reset=document.getElementById('tbResetTrial');
-    const expire=document.getElementById('tbExpireTrial');
-    if(reset)reset.onclick=function(){resetTrial();};
-    if(expire)expire.onclick=function(){expireTrial();};
     uiReady=true;
     if(window.lucide)lucide.createIcons();
   }
@@ -7971,7 +8078,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   window.trackabilityTestPurchase=activatePlan;
   window.trackabilityActivatePlan=function(planId,fromOnboarding){activatePlan(planId);if(fromOnboarding)updateBillingUI();};
-  window.trackabilityStartTrial=function(){startTrial();};
+  window.trackabilityStartTrial=function(forGuest){return startTrial(!!forGuest);};
   window.trackabilityHasEntitlement=function(){loadBilling();return isEntitled();};
   window.openTrackabilityPlans=openPlans;
   window.trackabilitySubscriptionState=function(){return JSON.parse(JSON.stringify(billingState));};
