@@ -300,13 +300,13 @@
 
 
 <style id="trackability-subscription-styles">
-  #trackabilitySubscriptionGate{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:18px}
+  #trackabilitySubscriptionGate{position:fixed;inset:0;z-index:999999;background:color-mix(in srgb,var(--bg-color) 72%,#000 28%);color:var(--text-color);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:18px}
   #trackabilitySubscriptionGate.is-open{display:flex}
-  .tb-sub-card{width:min(560px,100%);max-height:min(92vh,760px);overflow:auto;border:1px solid rgba(127,127,127,.22);border-radius:28px;background:var(--theme-card,#fff);box-shadow:0 30px 90px rgba(0,0,0,.35)}
-  .tb-sub-plan{border:1px solid rgba(127,127,127,.18);border-radius:20px;padding:15px;background:rgba(127,127,127,.045);transition:.18s ease}
+  .tb-sub-card{width:min(560px,100%);max-height:min(92vh,760px);overflow:auto;border:1px solid rgba(127,127,127,.22);border-radius:28px;background:var(--card-color,#fff);box-shadow:0 30px 90px rgba(0,0,0,.35)}
+  .tb-sub-plan{border:1px solid var(--border-color);border-radius:20px;padding:15px;background:var(--card-soft-color);color:var(--text-color);transition:.18s ease}
   .tb-sub-plan:hover{transform:translateY(-1px);border-color:rgba(127,127,127,.32)}
   .tb-sub-plan.popular{outline:2px solid rgba(59,130,246,.24)}
-  .tb-sub-test{border:1px dashed rgba(127,127,127,.35);border-radius:16px;padding:10px;background:rgba(127,127,127,.035)}
+  .tb-sub-test{border:1px dashed var(--border-color);border-radius:16px;padding:10px;background:var(--card-soft-color);color:var(--text-color)}
   .tb-sub-count{font-variant-numeric:tabular-nums}
 </style>
 
@@ -8015,6 +8015,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <span id="tbSubStatusPill" class="px-2 py-1 rounded-lg bg-themeAccent/10 text-themeAccent text-[8px] font-black whitespace-nowrap">EXPIRED</span>
             </div>
           </div>
+          <div id="tbSubAccountPrompt" class="tb-sub-test" style="display:none"><div class="text-[8px] font-black uppercase tracking-wider text-themeAccent">KEEP YOUR JOURNEY SYNCED</div><div class="text-[9px] text-themeMuted mt-1">Create your TRACKABILITY account before continuing so your trial and study data stay connected to you.</div><button type="button" onclick="window.trackabilityOpenAccountFromGate()" class="w-full mt-2 py-2 rounded-xl bg-themeAccent text-white text-[9px] font-black">CREATE ACCOUNT & SYNC</button></div>
           ${TEST_MODE?`<div class="tb-sub-test"><div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">PAYMENT TEST BUILD</div><div class="text-[9px] text-themeMuted mt-1">Payment activation is still test-only. The 14-day trial itself is verified from Supabase.</div></div>`:''}
         </div>
       </div>`;
@@ -8048,6 +8049,9 @@ document.addEventListener('DOMContentLoaded',function(){
     const msg=document.getElementById('tbSubGateMessage');
     const pill=document.getElementById('tbSubStatusPill');
     if(!msg||!pill)return;
+    const accountPrompt=document.getElementById('tbSubAccountPrompt');
+    const anonymous=typeof window.trackabilityIsAnonymousUser==='function' && window.trackabilityIsAnonymousUser();
+    if(accountPrompt) accountPrompt.style.display=anonymous?'block':'none';
     if(billingState.status==='trial' && isEntitled()){
       msg.textContent=`Your free trial is active — ${remainingText()}.`;
       pill.textContent='TRIAL ACTIVE';
@@ -8149,6 +8153,25 @@ document.addEventListener('DOMContentLoaded',function(){
   window.openTrackabilityPlans=openPlans;
   window.trackabilitySubscriptionState=function(){return JSON.parse(JSON.stringify(billingState));};
   window.trackabilityEnforceSubscription=enforce;
+  window.trackabilityOpenAccountFromGate=function(){
+    try{
+      if(typeof window.openSettingsModal==='function') window.openSettingsModal();
+      setTimeout(function(){
+        if(typeof window.openSettingsTab==='function') window.openSettingsTab('account');
+      },80);
+    }catch(e){ console.error(e); }
+  };
+
+  async function refreshEntitlementFromCloud(){
+    try{
+      if(typeof window.trackabilitySyncSubscription==='function') await window.trackabilitySyncSubscription();
+      loadBilling();
+      updateBillingUI();
+      if(!isEntitled()) openGate(true);
+    }catch(e){
+      console.warn('Subscription entitlement refresh deferred:',e);
+    }
+  }
 
   function boot(){
     loadBilling();
@@ -8159,9 +8182,15 @@ document.addEventListener('DOMContentLoaded',function(){
     if(countdownTimer)clearInterval(countdownTimer);
     countdownTimer=setInterval(function(){
       normalizeBilling(); updateBillingUI();
+      if(!isEntitled() && localStorage.getItem('trackability_onboarding_v1')==='1') openGate(true);
       if(document.getElementById('trackabilitySubscriptionGate')?.classList.contains('is-open'))updateGateCopy();
     },1000);
-    /* First-launch users choose trial/plan inside onboarding. Returning users with an expired entitlement are not forced into a full-screen gate until they try a locked action. */
+    /* First-launch users choose trial inside onboarding. Returning users are
+       immediately gated when their cloud-backed entitlement has expired. */
+    if(document.getElementById('trackabilityOnboarding')?.style.display==='none' || localStorage.getItem('trackability_onboarding_v1')==='1'){
+      setTimeout(refreshEntitlementFromCloud,250);
+      setInterval(refreshEntitlementFromCloud,60000);
+    }
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,180));
