@@ -218,6 +218,25 @@
   @media(max-width:420px){.ob-shell{padding:20px 15px 25px}.ob-card{min-height:590px}.ob-grid{gap:8px}.ob-feature{padding:11px}.ob-theme-grid,.ob-font-grid{gap:7px}.ob-theme,.ob-font{padding:10px}}
 </style>
 
+<style id="trackability-auth-gate-style">
+  #trackabilityAuthGate{position:fixed;inset:0;z-index:10001;background:var(--bg-color,#fff);color:var(--text-color,#111827);display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+  #trackabilityAuthGate.hidden{display:none;}
+  .auth-gate-card{width:min(430px,100%);padding:26px;border:1px solid var(--border-color,#e5e7eb);border-radius:28px;background:var(--card-color,#fff);box-shadow:0 24px 80px rgba(0,0,0,.14);}
+  .auth-gate-brand{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:900;letter-spacing:.16em;margin-bottom:28px;}
+  .auth-gate-dot{width:12px;height:12px;border-radius:4px;background:var(--accent-color,#6366f1);box-shadow:0 0 22px var(--accent-glow,#818cf8);}
+  .auth-gate-title{font-size:32px;line-height:1.05;font-weight:900;letter-spacing:-.04em;margin:0 0 10px;}
+  .auth-gate-subtitle{font-size:13px;line-height:1.65;color:var(--muted-color,#6b7280);margin:0 0 22px;}
+  .auth-gate-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .auth-gate-tab{padding:12px;border-radius:14px;font-size:12px;font-weight:900;border:1px solid var(--border-color,#e5e7eb);background:var(--card-soft-color,#f3f4f6);color:var(--muted-color,#6b7280);cursor:pointer;}
+  .auth-gate-tab.active{background:var(--accent-color,#6366f1);border-color:var(--accent-color,#6366f1);color:#fff;}
+  .auth-gate-field{width:100%;padding:14px;border-radius:15px;border:1px solid var(--border-color,#e5e7eb);background:var(--card-soft-color,#f3f4f6);color:var(--text-color,#111827);font-size:13px;outline:none;margin-top:9px;box-sizing:border-box;}
+  .auth-gate-primary{width:100%;padding:14px;border:0;border-radius:16px;background:var(--accent-color,#6366f1);color:#fff;font-size:13px;font-weight:900;margin-top:14px;cursor:pointer;}
+  .auth-gate-primary:disabled{opacity:.6;cursor:wait;}
+  .auth-gate-forgot{display:block;width:100%;border:0;background:none;color:var(--accent-color,#6366f1);font-size:11px;font-weight:800;padding:12px 0 2px;cursor:pointer;}
+  .auth-gate-note{font-size:10px;line-height:1.6;color:var(--muted-color,#6b7280);text-align:center;margin-top:18px;}
+  #trackabilityAuthGate.auth-gate-dark{background:#000;}
+</style>
+
 <style id="trackability-startup-splash-style">
   /* Premium startup: the supplied Trackability logo starts centered, then docks into the app's top-left identity area. */
   #trackabilityStartupSplash{
@@ -273,6 +292,24 @@
     </div>
   </div>
 
+  <!-- ACCOUNT REQUIRED GATE: TRACKABILITY has no guest mode. -->
+  <div id="trackabilityAuthGate" aria-modal="true" role="dialog">
+    <div class="auth-gate-card">
+      <div class="auth-gate-brand"><span class="auth-gate-dot"></span> TRACKABILITY</div>
+      <h1 class="auth-gate-title">Your account. Your progress.</h1>
+      <p class="auth-gate-subtitle">Sign in or create your TRACKABILITY account to continue. Your study data, focus sessions, MCQs, tests and trackers stay synced across devices.</p>
+      <div class="auth-gate-tabs">
+        <button id="startupSignInTab" class="auth-gate-tab active" type="button" onclick="setStartupAuthMode('signin')">Sign In</button>
+        <button id="startupSignUpTab" class="auth-gate-tab" type="button" onclick="setStartupAuthMode('signup')">Create Account</button>
+      </div>
+      <input id="startupEmailInput" class="auth-gate-field" type="email" autocomplete="email" placeholder="Email address" />
+      <input id="startupPasswordInput" class="auth-gate-field" type="password" autocomplete="current-password" placeholder="Password" />
+      <button id="startupPrimaryButton" class="auth-gate-primary" type="button" onclick="submitStartupAuth()">Sign In</button>
+      <button id="startupForgotButton" class="auth-gate-forgot" type="button" onclick="sendStartupPasswordReset()">Forgot password?</button>
+      <p id="startupAuthNote" class="auth-gate-note">No guest mode. Sign in to access TRACKABILITY.</p>
+    </div>
+  </div>
+
 
   <!-- FIRST-LAUNCH ONBOARDING -->
   <div id="trackabilityOnboarding" aria-modal="true" role="dialog">
@@ -316,11 +353,10 @@
           </section>
 
           <section class="ob-screen" data-ob-screen="3">
-            <div class="ob-kicker">Get started</div><h2 class="ob-title">How do you want to begin?</h2>
-            <p class="ob-subtitle">Create an account to keep your data synced, or start locally as a guest. You can connect an account later.</p>
+            <div class="ob-kicker">Account connected</div><h2 class="ob-title">Your workspace is connected.</h2>
+            <p class="ob-subtitle">TRACKABILITY uses your account as the source of truth, so the same study data can follow you across your iPad, phone and other devices.</p>
             <div class="ob-choices">
-              <div id="obChoiceAccount" class="ob-choice selected" onclick="obChooseMode('account')"><div class="ob-choice-icon">☁️</div><div><b>Create Account</b><span>Keep your TRACKABILITY data synced across devices.</span></div></div>
-              <div id="obChoiceGuest" class="ob-choice" onclick="obChooseMode('guest')"><div class="ob-choice-icon">👤</div><div><b>Continue as Guest</b><span>Start immediately and connect an account later.</span></div></div>
+              <div id="obChoiceAccount" class="ob-choice selected"><div class="ob-choice-icon">☁️</div><div><b>Cloud account active</b><span id="obConnectedEmail">Your account is connected and ready to sync.</span></div></div>
             </div><div class="ob-actions"><button class="ob-btn secondary" type="button" onclick="obBack()">← BACK</button><button class="ob-btn primary" onclick="obNext()">CONTINUE →</button></div>
           </section>
 
@@ -1464,7 +1500,7 @@
       <div class="flex justify-between items-center">
         <div>
           <h3 class="text-sm font-black">TRACKABILITY Account</h3>
-          <p id="accountStatusText" class="text-[10px] text-themeMuted mt-0.5">Guest mode • data stays on this device</p>
+          <p id="accountStatusText" class="text-[10px] text-themeMuted mt-0.5">Account required • sign in to continue</p>
         </div>
         <button onclick="closeModal('accountModal')" class="text-themeMuted"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -1472,7 +1508,7 @@
       <div id="accountSignedOutPanel" class="space-y-3">
         <div class="p-3 rounded-2xl bg-themeCardSoft border border-themeBorder">
           <p class="text-[10px] font-bold text-themeText">☁️ Sync your study data across devices</p>
-          <p class="text-[9px] text-themeMuted mt-1">Create an account to keep your tasks, focus logs, MCQs, GTs, tracker data and settings in the cloud.</p>
+          <p class="text-[9px] text-themeMuted mt-1">Sign in or create an account to keep your tasks, focus logs, MCQs, GTs, tracker data and settings synced across devices.</p>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <button id="accountSignInTab" onclick="setAccountMode('signin')" class="py-2.5 rounded-xl bg-themeAccent text-white text-xs font-black">Sign In</button>
@@ -1485,7 +1521,6 @@
         </div>
         <button id="accountPrimaryButton" onclick="submitAccountAuth()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-black">Sign In</button>
         <button id="accountForgotButton" onclick="sendPasswordReset()" class="w-full py-2 text-[10px] font-bold text-themeAccent">Forgot password?</button>
-        <button onclick="closeModal('accountModal')" class="w-full py-2 text-[10px] font-bold text-themeMuted">Continue as Guest</button>
       </div>
 
       <div id="accountSignedInPanel" class="hidden space-y-3">
@@ -1574,8 +1609,8 @@
           <div class="w-9 h-9 rounded-xl bg-themeAccent/15 border border-themeAccent/20 flex items-center justify-center shrink-0"><i data-lucide="user-round" class="w-4 h-4 text-themeAccent"></i></div>
           <div class="min-w-0 flex-1">
             <div class="text-[8px] font-black uppercase tracking-wider text-themeMuted">Connected account</div>
-            <div id="settingsConnectedAccount" class="text-[11px] font-black text-themeText truncate">Guest mode</div>
-            <div id="settingsConnectedStatus" class="text-[8px] text-themeMuted mt-0.5">Data stays on this device</div>
+            <div id="settingsConnectedAccount" class="text-[11px] font-black text-themeText truncate">Sign in required</div>
+            <div id="settingsConnectedStatus" class="text-[8px] text-themeMuted mt-0.5">Account required to access your data</div>
           </div>
           <button onclick="openAccountModal()" class="px-2.5 py-1.5 rounded-lg bg-themeCard border border-themeBorder text-[9px] font-black text-themeAccent">Manage</button>
         </div>
@@ -6244,6 +6279,7 @@ document.addEventListener('DOMContentLoaded',function(){
   const CLOUD_STATE_TABLE = 'app_data';
   const PROFILE_TABLE = 'profiles';
   const PENDING_MIGRATION_KEY = 'TRACKABILITY_PENDING_CLOUD_MIGRATION';
+  const PENDING_MIGRATION_EMAIL_KEY = 'TRACKABILITY_PENDING_CLOUD_MIGRATION_EMAIL';
   const SYNC_META_PREFIX = 'TRACKABILITY_SYNC_META_';
 
   let sb = null;
@@ -6299,7 +6335,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const signInTab = document.getElementById('accountSignInTab');
     const signUpTab = document.getElementById('accountSignUpTab');
     if(signup) signup.classList.toggle('hidden', accountMode !== 'signup');
-    if(primary) primary.textContent = accountMode === 'signup' ? 'Create Account & Sync' : 'Sign In & Sync';
+    if(primary) primary.textContent = accountMode === 'signup' ? 'Create Account' : 'Sign In';
     if(forgot) forgot.classList.toggle('hidden', accountMode === 'signup');
     if(signInTab) signInTab.className = accountMode === 'signin' ? 'py-2.5 rounded-xl bg-themeAccent text-white text-xs font-black' : 'py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-black text-themeMuted';
     if(signUpTab) signUpTab.className = accountMode === 'signup' ? 'py-2.5 rounded-xl bg-themeAccent text-white text-xs font-black' : 'py-2.5 rounded-xl bg-themeCardSoft border border-themeBorder text-xs font-black text-themeMuted';
@@ -6319,7 +6355,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const isIn=!!currentUser;
     signedOut.classList.toggle('hidden',isIn);
     signedIn.classList.toggle('hidden',!isIn);
-    if(status) status.textContent=isIn ? 'Cloud account • sync enabled' : 'Guest mode • data stays on this device';
+    if(status) status.textContent=isIn ? 'Cloud account • sync enabled' : 'Account required • sign in to continue';
     if(isIn){
       const email=currentUser.email||'';
       const ed=document.getElementById('accountEmailDisplay'); if(ed) ed.textContent=email;
@@ -6364,7 +6400,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
         setTimeout(function(){
           if(currentUser) finishSignedInBootstrap();
-          else { setSyncStatus('Guest mode'); populateAccountUI(); }
+          else { setSyncStatus('Account required'); populateAccountUI(); showStartupAuthGate(); }
         },0);
       });
 
@@ -6373,6 +6409,7 @@ document.addEventListener('DOMContentLoaded',function(){
       window.__trackabilityCurrentUserEmail=currentUser?.email||'';
       try{ updateSettingsAccountCard(); }catch(e){}
       if(currentUser) await finishSignedInBootstrap();
+      else showStartupAuthGate();
       populateAccountUI();
       try{ updateSettingsAccountCard(); }catch(e){}
     }catch(err){
@@ -6424,7 +6461,8 @@ document.addEventListener('DOMContentLoaded',function(){
           await applyCloudRow(cloudRow,false);
           cloudHydrated=true;
           localStorage.removeItem(PENDING_MIGRATION_KEY);
-        }else if(localStorage.getItem(PENDING_MIGRATION_KEY)==='1'){
+        localStorage.removeItem(PENDING_MIGRATION_EMAIL_KEY);
+        }else if(localStorage.getItem(PENDING_MIGRATION_KEY)==='1' && (localStorage.getItem(PENDING_MIGRATION_EMAIL_KEY)||'').toLowerCase()===String(currentUser.email||'').toLowerCase()){
           /*
            * BRAND-NEW ACCOUNT:
            * There is no cloud row, so the device's guest state is the intended
@@ -6434,6 +6472,7 @@ document.addEventListener('DOMContentLoaded',function(){
           if(!uploaded) throw new Error('Could not create the initial cloud copy');
           cloudHydrated=true;
           localStorage.removeItem(PENDING_MIGRATION_KEY);
+        localStorage.removeItem(PENDING_MIGRATION_EMAIL_KEY);
         }else{
           /*
            * EXISTING SIGN-IN WITH NO CLOUD ROW:
@@ -6446,6 +6485,7 @@ document.addEventListener('DOMContentLoaded',function(){
           return;
         }
         setSyncStatus('Synced');
+        hideStartupAuthGate();
         populateAccountUI();
       }catch(err){
         console.error('Cloud bootstrap failed:',err);
@@ -6536,6 +6576,102 @@ document.addEventListener('DOMContentLoaded',function(){
     if(typeof renderHome==='function') renderHome();
   }
 
+  let startupAuthMode='signin';
+  function setStartupAuthMode(mode){
+    startupAuthMode=mode==='signup'?'signup':'signin';
+    const si=document.getElementById('startupSignInTab');
+    const su=document.getElementById('startupSignUpTab');
+    const primary=document.getElementById('startupPrimaryButton');
+    const forgot=document.getElementById('startupForgotButton');
+    const note=document.getElementById('startupAuthNote');
+    if(si)si.classList.toggle('active',startupAuthMode==='signin');
+    if(su)su.classList.toggle('active',startupAuthMode==='signup');
+    if(primary)primary.textContent=startupAuthMode==='signup'?'Create Account':'Sign In';
+    if(forgot)forgot.classList.toggle('hidden',startupAuthMode==='signup');
+    if(note)note.textContent=startupAuthMode==='signup'?'Create your account once. Your TRACKABILITY data will be stored in the cloud and synced across devices.':'Sign in to access your TRACKABILITY workspace.';
+  }
+  window.setStartupAuthMode=setStartupAuthMode;
+
+  function showStartupAuthGate(){
+    const gate=document.getElementById('trackabilityAuthGate');
+    if(gate){gate.classList.remove('hidden');gate.setAttribute('aria-hidden','false');}
+    setStartupAuthMode(startupAuthMode);
+    document.body.classList.add('overflow-hidden');
+  }
+  window.showStartupAuthGate=showStartupAuthGate;
+
+  function hideStartupAuthGate(){
+    const gate=document.getElementById('trackabilityAuthGate');
+    if(gate){gate.classList.add('hidden');gate.setAttribute('aria-hidden','true');}
+    document.body.classList.remove('overflow-hidden');
+  }
+  window.hideStartupAuthGate=hideStartupAuthGate;
+
+  async function submitStartupAuth(){
+    if(!sb){accountToast('Cloud connection is not ready','alert-circle');return;}
+    const email=(document.getElementById('startupEmailInput')?.value||'').trim();
+    const password=document.getElementById('startupPasswordInput')?.value||'';
+    if(!email||!password){accountToast('Enter your email and password','alert-circle');return;}
+    if(password.length<6){accountToast('Password must be at least 6 characters','alert-circle');return;}
+    const button=document.getElementById('startupPrimaryButton');
+    if(button){button.disabled=true;button.textContent='Please wait…';}
+    try{
+      if(startupAuthMode==='signup'){
+        /* Account creation is the only supported first-time entry. If this
+           browser contains legacy guest data, migrate it once into the new account. */
+        localStorage.setItem(PENDING_MIGRATION_KEY,'1');
+        localStorage.setItem(PENDING_MIGRATION_EMAIL_KEY,email.toLowerCase());
+        const name=(appState.profileName||'').trim();
+        const age=appState.profileAge ?? '';
+        const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
+        const examDate=appState.examDate||null;
+        const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,age:age?Number(age):null,course,exam_date:examDate},emailRedirectTo:window.location.origin+window.location.pathname}});
+        if(error)throw error;
+        if(data.session){
+          currentUser=data.user;
+          window.__trackabilityCurrentUserEmail=currentUser?.email||'';
+          await finishSignedInBootstrap();
+          hideStartupAuthGate();
+          updateSettingsAccountCard();
+          populateAccountUI();
+          accountToast('Account created and connected ☁️');
+        }else{
+          accountToast('Account created. Check your email to confirm it, then sign in.','mail');
+        }
+      }else{
+        const {data,error}=await sb.auth.signInWithPassword({email,password});
+        if(error)throw error;
+        currentUser=data.user;
+        window.__trackabilityCurrentUserEmail=currentUser?.email||'';
+        await finishSignedInBootstrap();
+        if(cloudHydrated){
+          hideStartupAuthGate();
+          updateSettingsAccountCard();
+          populateAccountUI();
+          accountToast('Signed in successfully ☁️');
+        }
+      }
+    }catch(err){
+      console.error('Startup auth error:',err);
+      accountToast(err.message||'Authentication failed','alert-circle');
+    }finally{
+      if(button){button.disabled=false;button.textContent=startupAuthMode==='signup'?'Create Account':'Sign In';}
+    }
+  }
+  window.submitStartupAuth=submitStartupAuth;
+
+  async function sendStartupPasswordReset(){
+    if(!sb){accountToast('Cloud connection is not ready','alert-circle');return;}
+    const email=(document.getElementById('startupEmailInput')?.value||'').trim();
+    if(!email){accountToast('Enter your email first','alert-circle');return;}
+    try{
+      const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+      if(error)throw error;
+      accountToast('Password reset email sent');
+    }catch(err){accountToast(err.message||'Could not send password reset email','alert-circle');}
+  }
+  window.sendStartupPasswordReset=sendStartupPasswordReset;
+
   async function submitAccountAuth(){
     if(!sb){ accountToast('Cloud connection is not ready','alert-circle'); return; }
     const email=(document.getElementById('accountEmailInput')?.value||'').trim();
@@ -6551,6 +6687,7 @@ document.addEventListener('DOMContentLoaded',function(){
         const course=appState.course==='INI-CET'?'INI-CET':'NEET PG';
         const examDate=appState.examDate || null;
         localStorage.setItem(PENDING_MIGRATION_KEY,'1');
+        localStorage.setItem(PENDING_MIGRATION_EMAIL_KEY,email.toLowerCase());
         const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,age:age?Number(age):null,course,exam_date:examDate},emailRedirectTo:window.location.origin+window.location.pathname}});
         if(error) throw error;
         appState.profileName=name;
@@ -6582,7 +6719,7 @@ document.addEventListener('DOMContentLoaded',function(){
       console.error('Account auth error:',err);
       accountToast(err.message||'Authentication failed','alert-circle');
     }finally{
-      if(button){button.disabled=false;button.textContent=accountMode==='signup'?'Create Account & Sync':'Sign In & Sync';}
+      if(button){button.disabled=false;button.textContent=accountMode==='signup'?'Create Account':'Sign In';}
     }
   }
   window.submitAccountAuth=submitAccountAuth;
@@ -6791,13 +6928,14 @@ document.addEventListener('DOMContentLoaded',function(){
   async function signOutTRACKABILITY(){
     try{
       await uploadCloudState(false);
-      if(sb) await sb.auth.signOut();
       clearTimeout(cloudSaveTimer);
       cloudHydrated=false;
+      if(sb) await sb.auth.signOut();
       currentUser=null;
-      populateAccountUI();
-      closeModal('accountModal');
-      accountToast('Signed out. Guest mode restored');
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(PENDING_MIGRATION_KEY);
+      localStorage.removeItem(PENDING_MIGRATION_EMAIL_KEY);
+      window.location.reload();
     }catch(err){accountToast(err.message||'Sign out failed','alert-circle');}
   }
   window.signOutTRACKABILITY=signOutTRACKABILITY;
@@ -6835,6 +6973,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   document.addEventListener('DOMContentLoaded',function(){
     setTimeout(function(){
+      try{ setStartupAuthMode('signin'); }catch(e){}
       try{ initSupabase(); }catch(e){console.error(e);}
       const header=document.getElementById('navProfileName');
       if(header && !header.dataset.accountBound){
@@ -6901,7 +7040,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const name=(appState.cloudProfile?.name||appState.profileName||'').trim();
     const account=document.getElementById('settingsConnectedAccount');
     const status=document.getElementById('settingsConnectedStatus');
-    if(account)account.textContent=email?(name && name!=='Doctor'?name:email):'Guest mode';
+    if(account)account.textContent=email?(name && name!=='Doctor'?name:email):'Sign in required';
     if(status)status.textContent=email?email:'No account connected • Data stays on this device';
   }
   window.updateSettingsAccountCard=updateSettingsAccountCard;
@@ -7091,7 +7230,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function update(){const ss=screens();ss.forEach((x,i)=>x.classList.toggle('active',i===step));$('obProgress').textContent=String(step+1).padStart(2,'0')+' / '+String(ss.length).padStart(2,'0');if(step===7)updateSummary();}
   window.obNext=function(){if(step===4)obSaveProfile();if(step<7){step++;update();}};
   window.obBack=function(){if(step>0){step--;update();}};
-  window.obChooseMode=function(v){mode=v;$('obChoiceAccount').classList.toggle('selected',v==='account');$('obChoiceGuest').classList.toggle('selected',v==='guest');$('obSummaryMode').textContent=v==='account'?'Account':'Guest';};
+  window.obChooseMode=function(v){mode='account';$('obSummaryMode').textContent='Account';};
   window.obPickExamMode=function(v){examMode=v==='theory'?'theory':'mcq';$('obChoiceMCQ')?.classList.toggle('selected',examMode==='mcq');$('obChoiceTheory')?.classList.toggle('selected',examMode==='theory');if(typeof appState!=='undefined'){appState.examMode=examMode;appState.mcqEnabled=examMode==='mcq';appState.showHomeMCQ=examMode==='mcq';try{saveState();}catch(e){}}};
   window.obSaveProfile=function(){
     if(typeof appState==='undefined')return;
@@ -7100,14 +7239,14 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   window.obPickTheme=function(el,v){pickedTheme=v;document.querySelectorAll('.ob-theme').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setTheme==='function')setTheme(v);else document.body.className=v+' '+pickedFont+' h-screen overflow-hidden flex flex-col antialiased';};
   window.obPickFont=function(el,v){pickedFont=v;document.querySelectorAll('.ob-font').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');if(typeof setFontStyle==='function')setFontStyle(v);};
-  function updateSummary(){const n=($('obName').value||'').trim()||'Guest',g=($('obGoal').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent=mode==='account'?'Account':'Guest';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
+  function updateSummary(){const n=($('obName').value||'').trim()||((typeof appState!=='undefined'&&appState.profileName)||'Account'),g=($('obGoal').value||'').trim()||'Not set',d=$('obDate').value||'Not set';$('obSummaryName').textContent=n;$('obSummaryGoal').textContent=g;$('obSummaryDate').textContent=d;$('obSummaryMode').textContent='Account';const em=$('obSummaryExamMode');if(em)em.textContent=examMode==='mcq'?'MCQ / Objective':'Theory / Descriptive';}
   window.obStart=function(){
     obSaveProfile();
     try{appState.theme=pickedTheme;appState.fontStyle=pickedFont;saveState();}catch(e){}
     localStorage.setItem(KEY,'1');
     const el=$('trackabilityOnboarding');el.classList.add('ob-hide');
     setTimeout(()=>{el.style.display='none';try{if(typeof refreshAllViews==='function')refreshAllViews();if(window.lucide)lucide.createIcons();}catch(e){};
-      if(mode==='account' && typeof openAccountModal==='function')setTimeout(()=>openAccountModal(),250);
+      if(typeof updateSettingsAccountCard==='function')updateSettingsAccountCard();
     },650);
   };
   function boot(){
