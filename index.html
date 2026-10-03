@@ -5429,16 +5429,48 @@
 
   window.setChapterStatus=function(subId,chId,status){
     var item=getRevisionChapter(subId,chId);if(!item)return;
+
+    var chapterName=item.chapter.name||'Chapter';
+    var previousStatus=item.chapter.status||'BLANK';
+
     item.chapter.status=status;
-    /* R has no side effects beyond membership in the Hub. */
+
+    /* R has no side effects beyond membership in the Revision Hub. */
     delete item.chapter.nextRevisionDate;
     delete item.chapter.revStage;
+
     saveState();
     if(typeof renderSyllabus==='function')renderSyllabus();
     if(typeof renderHomeSyllabusCard==='function')renderHomeSyllabusCard();
     if(typeof renderRevisionTab==='function')renderRevisionTab();
     if(typeof renderStatistics==='function')renderStatistics();
-    showToast(status==='R'?item.chapter.name+' added to Revision Hub':item.chapter.name+' removed from Revision Hub');
+
+    /*
+     * IMPORTANT:
+     * The chapter status controls are a single state selector:
+     *   BLANK = Left
+     *   R     = Revision Hub
+     *   MCQ   = MCQ Hub
+     *   DONE  = Completed
+     *
+     * The old notification only understood R vs "everything else", so
+     * clicking MCQ, Done, or Left incorrectly produced
+     * "removed from Revision Hub".
+     */
+    var message='';
+    if(status==='R'){
+      message=chapterName+' added to Revision Hub';
+    }else if(status==='MCQ'){
+      message=chapterName+' added to MCQ Hub';
+    }else if(status==='DONE'){
+      message=chapterName+' done ✔️';
+    }else if(status==='BLANK'){
+      message='Undone: '+chapterName;
+    }else{
+      message=chapterName+' updated';
+    }
+
+    showToast(message);
   };
 
   window.renderRevisionTab=function(){
