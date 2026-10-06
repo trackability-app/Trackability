@@ -331,6 +331,10 @@
       <input id="startupEmailInput" class="auth-gate-field" type="email" autocomplete="email" placeholder="Email address" />
       <input id="startupPasswordInput" class="auth-gate-field" type="password" autocomplete="current-password" placeholder="Password" />
       <button id="startupPrimaryButton" class="auth-gate-primary" type="button" onclick="submitStartupAuth()">Sign In</button>
+      <div id="startupEmailConfirmationNote" class="hidden auth-gate-note" style="text-align:left;margin-top:10px;background:rgba(56,189,248,.10);border:1px solid rgba(56,189,248,.25);padding:12px;border-radius:14px;">
+        <strong style="display:block;color:var(--themeAccent,#38bdf8);">📩 Check your email to confirm your account</strong>
+        <span style="display:block;margin-top:4px;">We sent a confirmation link to your email address. Open your inbox and confirm your email before signing in. If you don't see it, check Spam or Promotions.</span>
+      </div>
       <button id="startupForgotButton" class="auth-gate-forgot" type="button" onclick="sendStartupPasswordReset()">Forgot password?</button>
       <p id="startupAuthNote" class="auth-gate-note">No guest mode. Sign in to access TRACKABILITY.</p>
     </div>
@@ -1558,6 +1562,10 @@
         <div id="accountSignupFields" class="hidden p-3 rounded-2xl bg-themeCardSoft border border-themeBorder">
           <p class="text-[9px] leading-relaxed text-themeMuted">Your name, age, target exam and target date are already taken from <b>Settings → General</b>. You only need to create your account here.</p>
         </div>
+        <div id="accountEmailConfirmationNote" class="hidden p-3 rounded-2xl bg-themeAccent/10 border border-themeAccent/25">
+          <p class="text-[10px] font-black text-themeAccent">📩 Check your email to confirm your account</p>
+          <p class="text-[9px] leading-relaxed text-themeMuted mt-1">We sent a confirmation link to your email address. Please open your inbox and confirm your email before signing in. Also check your Spam or Promotions folder if you don't see it.</p>
+        </div>
         <button id="accountPrimaryButton" onclick="submitAccountAuth()" class="w-full py-3 rounded-2xl bg-themeAccent text-white text-xs font-black">Sign In</button>
         <button id="accountForgotButton" onclick="sendPasswordReset()" class="w-full py-2 text-[10px] font-bold text-themeAccent">Forgot password?</button>
       </div>
@@ -1832,8 +1840,6 @@
           <button onclick="contactTrackabilitySupport()" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center gap-3 text-left">
             <i data-lucide="mail" class="w-4 h-4 text-themeAccent"></i><span><b class="block text-xs">Feedback / Contact Support</b><small class="text-[9px] text-themeMuted">Send an email to trackability.app@gmail.com</small></span>
           </button>
-          <button onclick="openLegalModal('privacy')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Privacy Policy</b><small class="text-[9px] text-themeMuted">Privacy information</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
-          <button onclick="openLegalModal('terms')" class="w-full p-3 rounded-2xl bg-themeCardSoft border border-themeBorder flex items-center justify-between text-left"><span><b class="block text-xs">Terms & Conditions</b><small class="text-[9px] text-themeMuted">Terms for using TRACKABILITY</small></span><i data-lucide="chevron-right" class="w-4 h-4 text-themeMuted"></i></button>
         </div>
       </div>
     </div>
@@ -6663,6 +6669,8 @@ document.addEventListener('DOMContentLoaded',function(){
     if(su)su.classList.toggle('active',startupAuthMode==='signup');
     if(primary)primary.textContent=startupAuthMode==='signup'?'Create Account':'Sign In';
     if(forgot)forgot.classList.toggle('hidden',startupAuthMode==='signup');
+    const confirmationNote=document.getElementById('startupEmailConfirmationNote');
+    if(confirmationNote)confirmationNote.classList.add('hidden');
     if(note)note.textContent=startupAuthMode==='signup'?'Create your account once. Your TRACKABILITY data will be stored in the cloud and synced across devices.':'Sign in to access your TRACKABILITY workspace.';
   }
   window.setStartupAuthMode=setStartupAuthMode;
@@ -6717,7 +6725,9 @@ document.addEventListener('DOMContentLoaded',function(){
           if(window.__trackabilityAuthRequestedFromOnboarding && typeof resumeOnboardingAfterAuth==='function') resumeOnboardingAfterAuth();
           accountToast('Account created and connected ☁️');
         }else{
-          accountToast('Account created. Check your email to confirm it, then sign in.','mail');
+          const confirmationNote=document.getElementById('startupEmailConfirmationNote');
+          if(confirmationNote)confirmationNote.classList.remove('hidden');
+          accountToast('Confirmation email sent. Check your inbox 📩','mail');
         }
       }else{
         const {data,error}=await sb.auth.signInWithPassword({email,password});
@@ -6784,8 +6794,9 @@ document.addEventListener('DOMContentLoaded',function(){
           populateAccountUI();
           accountToast('Account created and data synced ☁️');
         }else{
-          closeModal('accountModal');
-          alert('Account created. Please check your email to confirm the account, then sign in to complete cloud sync.');
+          const confirmationNote=document.getElementById('accountEmailConfirmationNote');
+          if(confirmationNote)confirmationNote.classList.remove('hidden');
+          accountToast('Confirmation email sent. Check your inbox 📩','mail');
         }
       }else{
         const {data,error}=await sb.auth.signInWithPassword({email,password});
@@ -7139,7 +7150,7 @@ document.addEventListener('DOMContentLoaded',function(){
   };
 
   window.shareTrackability=async function(){
-    const url='https://trackability-app.github.io/Trackability';
+    const url='https://www.trackability.in/';
     const data={title:'TRACKABILITY',text:'Try TRACKABILITY — track study, tasks, tests, MCQs and progress.',url};
     try{
       if(navigator.share){await navigator.share(data);return;}
