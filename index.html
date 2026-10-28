@@ -8344,5 +8344,63 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
+<script id="trackability-tab-scroll-reset">
+/* Keep each main navigation destination at the top of the viewport. */
+(function () {
+  function resetTabScroll() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    const main = document.getElementById('mainContainer');
+    if (main) main.scrollTop = 0;
+    document.querySelectorAll('#mainContainer, main, .overflow-y-auto, .overflow-auto').forEach(function (el) {
+      if (el.scrollTop > 0 && (el.id === 'mainContainer' || el.closest('#mainContainer'))) el.scrollTop = 0;
+    });
+  }
+  document.addEventListener('click', function (event) {
+    const navButton = event.target.closest('button[id^="nav-"]');
+    if (!navButton) return;
+    /* Run after the app's own switchTab click handler has hidden/shown sections. */
+    requestAnimationFrame(function () {
+      resetTabScroll();
+      requestAnimationFrame(resetTabScroll);
+    });
+  });
+})();
+</script>
+
+<style id="trackability-ipad-tab-visibility-fix">
+/* Important: #tab-home has an ID-based grid display on iPad.
+   Explicitly hide any tab carrying the app's .hidden class so Home cannot
+   remain visible when another navigation destination is selected. */
+#mainContainer > section.hidden,
+#mainContainer section.hidden {
+  display: none !important;
+}
+/* The selected section should begin at the top of the scrolling content. */
+#mainContainer {
+  scroll-behavior: auto;
+}
+</style>
+<script id="trackability-ipad-tab-scroll-fix">
+(function () {
+  function scrollMainToTop() {
+    var main = document.getElementById('mainContainer');
+    if (main) main.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('button[id^="nav-"]');
+    if (!button) return;
+
+    /* Let switchTab() update the .hidden classes first. */
+    setTimeout(scrollMainToTop, 0);
+    requestAnimationFrame(function () {
+      scrollMainToTop();
+      requestAnimationFrame(scrollMainToTop);
+    });
+  }, true);
+})();
+</script>
+
 </body>
 </html>
