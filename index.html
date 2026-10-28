@@ -308,6 +308,45 @@
   }
 </style>
 
+<style id="trackability-ipad-responsive-layout">
+/* Tablet/iPad presentation layer: layout-only changes; existing IDs and app logic stay intact. */
+@media (min-width: 768px) {
+  #mainContainer { max-width: none !important; width: 100% !important; padding: 24px !important; gap: 20px !important; }
+  #mainContainer > section { width: 100%; }
+  #tab-home { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: 18px !important; }
+  #tab-home > * { min-width: 0; margin-top: 0 !important; margin-bottom: 0 !important; }
+  #tab-home > :first-child { grid-column: 1 / -1; }
+  #tab-home .rounded-3xl, #tab-home .rounded-2xl { min-width: 0; }
+  #tab-home img { max-width: 100%; }
+  #trackabilityOnboarding .ob-shell { width: min(100%, 900px); }
+  #trackabilityOnboarding .ob-card { max-width: 900px; }
+  #searchModal > div, #legalModal > div { max-width: 680px; }
+}
+@media (min-width: 768px) and (orientation: landscape) {
+  body { --tb-ipad-nav-width: 92px; }
+  body > header { margin-left: var(--tb-ipad-nav-width); padding: 14px 28px !important; min-height: 76px; }
+  #mainContainer { margin-left: var(--tb-ipad-nav-width) !important; width: calc(100% - var(--tb-ipad-nav-width)) !important; padding: 26px 30px 30px !important; }
+  body > nav.fixed.bottom-0 { left: 0 !important; right: auto !important; top: 76px !important; bottom: 0 !important; width: var(--tb-ipad-nav-width) !important; height: auto !important; max-width: none !important; padding: 18px 8px !important; flex-direction: column !important; justify-content: flex-start !important; gap: 12px !important; border-top: 0 !important; border-right: 1px solid var(--border-color) !important; }
+  body > nav.fixed.bottom-0 button { flex: 0 0 auto !important; width: 100%; min-height: 64px; border-radius: 16px; padding: 10px 2px; }
+  body > nav.fixed.bottom-0 button span { font-size: 9px !important; letter-spacing: .04em; }
+  #mainContainer { padding-bottom: 30px !important; }
+  #tab-home { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px !important; }
+  #tab-home > :first-child { grid-column: 1 / -1; }
+  #tab-home > :nth-child(2), #tab-home > :nth-child(3) { grid-column: span 1; }
+  #tab-home > :last-child { grid-column: 1 / -1; }
+}
+@media (min-width: 768px) and (orientation: portrait) {
+  body > header { padding: 16px 24px !important; }
+  #mainContainer { padding: 22px !important; padding-bottom: 100px !important; }
+  body > nav.fixed.bottom-0 { max-width: none !important; height: 76px !important; padding-left: 5vw !important; padding-right: 5vw !important; }
+  body > nav.fixed.bottom-0 button { flex-direction: row !important; justify-content: center; gap: 9px !important; }
+  body > nav.fixed.bottom-0 button span { font-size: 11px !important; }
+}
+@media (min-width: 1200px) {
+  #mainContainer { padding-left: 38px !important; padding-right: 38px !important; }
+  #tab-home { gap: 24px !important; }
+}
+</style>
 </head>
 <body class="theme-light h-screen overflow-hidden flex flex-col antialiased">
 
